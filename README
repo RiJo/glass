@@ -23,6 +23,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
     
     This program is forked from aewm++ (timestamped 28 December 2008).
+    http://code.google.com/p/aewmpp
 
 --------------------------------------------------------------------------------
 
@@ -30,7 +31,7 @@
 --------------------------------------------------------------------------------
  version 0.1.0, 2010-03-18
 --------------------------------------------------------------------------------
-    * Branched from aewm++ (timestamped 28 December 2008)
+    * Forked from aewm++ (timestamped 28 December 2008)
     * Abstracted keybindings
     * Toggle windows (Alt-Tab)
     * Close active window (Alt-F4)
@@ -46,4 +47,11 @@
     * Windows are tagged a workspace (can belong to several workspaces)
     * A workspace with all windows
     * Shortcuts for accessing workspaces (Mod4+<num>)
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.3.0, xxxx-xx-xx
+--------------------------------------------------------------------------------
+    * Updated copyright information
 --------------------------------------------------------------------------------
