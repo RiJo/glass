@@ -1,0 +1,28 @@
+--------------------------------------------------------------------------------
+
+   glass
+   current version:     0.1.0
+   by:                  Rikard Johansson
+
+    Glossary:
+        * desktop   = should not be used (I think)
+        * workspace = area containing programs
+        * tags      = used by awesome, tags a program to be shown on one/several
+
+--------------------------------------------------------------------------------
+ version 0.1.0, 2010-03-18
+--------------------------------------------------------------------------------
+    * Branched from aewm++ (timestamped 28 December 2008)
+    * Abstracted keybindings
+    * Toggle windows (Alt-Tab)
+    * Close active window (Alt-F4)
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.2.0, xxxx-xx-xx
+--------------------------------------------------------------------------------
+    * Improved swapping of workspace
+    * Renamed desktop to workspace
+    * Removed all menus
+--------------------------------------------------------------------------------
