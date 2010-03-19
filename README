@@ -1,13 +1,8 @@
 --------------------------------------------------------------------------------
 
    glass
-   current version:     0.1.0
+   current version:     0.2.0
    by:                  Rikard Johansson
-
-    Glossary:
-        * desktop   = should not be used (I think)
-        * workspace = area containing programs
-        * tags      = used by awesome, tags a program to be shown on one/several
 
 --------------------------------------------------------------------------------
  version 0.1.0, 2010-03-18
