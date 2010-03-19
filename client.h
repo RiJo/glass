@@ -127,9 +127,9 @@ public: /* Member Functions */
     void shade();
     void maximize();
 
-    void setTag(int);
-    void addTag(int);
-    void removeTag(int);
+    void setTag(char);
+    void addTag(char);
+    void removeTag(char);
 
     void handleButtonEvent(XButtonEvent *);
     void handleConfigureRequest(XConfigureRequestEvent *);

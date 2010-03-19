@@ -44,6 +44,8 @@ struct key_binding {
     char *foo;
 };
 
+unsigned int GOTO_WORKSPACE_MODIFIER = Mod4Mask;
+
 key_binding key_bindings[] = {
     {XK_End,        (ControlMask|Mod1Mask), CMD_QUIT,               NULL},
     {XK_Home,       (ControlMask|Mod1Mask), CMD_RESTART,            NULL},
@@ -65,7 +67,7 @@ WindowManager::WindowManager(int argc, char** argv)
 {
     wm = this;
 
-    current_workspace = 0;
+    current_workspace = 1;
 
     focused_client=NULL;
 
@@ -76,9 +78,6 @@ WindowManager::WindowManager(int argc, char** argv)
     setupSignalHandlers();
     setupDisplay();
     scanWins();
-
-    // If there are any iconified clients, add them to the icon menu.
-//    updateIconMenu();
 
     doEventLoop();
 }
@@ -211,58 +210,18 @@ bool WindowManager::setCurrentWorkspace(char x)
     if (x < 0) {
         x = 0;
     }
-    else if (x >= workspace_count) {
-        x = workspace_count - 1;
+    else if (x > workspace_count) {
+        x = workspace_count;
     }
 
     if(x != current_workspace) {
         current_workspace = x;
-//        updateIconMenu();
         return true;
     }
     else {
         return false;
     }
 }
-
-/*void WindowManager::addClientToIconMenu(Client *c)
-{
-    icon_menu->hide();
-
-    if(c->isTagged(current_workspace))
-        icon_menu->addThisClient(c);
-
-    icon_menu->updateMenu();
-}
-
-void WindowManager::removeClientFromIconMenu(Client *c)
-{
-    icon_menu->hide();
-    icon_menu->removeClientFromIconMenu(c);
-    icon_menu->updateMenu();
-}
-
-void WindowManager::updateClientNameOnIconMenu(Client *c)
-{
-    icon_menu->updateClientName(c);
-}
-
-void WindowManager::updateIconMenu()
-{
-    icon_menu->hide();
-    icon_menu->removeAll();
-
-    list<Client*>::iterator it;
-    for(it = client_list.begin(); it != client_list.end(); it++)
-    {
-        if((*it)->isTagged(current_workspace))
-        {
-            if((!(*it)->isTransient()) && ((*it)->hasWindowDecorations())) icon_menu->addThisClient(*it);
-        }
-    }
-
-    icon_menu->updateMenu();
-}*/
 
 void WindowManager::goToWorkspace(char x)
 {
@@ -414,9 +373,6 @@ void WindowManager::setupDisplay()
     XChangeWindowAttributes(dpy, root, CWEventMask, &sattr);
 
     grabKeys(root);
-
-//    window_menu = new WindowMenu(dpy);
-//    icon_menu = new IconMenu(dpy);
 }
 
 void WindowManager::doEventLoop()
@@ -503,32 +459,23 @@ void WindowManager::doEventLoop()
 
 void WindowManager::grabKeys(Window w)
 {
-    /*int max_desktop_keys=workspace_count;
-    if (workspace_count>9)
-    {
-        max_desktop_keys=9;
-    }*/
-    for(int i=0;i<KEY_BINDING_COUNT;i++)
+    // Workspace switchers
+    for (int i = 0; i <= workspace_count; i++) {
+        XGrabKey(dpy,XKeysymToKeycode(dpy, XK_0+i), GOTO_WORKSPACE_MODIFIER, w,True,GrabModeAsync,GrabModeAsync);
+    }
+    // Keybindings
+    for (int i = 0; i <= KEY_BINDING_COUNT; i++)
         XGrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].mod, w,True,GrabModeAsync,GrabModeAsync);
-    //for(int i=0;i<AEWM_KEY_ALT_COUNT;i++)
-    //    XGrabKey(dpy,XKeysymToKeycode(dpy,alt_keys[i]), (Mod1Mask|ControlMask), w,True,GrabModeAsync,GrabModeAsync);
-    //for(int i=0;i<AEWM_KEY_ALT_COUNT+max_desktop_keys;i++)
-    //    XGrabKey(dpy,XKeysymToKeycode(dpy,alt_keys[i]), (Mod1Mask), w,True,GrabModeAsync,GrabModeAsync);
 }
 
 void WindowManager::ungrabKeys(Window w)
 {
-    /*int max_desktop_keys=workspace_count;
-    if (workspace_count>9)
-    {
-        max_desktop_keys=9;
-    }*/
-    for(int i=0;i<KEY_BINDING_COUNT;i++)
+    // Workspace switchers
+    for (int i = 0; i <= workspace_count; i++)
+        XUngrabKey(dpy,XKeysymToKeycode(dpy, XK_0+i), GOTO_WORKSPACE_MODIFIER, w);
+    // Keybindings
+    for (int i = 0; i <= KEY_BINDING_COUNT; i++)
         XUngrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].mod,w);
-    //for(int i=0;i<AEWM_KEY_ALT_COUNT;i++)
-    //    XUngrabKey(dpy,XKeysymToKeycode(dpy,alt_keys[i]), (Mod1Mask|ControlMask),w);
-    //for(int i=0;i<AEWM_KEY_ALT_COUNT+max_desktop_keys;i++)
-    //    XUngrabKey(dpy,XKeysymToKeycode(dpy,alt_keys[i]), (Mod1Mask),w);
 }
 
 void WindowManager::handleKeyPressEvent(XEvent *ev)
@@ -537,7 +484,14 @@ void WindowManager::handleKeyPressEvent(XEvent *ev)
     KeySym ks=XKeycodeToKeysym(dpy,ev->xkey.keycode,0);
     if (ks==NoSymbol) return;
 
-    for (int i=0;i<KEY_BINDING_COUNT;i++) {
+    for (int i = 0; i <= workspace_count; i++) {
+        if (ks == (XK_0 + i) && state == GOTO_WORKSPACE_MODIFIER) {
+            goToWorkspace(i);
+            return;
+        }
+    }
+
+    for (int i = 0; i < KEY_BINDING_COUNT; i++) {
         if (key_bindings[i].key == ks && key_bindings[i].mod == state) {
             switch (key_bindings[i].cmd) {
                 case CMD_QUIT:
@@ -553,17 +507,17 @@ void WindowManager::handleKeyPressEvent(XEvent *ev)
                     closeFocusedClient();
                 break;
                 case CMD_WS_SHIFT_RIGHT:
-                    shiftWorkspaceRight();
+                    nextWorkspace();
                 break;
                 case CMD_WS_SHIFT_LEFT:
-                    shiftWorkspaceLeft();
+                    previousWorkspace();
                 break;
                 case CMD_EXEC:
                     printf("Executing: %s\n", key_bindings[i].foo);
                     forkExec(key_bindings[i].foo);
                 break;
             }
-            break;
+            return;
         }
     }
 }
@@ -635,14 +589,6 @@ void WindowManager::handleButtonPressEvent(XEvent *ev)
                     c->handleButtonEvent(&ev->xbutton);
             break;
         }
-
-        /*BaseMenu* mu = window_menu->findMenu(ev->xbutton.window);
-
-        if(!mu)
-            mu = icon_menu->findMenu(ev->xbutton.window);
-
-        if(mu)
-            mu->handleButtonPressEvent(&ev->xbutton);*/
     }
 
     //if(ev->xbutton.window==root)
@@ -709,13 +655,7 @@ void WindowManager::handleMotionNotifyEvent(XEvent *ev)
         c->handleMotionNotifyEvent(&ev->xmotion);
     else
     {
-        /*BaseMenu* mu = window_menu->findMenu(ev->xmotion.window);
 
-        if(!mu)
-            mu = icon_menu->findMenu(ev->xmotion.window);
-
-        if(mu)
-            mu->handleMotionNotifyEvent(&ev->xmotion);*/
     }
 }
 
@@ -728,8 +668,6 @@ void WindowManager::handleMapRequestEvent(XEvent *ev)
     else {
         client_window_list.push_back(ev->xmaprequest.window);
         c = new Client(dpy, ev->xmaprequest.window);
-
-//        updateIconMenu();
     }
 }
 
@@ -761,49 +699,34 @@ void WindowManager::handleDestroyNotifyEvent(XEvent *ev)
 
 void WindowManager::handleEnterNotifyEvent(XEvent *ev)
 {
-    /*BaseMenu* mu = window_menu->findMenu(ev->xcrossing.window);
+    Client* c = findClient(ev->xcrossing.window);
 
-    if(!mu)
-        mu = icon_menu->findMenu(ev->xcrossing.window);
+    switch (focus_model)
+    {
+        case FOCUS_FOLLOW:
+            if(c)
+            {
+                c->handleEnterEvent(&ev->xcrossing);
+                focused_client = c;
+            }
+            else
+                XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
+        break;
 
-    if(mu)
-        mu->handleEnterNotify(&ev->xcrossing);
-    else
-    {*/
-        Client* c = findClient(ev->xcrossing.window);
-
-        switch (focus_model)
-        {
-            case FOCUS_FOLLOW:
-                if(c)
-                {
-                    c->handleEnterEvent(&ev->xcrossing);
-                    focused_client = c;
-                }
-                else
-                    XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
-            break;
-
-            case FOCUS_SLOPPY:
-                // if the pointer's not on a client now, don't change focus
-                if(c)
-                {
-                    c->handleEnterEvent(&ev->xcrossing);
-                    focused_client = c;
-                }
-            break;
-        }
-    /*}*/
+        case FOCUS_SLOPPY:
+            // if the pointer's not on a client now, don't change focus
+            if(c)
+            {
+                c->handleEnterEvent(&ev->xcrossing);
+                focused_client = c;
+            }
+        break;
+    }
 }
 
 void WindowManager::handleLeaveNotifyEvent(XEvent *ev)
 {
-    /*BaseMenu* mu = window_menu->findMenu(ev->xcrossing.window);
 
-    if(!mu)
-        mu = icon_menu->findMenu(ev->xcrossing.window);
-
-    if(mu) mu->handleLeaveNotify(&ev->xcrossing);*/
 }
 
 void WindowManager::handleFocusInEvent(XEvent *ev)
@@ -904,20 +827,10 @@ void WindowManager::handlePropertyNotifyEvent(XEvent *ev)
 
 void WindowManager::handleExposeEvent(XEvent *ev)
 {
-    /*BaseMenu* mu = window_menu->findMenu(ev->xexpose.window);
+    Client* c = findClient(ev->xexpose.window);
 
-    if(!mu)
-        mu = icon_menu->findMenu(ev->xexpose.window);
-
-    if(mu)
-        mu->handleExposeEvent(&ev->xexpose);
-    else
-    {*/
-        Client* c = findClient(ev->xexpose.window);
-
-        if(c)
-            c->handleExposeEvent(&ev->xexpose);
-    /*}*/
+    if(c)
+        c->handleExposeEvent(&ev->xexpose);
 }
 
 void WindowManager::handleDefaultEvent(XEvent *ev)
@@ -1004,7 +917,6 @@ void WindowManager::addClient(Client *c)
 
 void WindowManager::removeClient(Client* c)
 {
-//    removeClientFromIconMenu(c);
     client_window_list.remove(c->getAppWindow());
     client_list.remove(c);
 }
@@ -1091,9 +1003,6 @@ void WindowManager::cleanup()
         }
     }
     XFree(wins);
-
-//    delete window_menu;
-//    delete icon_menu;
 
     XFreeFont(dpy, font);
 
@@ -1196,16 +1105,11 @@ void WindowManager::sigHandler(int signal)
     }
 }
 
-
-/*##############################################################################
-#   TEST   #####################################################################
-##############################################################################*/
-
-void WindowManager::shiftWorkspaceRight() {
+void WindowManager::nextWorkspace() {
     goToWorkspace(current_workspace + 1);
 }
 
-void WindowManager::shiftWorkspaceLeft() {
+void WindowManager::previousWorkspace() {
     goToWorkspace(current_workspace - 1);
 }
 
@@ -1226,7 +1130,3 @@ void WindowManager::closeFocusedClient() {
         }
     }
 }
-
-/*##############################################################################
-#   TEST   #####################################################################
-##############################################################################*/
