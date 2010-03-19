@@ -1053,3 +1053,10 @@ void Client::removeTag(char tag)
     }
 }
 
+void Client::toggleTag(char tag)
+{
+    if (isTagged(tag))
+        removeTag(tag);
+    else
+        addTag(tag);
+}
