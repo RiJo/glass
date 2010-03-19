@@ -20,9 +20,12 @@
 
 
 --------------------------------------------------------------------------------
- version 0.2.0, xxxx-xx-xx
+ version 0.2.0, 2010-03-19
 --------------------------------------------------------------------------------
     * Improved swapping of workspace
     * Renamed desktop to workspace
     * Removed all menus
+    * Windows are tagged a workspace (can belong to several workspaces)
+    * A workspace with all windows
+    * Shortcuts for accessing workspaces (Mod4+<num>)
 --------------------------------------------------------------------------------

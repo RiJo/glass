@@ -209,8 +209,8 @@ public: /* Member Functions */
 #   TEST   #####################################################################
 ##############################################################################*/
 
-    void shiftWorkspaceRight();
-    void shiftWorkspaceLeft();
+    void nextWorkspace();
+    void previousWorkspace();
     void nextClient();
     void closeFocusedClient();
 };

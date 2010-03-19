@@ -38,8 +38,6 @@ void Client::initialize(Display *d)
     title                   = None;
     trans                   = None;
 
-//    window_menu             = NULL;
-
     x                       = 1;
     y                       = 1;
     width                   = 1;
@@ -149,12 +147,9 @@ void Client::makeNewClient(Window w)
         }
     }
 
-//    window_menu = wm->getWindowMenu();
-
     gravitate(APPLY_GRAVITY);
     reparent();
 
-    //belongs_to_workspace = wm->getCurrentWorkspace();
     tags.insert(wm->getCurrentWorkspace());
 
     if (wm->getWMState(window) == IconicState)
@@ -192,8 +187,6 @@ void Client::removeClient()
 
     XSync(dpy, False);
     XUngrabServer(dpy);
-
-//    window_menu->hide();
 
     wm->removeClient(this);
 }
@@ -352,7 +345,7 @@ void Client::iconify()
 
 bool Client::isTagged(char workspace) const {
     
-    return (workspace < 0) ? true : (tags.find(workspace) != tags.end());
+    return (workspace <= 0) ? true : (tags.find(workspace) != tags.end());
 }
 
 void Client::hide()
@@ -360,8 +353,6 @@ void Client::hide()
     if (!ignore_unmap) ignore_unmap++;
 
     if(has_focus) setFocus(false);
-
-//    if(window_menu->isVisible()) window_menu->hide();
 
     XUnmapSubwindows(dpy, frame);
     XUnmapWindow(dpy, frame);
@@ -751,7 +742,6 @@ void Client::handlePropertyChange(XPropertyEvent *e)
     {
             case XA_WM_NAME:
                 getXClientName();
-//                wm->updateClientNameOnIconMenu(this);
                 XClearWindow(dpy, title);
                 redraw();
                 break;
@@ -857,8 +847,6 @@ void Client::handleButtonEvent(XButtonEvent *e)
     // so click to raise works.
     XAllowEvents(dpy, ReplayPointer, CurrentTime);
 
-//    window_menu->hide();
-
     switch (e->button)
     {
         //case Button4:
@@ -895,8 +883,6 @@ void Client::handleButtonEvent(XButtonEvent *e)
 
             if (e->window == title)
             {
-//                window_menu->hideAllVisibleSubmenus();
-
                 if (in_box)
                     wm->sendWMDelete(window);
                 else
@@ -952,10 +938,7 @@ void Client::handleButtonEvent(XButtonEvent *e)
             if(e->type == ButtonRelease)
             {
                 if((!trans)&&(in_box))
-                {
-//                    window_menu->hide();
                     iconify();
-                }
                 else
                     shade();
             }
@@ -1057,37 +1040,31 @@ void Client::handleShapeChange(XShapeEvent *e)
     setShape();
 }
 
-void Client::setTag(int workspace)
+void Client::setTag(char tag)
 {
     tags.clear();
-    tags.insert(workspace);
+    tags.insert(tag);
 
-    if(!isTagged(wm->getCurrentWorkspace())) {
+    if(!isTagged(wm->getCurrentWorkspace()))
         hide();
-//        wm->removeClientFromIconMenu(this);
-    }
 }
 
-void Client::addTag(int workspace)
+void Client::addTag(char tag)
 {
-    tags.insert(workspace);
+    tags.insert(tag);
 
-    if(!isTagged(wm->getCurrentWorkspace())) {
+    if(!isTagged(wm->getCurrentWorkspace()))
         hide();
-//        wm->removeClientFromIconMenu(this);
-    }
 }
 
-void Client::removeTag(int workspace)
+void Client::removeTag(char tag)
 {
     if (tags.size() > 1) {
-        set<char>::iterator item = tags.find(workspace);
+        set<char>::iterator item = tags.find(tag);
         tags.erase(item);
 
-        if(!isTagged(wm->getCurrentWorkspace())) {
+        if(!isTagged(wm->getCurrentWorkspace()))
             hide();
-//            wm->removeClientFromIconMenu(this);
-        }
     }
 }
 
