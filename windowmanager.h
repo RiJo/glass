@@ -1,18 +1,3 @@
-/*
- * aewm++ - A small C++ window manager developed from aewm 0.9.6 around 2000
- *
- * Frank Hale
- * frankhale@gmail.com
- *
- * http://code.google.com/p/aewmpp/
- *
- * Date: 28 December 2008
- *
- * This code is released under the GPL license www.gnu.org
- *
- * See LICENSE.txt which is included with the source code files.
- */
-
 #ifndef _WINDOWMANAGER_H_
 #define _WINDOWMANAGER_H_
 

@@ -1,16 +1,21 @@
 /*
- * aewm++ - A small C++ window manager developed from aewm 0.9.6 around 2000
- *
- * Frank Hale
- * frankhale@gmail.com
- *
- * http://code.google.com/p/aewmpp/
- *
- * Date: 28 December 2008
- *
- * This code is released under the GPL license www.gnu.org
- *
- * See LICENSE.txt which is included with the source code files.
+    Copyright (C) 2010 Rikard Johansson
+ 
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+ 
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+ 
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+    
+    This program is forked from aewm++ (timestamped 28 December 2008).
  */
 
 #include "glass.h"
