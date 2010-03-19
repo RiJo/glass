@@ -20,8 +20,6 @@ private: /* Member Variables */
     Window          title;    // window which holds title
     Window          trans;    // window id for which this client is transient for
 
-//    WindowMenu *window_menu;
-
     set<char> tags;
 
     int  x, y, width, height;
@@ -115,6 +113,7 @@ public: /* Member Functions */
     void setTag(char);
     void addTag(char);
     void removeTag(char);
+    void toggleTag(char);
 
     void handleButtonEvent(XButtonEvent *);
     void handleConfigureRequest(XConfigureRequestEvent *);

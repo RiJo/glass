@@ -28,7 +28,8 @@ struct key_binding {
     char *foo;
 };
 
-unsigned int GOTO_WORKSPACE_MODIFIER = Mod4Mask;
+unsigned int GOTO_WORKSPACE_MODIFIER    = Mod4Mask;
+unsigned int TAG_CLIENT_MODIFIER        = (ControlMask|Mod1Mask);
 
 key_binding key_bindings[] = {
     {XK_End,        (ControlMask|Mod1Mask), CMD_QUIT,               NULL},
@@ -57,7 +58,7 @@ WindowManager::WindowManager(int argc, char** argv)
 
     parseCommandLine(argc, argv);
 
-    if(workspace_count <= 0) workspace_count=DEFAULT_WORKSPACE_COUNT;
+    if(workspace_count <= 0) workspace_count = DEFAULT_WORKSPACE_COUNT;
 
     setupSignalHandlers();
     setupDisplay();
@@ -443,38 +444,54 @@ void WindowManager::doEventLoop()
 
 void WindowManager::grabKeys(Window w)
 {
-    // Workspace switchers
+    // Workspace/tag switchers
     for (int i = 0; i <= workspace_count; i++) {
-        XGrabKey(dpy,XKeysymToKeycode(dpy, XK_0+i), GOTO_WORKSPACE_MODIFIER, w,True,GrabModeAsync,GrabModeAsync);
+        XGrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), GOTO_WORKSPACE_MODIFIER,
+                w, True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), TAG_CLIENT_MODIFIER,
+                w, True, GrabModeAsync, GrabModeAsync);
     }
     // Keybindings
-    for (int i = 0; i <= KEY_BINDING_COUNT; i++)
+    for (int i = 0; i <= KEY_BINDING_COUNT; i++) {
         XGrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].mod, w,True,GrabModeAsync,GrabModeAsync);
+    }
 }
 
 void WindowManager::ungrabKeys(Window w)
 {
-    // Workspace switchers
-    for (int i = 0; i <= workspace_count; i++)
-        XUngrabKey(dpy,XKeysymToKeycode(dpy, XK_0+i), GOTO_WORKSPACE_MODIFIER, w);
+    // Workspace/tag switchers
+    for (int i = 0; i <= workspace_count; i++) {
+        XUngrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), GOTO_WORKSPACE_MODIFIER, w);
+        XUngrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), TAG_CLIENT_MODIFIER, w);
+    }
     // Keybindings
-    for (int i = 0; i <= KEY_BINDING_COUNT; i++)
+    for (int i = 0; i <= KEY_BINDING_COUNT; i++) {
         XUngrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].mod,w);
+    }
 }
 
 void WindowManager::handleKeyPressEvent(XEvent *ev)
 {
-    unsigned int state = ev->xkey.state;
     KeySym ks=XKeycodeToKeysym(dpy,ev->xkey.keycode,0);
-    if (ks==NoSymbol) return;
+    if (ks == NoSymbol)
+        return;
+    unsigned int state = ev->xkey.state;
 
+    // Switch workspace
     for (int i = 0; i <= workspace_count; i++) {
-        if (ks == (XK_0 + i) && state == GOTO_WORKSPACE_MODIFIER) {
+        if (ks == (unsigned int)(XK_0 + i) && state == GOTO_WORKSPACE_MODIFIER) {
             goToWorkspace(i);
+            return;
+        }
+        if (ks == (unsigned int)(XK_0 + i) && state == TAG_CLIENT_MODIFIER) {
+            Client *focused = focusedClient();
+            if (focused)
+                focused->toggleTag(i);
             return;
         }
     }
 
+    // Key bindings
     for (int i = 0; i < KEY_BINDING_COUNT; i++) {
         if (key_bindings[i].key == ks && key_bindings[i].mod == state) {
             switch (key_bindings[i].cmd) {
@@ -1089,6 +1106,16 @@ void WindowManager::sigHandler(int signal)
     }
 }
 
+Client *WindowManager::focusedClient() {
+    list<Client*>::iterator it;
+    for(it = client_list.begin(); it != client_list.end(); it++) {
+        if((*it)->hasFocus() && (*it)->isTagged(current_workspace)) {
+            return (*it);
+        }
+    }
+    return NULL;
+}
+
 void WindowManager::nextWorkspace() {
     goToWorkspace(current_workspace + 1);
 }
@@ -1103,14 +1130,9 @@ void WindowManager::nextClient() {
 
 void WindowManager::closeFocusedClient() {
     if (client_list.size()) {
-        list<Client*>::iterator it;
-        for(it = client_list.begin(); it != client_list.end(); it++)
-        {
-            if((*it)->hasFocus() && (*it)->isTagged(current_workspace))
-            {
-                sendWMDelete((*it)->getAppWindow());
-                break;
-            }
+        Client *focused = focusedClient();
+        if (focused) {
+            sendWMDelete(focused->getAppWindow());
         }
     }
 }

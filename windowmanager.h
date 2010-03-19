@@ -10,9 +10,6 @@ private: /* member variables */
     list<Client*> client_list;
     list<Window> client_window_list;
 
-//    WindowMenu *window_menu;
-//    IconMenu *icon_menu;
-
     Client* focused_client;
     XFontStruct *font;
     GC invert_gc, string_gc, border_gc, unfocused_gc, focused_title_gc;
@@ -113,14 +110,6 @@ public: /* Member Functions */
     void unfocusAnyStrayClients();
     void findTransientsToMapOrUnmap(Window win, bool hide);
 
-//    inline WindowMenu* getWindowMenu()     const { return window_menu; }
-//    inline IconMenu*   getIconMenu()     const { return icon_menu; }
-
-//    void updateIconMenu();
-//    void addClientToIconMenu(Client *c);
-//    void updateClientNameOnIconMenu(Client *c);
-//    void removeClientFromIconMenu(Client *c);
-
     inline XFontStruct* getFont()   const { return font;         }
     inline GC getInvertGC()         const { return invert_gc;     }
     inline GC getStringGC()         const { return string_gc;     }
@@ -190,10 +179,8 @@ public: /* Member Functions */
     void grabKeys(Window w);
     void ungrabKeys(Window w);
 
-/*##############################################################################
-#   TEST   #####################################################################
-##############################################################################*/
 
+    Client *focusedClient();
     void nextWorkspace();
     void previousWorkspace();
     void nextClient();
