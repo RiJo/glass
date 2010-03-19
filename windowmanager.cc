@@ -525,16 +525,15 @@ void WindowManager::handleKeyPressEvent(XEvent *ev)
 
 void WindowManager::handleButtonPressEvent(XEvent *ev)
 {
-    if (ev->xbutton.window == root)
-    {
-        /*switch (ev->xbutton.button)
-        {
-            case Button1:
+    if (ev->xbutton.window == root) {
+        printf("button: %d\n", ev->xbutton.button);
+        switch (ev->xbutton.button) {
+            /*case Button1: // left
                 if(icon_menu->isVisible())
                     icon_menu->hide();
             break;
 
-            case Button2:
+            case Button2: // middle
                 if(icon_menu->getItemCount())
                 {
                     if(icon_menu->isVisible())
@@ -544,13 +543,21 @@ void WindowManager::handleButtonPressEvent(XEvent *ev)
                 }
             break;
 
-            case Button3:
+            case Button3: // right
                 forkExec(opt_new1);
 
                 if(icon_menu->isVisible())
                     icon_menu->hide();
+            break;*/
+
+            case Button4: // scroll up
+                nextWorkspace();
             break;
-        }*/
+
+            case Button5: // scroll down
+                previousWorkspace();
+            break;
+        }
     }
     else
     {
