@@ -56,4 +56,5 @@
     * Updated copyright information
     * Shortcut for toggling tags on focused window (Ctrl-Alt-<num>)
     * Step through workspaces with mouse scrolling
+    * Simple bar showing workspaces as boxes with the active one highlighted
 --------------------------------------------------------------------------------

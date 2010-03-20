@@ -63,10 +63,6 @@ int handleXError(Display *, XErrorEvent *);
 
 class Client;
 
-//#include "basemenu.h"
-//#include "genericmenu.h"
-//#include "windowmenu.h"
-//#include "iconmenu.h"
 #include "client.h"
 #include "windowmanager.h"
 

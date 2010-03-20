@@ -77,7 +77,7 @@ private: /* Member Functions */
 
 public: /* Member Functions */
 
-    Client(Display *d, Window new_client);
+    Client(Display *, Window);
     ~Client();
 
     void getXClientName();
@@ -130,4 +130,4 @@ public: /* Member Functions */
     void handleShapeChange(XShapeEvent *);
 };
 
-#endif
+#endif // _CLIENT_H_

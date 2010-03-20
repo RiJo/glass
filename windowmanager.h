@@ -2,6 +2,7 @@
 #define _WINDOWMANAGER_H_
 
 #include "glass.h"
+#include "workspacebar.h"
 
 class WindowManager
 {
@@ -9,6 +10,8 @@ private: /* member variables */
 
     list<Client*> client_list;
     list<Window> client_window_list;
+
+    WorkspaceBar *foobar;
 
     Client* focused_client;
     XFontStruct *font;
@@ -189,4 +192,4 @@ public: /* Member Functions */
 
 extern WindowManager *wm;
 
-#endif
+#endif // _WINDOWMANAGER_H_

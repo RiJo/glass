@@ -1,5 +1,4 @@
 #include "glass.h"
-#include <boost/function.hpp>
 
 /*##############################################################################
 #   TEST   #####################################################################
@@ -63,6 +62,12 @@ WindowManager::WindowManager(int argc, char** argv)
     setupSignalHandlers();
     setupDisplay();
     scanWins();
+    
+    // TEST
+    foobar = new WorkspaceBar(dpy, root);
+    foobar->setWorkspaceCount(&workspace_count);
+    foobar->setCurrentWorkspace(&current_workspace);
+    // TEST
 
     doEventLoop();
 }
@@ -439,6 +444,8 @@ void WindowManager::doEventLoop()
                 handleDefaultEvent(&ev);
             break;
         }
+        
+        foobar->redraw();
     }
 }
 
