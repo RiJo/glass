@@ -12,6 +12,7 @@ private: /* Member Variables */
     Colormap colormap;
     GC active_gc;
     GC inactive_gc;
+    GC text_gc;
 
     char *workspace_count;
     char *current_workspace;
