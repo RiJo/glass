@@ -9,6 +9,7 @@ enum command {
     CMD_RESTART,
     CMD_NEXT_CLIENT,
     CMD_CLOSE_CLIENT,
+    CMD_RUN_DIALOG,
     CMD_WS_SHIFT_RIGHT,
     CMD_WS_SHIFT_LEFT,
     CMD_EXEC
@@ -19,6 +20,9 @@ WindowManager* wm;
 #define EXEC_TERMINAL       "xterm"
 #define EXEC_WEBBROWSER     "firefox"
 #define EXEC_EDITOR         "scite"
+// TEMP
+#define RUN_DIALOG          "fbrun"
+// TEMP
 
 struct key_binding {
     KeySym key;
@@ -37,11 +41,12 @@ key_binding key_bindings[] = {
     {XK_F4,         (Mod1Mask),             CMD_CLOSE_CLIENT,       NULL},
     {XK_Right,      (Mod4Mask),             CMD_WS_SHIFT_RIGHT,     NULL},
     {XK_Left,       (Mod4Mask),             CMD_WS_SHIFT_LEFT,      NULL},
+    {XK_r,          (Mod4Mask),             CMD_RUN_DIALOG,         NULL},
     {XK_Return,     (Mod4Mask),             CMD_EXEC,               (char *)EXEC_TERMINAL},
     {XK_w,          (Mod4Mask),             CMD_EXEC,               (char *)EXEC_WEBBROWSER},
     {XK_s,          (Mod4Mask),             CMD_EXEC,               (char *)EXEC_EDITOR}
 };
-#define KEY_BINDING_COUNT 9
+#define KEY_BINDING_COUNT 10
 
 /*##############################################################################
 #   TEST   #####################################################################
@@ -64,9 +69,7 @@ WindowManager::WindowManager(int argc, char** argv)
     scanWins();
     
     // TEST
-    foobar = new WorkspaceBar(dpy, root);
-    foobar->setWorkspaceCount(&workspace_count);
-    foobar->setCurrentWorkspace(&current_workspace);
+    foobar = new FooBar(dpy, root, workspace_count, current_workspace);
     // TEST
 
     doEventLoop();
@@ -126,14 +129,14 @@ void WindowManager::parseCommandLine(int argc, char** argv)
 
         if (strcmp(argv[i], "-version") == 0)
         {
-            cout << "Version: " << VERSION << endl;
+            cout << "Version: " << PROGRAM_VERSION << endl;
             cout << "Date: " << DATE << endl;
                     exit(0);
         }
 
         if(strcmp(argv[i], "-usage")==0)
         {
-            cerr << "usage: " << WINDOW_MANAGER_NAME << " [options]" << endl;
+            cerr << "usage: " << PROGRAM_NAME << " [options]" << endl;
             cerr << "   options are: -display <display>, -fg|-bg|-bd <color>, " << endl;
             cerr << "   -bw <width>, -md <workspace count>, -tj <left|center|right>, -wm <true|false>," << endl;
             cerr << "    -new1|-new2 <cmd>, -fm (follow|sloppy|click), -wp (mouse|random), -usage, -help" << endl;
@@ -142,7 +145,7 @@ void WindowManager::parseCommandLine(int argc, char** argv)
 
         if(strcmp(argv[i], "-help")==0)
         {
-            cerr << "help: " << WINDOW_MANAGER_NAME << endl << endl;
+            cerr << "help: " << PROGRAM_NAME << endl << endl;
             cerr << "-display specifies a display to start the window manager on, The default is display :0." << endl;
             cerr << "-fg, -bg and -bd are colors you wish the foreground, background and border to be for window titlebars." << endl;
             cerr << "-bw is the border width of the window." << endl;
@@ -520,6 +523,9 @@ void WindowManager::handleKeyPressEvent(XEvent *ev)
                 case CMD_WS_SHIFT_LEFT:
                     previousWorkspace();
                 break;
+                case CMD_RUN_DIALOG:
+                    runDialog();
+                break;
                 case CMD_EXEC:
                     printf("Executing: %s\n", key_bindings[i].foo);
                     forkExec(key_bindings[i].foo);
@@ -534,27 +540,17 @@ void WindowManager::handleButtonPressEvent(XEvent *ev)
 {
     if (ev->xbutton.window == root) {
         switch (ev->xbutton.button) {
-            /*case Button1: // left
-                if(icon_menu->isVisible())
-                    icon_menu->hide();
+            case Button1: // left
+                foobar->handleButtonEvent(&ev->xbutton);
             break;
 
             case Button2: // middle
-                if(icon_menu->getItemCount())
-                {
-                    if(icon_menu->isVisible())
-                        icon_menu->hide();
-                    else
-                        icon_menu->show();
-                }
+                foobar->handleButtonEvent(&ev->xbutton);
             break;
 
             case Button3: // right
-                forkExec(opt_new1);
-
-                if(icon_menu->isVisible())
-                    icon_menu->hide();
-            break;*/
+                foobar->handleButtonEvent(&ev->xbutton);
+            break;
 
             case Button4: // scroll up
                 nextWorkspace();
@@ -992,7 +988,7 @@ void WindowManager::quitNicely()
 
 void WindowManager::cleanup()
 {
-    cerr << WINDOW_MANAGER_NAME << " is cleaning up.... " << endl;
+    cerr << PROGRAM_NAME << " is cleaning up.... " << endl;
 
     unsigned int nwins, i;
     Window dummyw1, dummyw2, *wins;
@@ -1139,6 +1135,10 @@ void WindowManager::previousWorkspace() {
 
 void WindowManager::nextClient() {
     XCirculateSubwindows(dpy, root, LowerHighest);
+}
+
+void WindowManager::runDialog() {
+    foobar->setRunfield(true);
 }
 
 void WindowManager::closeFocusedClient() {

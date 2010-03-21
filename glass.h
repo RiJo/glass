@@ -1,8 +1,9 @@
 #ifndef _GLASS_H_
 #define _GLASS_H_
 
-#define WINDOW_MANAGER_NAME "aewm++"
-#define VERSION "xxx"
+#define PROGRAM_NAME "glass"
+#define PROGRAM_VERSION "0.3.0"
+
 #define DATE "28 December 2008"
 
 #include <stdio.h>

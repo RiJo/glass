@@ -9,12 +9,12 @@ NAME     =  glass
 
 HEADERS  =  glass.h 		\
             client.h 		\
-            workspacebar.h 		\
+            foobar.h 		\
             windowmanager.h
 
 OBJS     =  windowmanager.o 	\
             client.o 		\
-            workspacebar.o 		\
+            foobar.o 		\
             main.o
 
 all: $(NAME)
