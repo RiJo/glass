@@ -380,7 +380,10 @@ void WindowManager::doEventLoop()
         switch (ev.type)
         {
             case KeyPress:
-                handleKeyPressEvent(&ev);
+                if (foobar->getRunfield())
+                    foobar->handleKeyEvent(&ev.xkey);
+                else
+                    handleKeyPressEvent(&ev);
             break;
 
             case ButtonPress:
@@ -736,31 +739,27 @@ void WindowManager::handleEnterNotifyEvent(XEvent *ev)
 
 void WindowManager::handleLeaveNotifyEvent(XEvent *ev)
 {
-
+    printf("handleLeaveNotifyEvent(): when does this happen???\n");
 }
 
 void WindowManager::handleFocusInEvent(XEvent *ev)
 {
-    if((ev->xfocus.mode==NotifyGrab) || (ev->xfocus.mode==NotifyUngrab)) return;
+    if((ev->xfocus.mode == NotifyGrab) || (ev->xfocus.mode == NotifyUngrab))
+        return;
     
     list<Window>::iterator iter;
 
-    for(iter=client_window_list.begin(); iter != client_window_list.end(); iter++)
-    {
-        if(ev->xfocus.window == (*iter))
-        {
+    for(iter=client_window_list.begin(); iter != client_window_list.end(); iter++) {
+        if(ev->xfocus.window == (*iter)) {
             Client *c = findClient( (*iter) );
-
-            if(c)
-            {
+            if(c) {
                 unfocusAnyStrayClients();
                 c->handleFocusInEvent(&ev->xfocus);
                 focused_client = c;
                 grabKeys( (*iter) );
             }
         }
-        else
-        {
+        else {
             if(ev->xfocus.window==root && focus_model==FOCUS_FOLLOW)
                 unfocusAnyStrayClients();
         }
@@ -770,14 +769,10 @@ void WindowManager::handleFocusInEvent(XEvent *ev)
 void WindowManager::handleFocusOutEvent(XEvent *ev)
 {
     list<Window>::iterator iter;
-    for(iter=client_window_list.begin(); iter != client_window_list.end(); iter++)
-    {
-        if(ev->xfocus.window == (*iter))
-        {
+    for(iter=client_window_list.begin(); iter != client_window_list.end(); iter++) {
+        if(ev->xfocus.window == (*iter)) {
             Client *c = findClient( (*iter) );
-
-            if(c)
-            {
+            if(c) {
                 focused_client = NULL;
                 ungrabKeys( (*iter) );
                 return;
@@ -814,7 +809,6 @@ void WindowManager::handleFocusOutEvent(XEvent *ev)
 void WindowManager::handleClientMessageEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xclient.window);
-
     if(c)
         c->handleClientMessage(&ev->xclient);
 }
@@ -822,7 +816,6 @@ void WindowManager::handleClientMessageEvent(XEvent *ev)
 void WindowManager::handleColormapNotifyEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xcolormap.window);
-
     if(c)
         c->handleColormapChange(&ev->xcolormap);
 }
@@ -830,7 +823,6 @@ void WindowManager::handleColormapNotifyEvent(XEvent *ev)
 void WindowManager::handlePropertyNotifyEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xproperty.window);
-
     if(c)
         c->handlePropertyChange(&ev->xproperty);
 }
@@ -838,7 +830,6 @@ void WindowManager::handlePropertyNotifyEvent(XEvent *ev)
 void WindowManager::handleExposeEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xexpose.window);
-
     if(c)
         c->handleExposeEvent(&ev->xexpose);
 }
@@ -846,11 +837,8 @@ void WindowManager::handleExposeEvent(XEvent *ev)
 void WindowManager::handleDefaultEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xany.window);
-
-    if(c)
-    {
+    if(c) {
         if (shape && ev->type == shape_event)
-            // ev was &ev
             c->handleShapeChange((XShapeEvent *)ev);
     }
 }
@@ -875,30 +863,25 @@ void WindowManager::focusPreviousWindowInStackingOrder()
 
     XQueryTree(dpy, root, &dummyw1, &dummyw2, &wins, &nwins);
 
-    if(client_list.size())
-    {
+    if(client_list.size()) {
         list<Client*> client_list_for_current_workspace;
 
-        for (i = 0; i < nwins; i++)
-        {
+        for (i = 0; i < nwins; i++) {
             c = findClient(wins[i]);
 
-            if(c)
-            {
+            if(c) {
                 if((c->isTagged(current_workspace)
                 && c->hasWindowDecorations() && (c->isIconified() == false) ))
                 client_list_for_current_workspace.push_back(c);
             }
         }
 
-        if(client_list_for_current_workspace.size())
-        {
+        if(client_list_for_current_workspace.size()) {
             list<Client*>::iterator iter = client_list_for_current_workspace.end();
 
             iter--;
             
-            if( (*iter) )
-            {
+            if( (*iter) ) {
                 XSetInputFocus(dpy, (*iter)->getAppWindow(), RevertToNone, CurrentTime);
                 client_list_for_current_workspace.clear();
                 XFree(wins);
@@ -933,12 +916,10 @@ void WindowManager::removeClient(Client* c)
 
 Client* WindowManager::findClient(Window w)
 {
-    if(client_list.size())
-    {
+    if(client_list.size()) {
         list<Client*>::iterator iter = client_list.begin();
 
-        for(; iter != client_list.end(); iter++)
-        {
+        for(; iter != client_list.end(); iter++) {
             if (w == (*iter)->getTitleWindow()  ||
                 w == (*iter)->getFrameWindow()  ||
                 w == (*iter)->getAppWindow())
@@ -952,19 +933,14 @@ void WindowManager::findTransientsToMapOrUnmap(Window win, bool hide)
 {
     list<Client*>::iterator iter;
 
-    if(client_list.size())
-    {
-        for(iter=client_list.begin(); iter!= client_list.end(); iter++)
-        {
-            if((*iter)->getTransientWindow() == win)
-            {
-                if(hide)
-                {
+    if(client_list.size()) {
+        for(iter=client_list.begin(); iter!= client_list.end(); iter++) {
+            if((*iter)->getTransientWindow() == win) {
+                if(hide) {
                     if(! (*iter)->isIconified())
                         (*iter)->iconify();
                 }
-                else
-                {
+                else {
                     if((*iter)->isIconified())
                         (*iter)->unhide();
                 }
@@ -976,7 +952,6 @@ void WindowManager::findTransientsToMapOrUnmap(Window win, bool hide)
 void WindowManager::restart()
 {
     cleanup();
-
     execl("/bin/sh", "sh", "-c", command_line.c_str(), (char *)NULL);
 }
 

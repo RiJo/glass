@@ -16,6 +16,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
     
     This program is forked from aewm++ (timestamped 28 December 2008).
+    http://code.google.com/p/aewmpp
  */
 
 #include "glass.h"
