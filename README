@@ -63,6 +63,9 @@
 --------------------------------------------------------------------------------
  version 0.4.0, xxxx-xx-xx
 --------------------------------------------------------------------------------
-    * Minor calibrations of workspacebar geometry
-    * Added workspace numbers in workspacebar
+    * Renamed workspacebar to foobar
+    * Minor calibrations of foobar geometry
+    * Added workspace numbers in foobar
+    * Switch workspace by clicking in foobar
+    * Runfield to fork programs in foobar (only graphics so far)
 --------------------------------------------------------------------------------
