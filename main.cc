@@ -26,6 +26,8 @@ void forkExec(char *cmd)
 {
     if(! (strlen(cmd)>0)) return;
 
+    printf("Executing: %s\n", cmd);
+
     pid_t pid = fork();
 
     switch (pid) {

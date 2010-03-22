@@ -8,7 +8,6 @@ workspace_count(count), current_workspace(current)
 
     setupColors();
 
-    // Run field
     runfield_active = false;
     runfield = (char *)malloc(RUNFIELD_BUFFER);
     resetRunField();
@@ -17,35 +16,6 @@ workspace_count(count), current_workspace(current)
 FooBar::~FooBar()
 {
     delete [] runfield;
-}
-
-void FooBar::redrawWorkspaces()
-{
-    XTextItem *text = new XTextItem();
-    text->chars = (char *)malloc(1);
-    text->nchars = 1;
-
-    int x, y;
-    for (char ws = 0; ws <= workspace_count; ws++) {
-        x = 1+((WORKSPACE_WIDTH+ITEM_PADDING)*ws);
-        y = 1;
-        
-        XFillRectangle(dpy, root, background_gc, x, y, WORKSPACE_WIDTH, BAR_HEIGHT);
-        if (ws == current_workspace) {
-            XDrawRectangle(dpy, root, active_gc, x, y, WORKSPACE_WIDTH, BAR_HEIGHT);
-        }
-        else {
-            XDrawRectangle(dpy, root, inactive_gc, x, y, WORKSPACE_WIDTH, BAR_HEIGHT);
-        }
-
-        if (ws > 0) {
-            text->chars[0] = (char)(48 + ws);
-            XDrawText(dpy, root, text_gc, x + MAGIC_NUMBER - 1, y + MAGIC_NUMBER, text, 1);
-        }
-    }
-
-    delete [] text->chars;
-    delete [] text;
 }
 
 void FooBar::setupColors() {
@@ -76,6 +46,35 @@ void FooBar::setupColors() {
     XSetForeground(dpy, text_gc, text_color.pixel);
 }
 
+void FooBar::redrawWorkspaces()
+{
+    XTextItem *text = new XTextItem();
+    text->chars = (char *)malloc(1);
+    text->nchars = 1;
+
+    int x, y;
+    for (char ws = 0; ws <= workspace_count; ws++) {
+        x = 1 + WORKSPACE_OFFSET(ws);
+        y = 1;
+        
+        XFillRectangle(dpy, root, background_gc, x, y, WORKSPACE_WIDTH, BAR_HEIGHT);
+        if (ws == current_workspace) {
+            XDrawRectangle(dpy, root, active_gc, x, y, WORKSPACE_WIDTH, BAR_HEIGHT);
+        }
+        else {
+            XDrawRectangle(dpy, root, inactive_gc, x, y, WORKSPACE_WIDTH, BAR_HEIGHT);
+        }
+
+        if (ws > 0) {
+            text->chars[0] = (char)(48 + ws);
+            XDrawText(dpy, root, text_gc, x + MAGIC_NUMBER - 1, y + MAGIC_NUMBER, text, 1);
+        }
+    }
+
+    delete [] text->chars;
+    delete [] text;
+}
+
 void FooBar::redrawRunField()
 {
     GC gc;
@@ -91,8 +90,14 @@ void FooBar::redrawRunField()
     XDrawRectangle(dpy, root, gc, x, y, RUNFIELD_WIDTH, BAR_HEIGHT);
 
     XTextItem *text = new XTextItem();
-    text->chars = runfield;
-    text->nchars = strlen(runfield);
+    if (strlen(runfield) <= RUNFIELD_MAX_LENGTH) {
+        text->chars = runfield;
+        text->nchars = strlen(runfield);
+    }
+    else {
+        text->chars = runfield + (strlen(runfield) - RUNFIELD_MAX_LENGTH);
+        text->nchars = RUNFIELD_MAX_LENGTH;
+    }
 
     XDrawText(dpy, root, text_gc, x + MAGIC_NUMBER, y + MAGIC_NUMBER, text, 1);
 
@@ -128,37 +133,53 @@ inline bool FooBar::insideRunfield(int x, int y)
 void FooBar::resetRunField()
 {
     current_character = 0;
-    for (int i = 0; i < RUNFIELD_BUFFER; i++) {
-        runfield[i] = '\0';
+    memset(runfield, '\0', RUNFIELD_BUFFER);
+}
+
+void FooBar::setRunfield(bool active)
+{
+    runfield_active = active;
+    if (active) {
+        XGrabKeyboard(dpy, root, True, GrabModeAsync, GrabModeAsync, CurrentTime);
+    }
+    else {
+        XUngrabKeyboard(dpy, CurrentTime);
+        resetRunField();
     }
 }
 
 void FooBar::handleButtonEvent(XButtonEvent *e)
 {
-    //printf("Handle button:\n\tinsideRunfield() == %d\n\tinsideWorkspace() == %d\n", insideRunfield(e->x, e->y), insideWorkspaces(e->x, e->y));
     switch (e->button) {
         case Button1:
-            runfield_active = insideRunfield(e->x, e->y);
+            setRunfield(insideRunfield(e->x, e->y));
 
-            if (insideWorkspaces(e->x, e->y)) {
+            if (insideWorkspaces(e->x, e->y))
                 wm->goToWorkspace(e->x / (WORKSPACE_WIDTH+ITEM_PADDING));
-            }
         break;
     }
 }
 
 void FooBar::handleKeyEvent(XKeyEvent *e)
 {
-    KeySym ks=XKeycodeToKeysym(dpy, e->keycode, 0);
+    printf("process id: %ld\n", (long)getpid());
+    KeySym ks = XKeycodeToKeysym(dpy, e->keycode, 0);
     if (ks == NoSymbol)
         return;
     //printf("handle key: %d\t keysym: %ld\tstring: %s\n", e->keycode, (long)ks, XKeysymToString(ks));
     switch (ks) {
         case XK_Return:
-            forkExec(runfield);
-            resetRunField();
+            if (strlen(runfield) > 0)
+                forkExec(runfield);
+        case XK_Escape: // fallthrough
+            setRunfield(false);
+        break;
+        case XK_BackSpace:
+            if (current_character > 0)
+                runfield[--current_character] = '\0';
         break;
         default:
+            if (current_character < RUNFIELD_BUFFER)
             runfield[current_character++] = *XKeysymToString(ks);
         break;
     }
