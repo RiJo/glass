@@ -65,7 +65,7 @@ void Client::initialize(Display *d)
     descent                 = 0;
     text_width              = 0;
     text_justify            = 0;
-    justify_style           = DEF_TJ;
+    justify_style           = RIGHT_JUSTIFY;
 
     screen                  = DefaultScreen(dpy);
     root                    = RootWindow(dpy, screen);
@@ -210,22 +210,22 @@ void Client::redraw()
     if (!has_title) return;
 
     GC gc;
-
     if(has_focus)
-        gc = wm->getBorderGC();
+        gc = wm->getFocusedBorder2GC();
     else
-        gc = wm->getUnfocusedGC();
+        gc = wm->getUnfocusedBorder2GC();
 
     XDrawLine(dpy, title, gc, 0, theight() - BW + BW/2, width, theight() - BW + BW/2);
     XDrawLine(dpy, title, gc, width - theight()+ BW/2, 0, width - theight()+ BW/2, theight());
 
+    // Title text
     if(has_focus)
-        gc = wm->getFocusedTitleGC();
+        gc = wm->getFocusedTitleFGGC();
+    else
+        gc = wm->getUnfocusedTitleFGGC();
 
-    if (!trans && name)
-    {
-        switch(justify_style)
-        {
+    if (!trans && name) {
+        switch(justify_style) {
             case LEFT_JUSTIFY:
                 text_justify = SPACE;
             break;
@@ -239,8 +239,7 @@ void Client::redraw()
             break;
         }
 
-        if(name!=NULL)
-        {
+        if(name != NULL) {
             XDrawString(dpy, title, gc, text_justify, wm->getFont()->ascent+1,name, strlen(name));
         }
     }
@@ -265,45 +264,43 @@ void Client::gravitate(int multiplier)
 void Client::setShape()
 {
     int n=0, order=0;
-        XRectangle temp, *dummy;
+    XRectangle temp, *dummy;
 
-        dummy = XShapeGetRectangles(dpy, window, ShapeBounding, &n, &order);
+    dummy = XShapeGetRectangles(dpy, window, ShapeBounding, &n, &order);
 
-        if (n > 1) {
-            XShapeCombineShape(dpy, frame, ShapeBounding,
+    if (n > 1) {
+        XShapeCombineShape(dpy, frame, ShapeBounding,
                 0, theight(), window, ShapeBounding, ShapeSet);
 
-            temp.x = -BW;
-            temp.y = -BW;
-            temp.width = width + 2*BW;
-            temp.height = theight() + BW;
+        temp.x = -BW;
+        temp.y = -BW;
+        temp.width = width + 2*BW;
+        temp.height = theight() + BW;
 
         XShapeCombineRectangles(dpy, frame, ShapeBounding,
                 0, 0, &temp, 1, ShapeUnion, YXBanded);
 
         temp.x = 0;
-            temp.y = 0;
-            temp.width = width;
-            temp.height = theight() - BW;
+        temp.y = 0;
+        temp.width = width;
+        temp.height = theight() - BW;
 
         XShapeCombineRectangles(dpy, frame, ShapeClip,
                 0, theight(), &temp, 1, ShapeUnion, YXBanded);
 
         has_been_shaped = 1;
     }
-    else
-    if (has_been_shaped)
-    {
-            temp.x = -BW;
-            temp.y = -BW;
-            temp.width = width + 2*BW;
-            temp.height = height + theight() + 2*BW;
+    else if (has_been_shaped) {
+        temp.x = -BW;
+        temp.y = -BW;
+        temp.width = width + 2*BW;
+        temp.height = height + theight() + 2*BW;
 
         XShapeCombineRectangles(dpy, frame, ShapeBounding,
                 0, 0, &temp, 1, ShapeSet, YXBanded);
-        }
+    }
 
-        XFree(dummy);
+    XFree(dummy);
 }
 
 void Client::iconify()
@@ -603,24 +600,22 @@ void Client::handleMotionNotifyEvent(XMotionEvent *ev)
 
 void Client::drawOutline()
 {
-        if(! is_shaded)
-        {
-            XDrawRectangle(dpy, root, wm->getInvertGC(),
+    if (!is_shaded) {
+        XDrawRectangle(dpy, root, wm->getFocusedBorderGC(),
                 x + BW/2, y - theight() + BW/2,
                 width + BW, height + theight() + BW);
 
-        XDrawRectangle(dpy, root, wm->getInvertGC(),
+        XDrawRectangle(dpy, root, wm->getFocusedBorderGC(),
                 x + BW/2 + 4, y - theight() + BW/2 + 4,
                 width + BW - 8, height + theight() + BW - 8);
     }
-    else
-    {
-        XDrawRectangle(dpy, root, wm->getInvertGC(),
-                    x + BW/2,
+    else {
+        XDrawRectangle(dpy, root, wm->getFocusedBorderGC(),
+                x + BW/2,
                 y - theight() + BW/2,
-                    width + BW,
+                width + BW,
                 theight() + BW);
-        }
+    }
 }
 
 int Client::getIncsize(int *x_ret, int *y_ret, int mode)
@@ -737,12 +732,11 @@ void Client::handlePropertyChange(XPropertyEvent *e)
 
 void Client::reparent()
 {
-        XSetWindowAttributes pattr;
-
     XGrabServer(dpy);
 
-        pattr.background_pixel = wm->getFCColor().pixel;
-        pattr.border_pixel = wm->getBDColor().pixel;
+    XSetWindowAttributes pattr;
+    pattr.background_pixel = wm->getFCColor().pixel;
+    pattr.border_pixel = wm->getBDColor().pixel;
     pattr.do_not_propagate_mask = ButtonPressMask|ButtonReleaseMask|ButtonMotionMask;
     pattr.override_redirect=False;
     pattr.event_mask = ButtonMotionMask        |
@@ -756,53 +750,56 @@ void Client::reparent()
 
     int b_w = BW;
 
-    if(border_width) { b_w = border_width; XSetWindowBorderWidth(dpy, window, 0); } else { b_w = BW; }
+    if(border_width) {
+        b_w = border_width; XSetWindowBorderWidth(dpy, window, 0);
+    }
+    else {
+        b_w = BW;
+    }
 
-        frame = XCreateWindow(dpy,
-                root,
-                    x,
-                y - theight(),
-                width,
-                height + theight(),
-                b_w,
-                    DefaultDepth(dpy, screen ),
-                CopyFromParent,
-                DefaultVisual(dpy, screen ),
-                    CWOverrideRedirect|CWDontPropagate|CWBackPixel|CWBorderPixel|CWEventMask,
-                &pattr);
+    frame = XCreateWindow(
+            dpy,
+            root,
+            x,
+            y - theight(),
+            width,
+            height + theight(),
+            b_w,
+            DefaultDepth(dpy, screen),
+            CopyFromParent,
+            DefaultVisual(dpy, screen),
+            CWOverrideRedirect|CWDontPropagate|CWBackPixel|CWBorderPixel|CWEventMask,
+            &pattr
+    );
 
-    title = XCreateWindow(dpy,
-                frame,
-                    0,
-                0,
-                width,
-                theight(),
-                0,
-                    DefaultDepth(dpy,  screen ),
-                CopyFromParent,
-                DefaultVisual(dpy,  screen ),
-                CWOverrideRedirect|CWDontPropagate|CWBackPixel|CWBorderPixel|CWEventMask,
-                &pattr);
+    title = XCreateWindow(
+            dpy,
+            frame,
+            0,
+            0,
+            width,
+            theight(),
+            0,
+            DefaultDepth(dpy,  screen),
+            CopyFromParent,
+            DefaultVisual(dpy,  screen),
+            CWOverrideRedirect|CWDontPropagate|CWBackPixel|CWBorderPixel|CWEventMask,
+            &pattr
+    );
 
-        if (wm->getShape()) {
-            XShapeSelectInput(dpy, window, ShapeNotifyMask);
-            setShape();
-        }
+    if (wm->getShape()) {
+        XShapeSelectInput(dpy, window, ShapeNotifyMask);
+        setShape();
+    }
 
     XChangeWindowAttributes(dpy, window, CWDontPropagate, &pattr);
 
     XSelectInput(dpy, window, FocusChangeMask|PropertyChangeMask);
 
-        XReparentWindow(dpy, window, frame, 0, theight());
+    XReparentWindow(dpy, window, frame, 0, theight());
 
-    XGrabButton(dpy,
-        Button1,
-        AnyModifier,
-        frame,
-        1,
-        ButtonPressMask|ButtonReleaseMask,
-        GrabModeSync,
-        GrabModeAsync, None, None);
+    XGrabButton(dpy, Button1, AnyModifier, frame, 1,  ButtonPressMask|ButtonReleaseMask,
+            GrabModeSync, GrabModeAsync, None, None);
 
     sendConfig();
 
@@ -998,7 +995,6 @@ void Client::setFocus(bool focus)
             XSetWindowBackground(dpy, title, wm->getFCColor().pixel);
             XSetWindowBorder(dpy, frame, wm->getUnFocusedBorderColor().pixel);
         }
-
         XClearWindow(dpy, title);
         redraw();
     }

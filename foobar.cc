@@ -22,19 +22,19 @@ void FooBar::setupColors() {
     XColor background_color, active_color, inactive_color, text_color, dummyc;
 
     background_gc = XCreateGC(dpy, root, 0, 0);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_BACKGROUND, &background_color, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_TITLE_BG_FOCUS, &background_color, &dummyc);
     XSetForeground(dpy, background_gc, background_color.pixel);
 
     active_gc = XCreateGC(dpy, root, 0, 0);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_ACTIVE, &active_color, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_CLIENT_BD_FOCUS, &active_color, &dummyc);
     XSetForeground(dpy, active_gc, active_color.pixel);
 
     inactive_gc = XCreateGC(dpy, root, 0, 0);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_INACTIVE, &inactive_color, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_CLIENT_BD_UNFOCUS, &inactive_color, &dummyc);
     XSetForeground(dpy, inactive_gc, inactive_color.pixel);
 
     text_gc = XCreateGC(dpy, root, 0, 0);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_TEXT, &text_color, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_TITLE_FG_FOCUS, &text_color, &dummyc);
     XSetForeground(dpy, text_gc, text_color.pixel);
 }
 

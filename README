@@ -76,4 +76,5 @@
 --------------------------------------------------------------------------------
     * Removed some of the commandline arguments
     * Rewrote commandline parser to use getopt instead
+    * Better color handling
 --------------------------------------------------------------------------------

@@ -15,10 +15,23 @@ private: /* member variables */
 
     Client* focused_client;
     XFontStruct *font;
-    GC invert_gc, string_gc, border_gc, unfocused_gc, focused_title_gc;
-    XColor fg, bg, bd, fc;
+    GC      focused_title_fg_gc,
+            unfocused_title_fg_gc,
+            focused_title_bg_gc,
+            unfocused_title_bg_gc,
+            focused_border_gc,
+            unfocused_border_gc,
+            focused_border2_gc,
+            unfocused_border2_gc;
 
-    XColor focused_border, unfocused_border;
+    XColor  col_fg_focus,
+            col_fg_unfocus,
+            col_bg_focus,
+            col_bg_unfocus,
+            col_title_bd_focus,
+            col_title_bd_unfocus,
+            col_cli_bd_focus,
+            col_cli_bd_unfocus;
 
     Cursor move_curs, arrow_curs;
 
@@ -30,8 +43,7 @@ private: /* member variables */
     char current_workspace;
 
     // The screen max resolutions (x,y)
-    int xres;
-    int yres;
+    int xres, yres;
 
     int shape, shape_event;
 
@@ -105,21 +117,28 @@ public: /* Member Functions */
     void unfocusAnyStrayClients();
     void findTransientsToMapOrUnmap(Window win, bool hide);
 
-    inline XFontStruct* getFont()   const { return font;         }
-    inline GC getInvertGC()         const { return invert_gc;     }
-    inline GC getStringGC()         const { return string_gc;     }
-    inline GC getBorderGC()         const { return border_gc;     }
-    inline GC getUnfocusedGC()      const { return unfocused_gc;     }
-    inline GC getFocusedTitleGC()   const { return focused_title_gc;}
-    inline Cursor getMoveCursor()   const { return move_curs;    }
-    inline Cursor getArrowCursor()  const { return arrow_curs;     }
-    inline XColor getFGColor()      const { return fg;         }
-    inline XColor getFCColor()      const { return fc;         }
-    inline XColor getBGColor()      const { return bg;         }
-    inline XColor getBDColor()      const { return bd;         }
+    inline XFontStruct* getFont()   const { return font; }
 
-    inline XColor getFocusedBorderColor() const { return focused_border; }
-    inline XColor getUnFocusedBorderColor() const { return unfocused_border; }
+    inline GC getFocusedTitleFGGC()             const { return focused_title_fg_gc;     }
+    inline GC getUnfocusedTitleFGGC()           const { return unfocused_title_fg_gc;   }
+    inline GC getFocusedTitleBGGC()             const { return focused_title_bg_gc;     }
+    inline GC getUnfocusedTitleBGGC()           const { return unfocused_title_bg_gc;   }
+    inline GC getFocusedBorderGC()              const { return focused_border_gc;       }
+    inline GC getUnfocusedBorderGC()            const { return unfocused_border_gc;     }
+    inline GC getFocusedBorder2GC()             const { return focused_border2_gc;      }
+    inline GC getUnfocusedBorder2GC()           const { return unfocused_border2_gc;    }
+
+    inline XColor getFGColor()                  const { return col_fg_focus;            }
+    inline XColor getFRColor()                  const { return col_fg_unfocus;          }
+    inline XColor getBGColor()                  const { return col_bg_focus;            }
+    inline XColor getFCColor()                  const { return col_bg_unfocus;          }
+    inline XColor getBRColor()                  const { return col_title_bd_focus;      }
+    inline XColor getBDColor()                  const { return col_title_bd_unfocus;    }
+    inline XColor getFocusedBorderColor()       const { return col_cli_bd_focus;        }
+    inline XColor getUnFocusedBorderColor()     const { return col_cli_bd_unfocus;      }
+
+    inline Cursor getMoveCursor()   const { return move_curs;           }
+    inline Cursor getArrowCursor()  const { return arrow_curs;          }
 
     inline int getShape()         const { return shape; }
     inline int getShapeEvent()     const { return shape_event; }

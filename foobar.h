@@ -10,10 +10,6 @@
 #define BAR_HEIGHT          20
 #define BAR_WIDTH           (WORKSPACES_WIDTH + RUNFIELD_WIDTH)
 #define ITEM_PADDING        3
-#define COLOR_BACKGROUND    "#070707"
-#define COLOR_ACTIVE        "#ff0000"
-#define COLOR_INACTIVE      "#555555"
-#define COLOR_TEXT          "#333333"
 
 #define RUNFIELD_BUFFER     255
 #define RUNFIELD_MAX_LENGTH 20
@@ -25,7 +21,7 @@ class FooBar
 private: /* Member Variables */
     Display *dpy;
     Window root;
-;
+
     GC background_gc;
     GC active_gc;
     GC inactive_gc;
