@@ -1,28 +1,30 @@
 /*
     Copyright (C) 2010 Rikard Johansson
-
+ 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
-
+ 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
-
+ 
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
+    
     This program is forked from aewm++ (timestamped 28 December 2008).
     http://code.google.com/p/aewmpp
-*/
+ */
 
 #include "glass.h"
 
-void forkExec(char *cmd) {
-    if (! (strlen(cmd) > 0)) return;
+// Dunno where I ripped this from. Kudos to the author whoever he is!
+void forkExec(char *cmd)
+{
+    if(! (strlen(cmd)>0)) return;
 
     printf("Executing: %s\n", cmd);
 
@@ -38,7 +40,8 @@ void forkExec(char *cmd) {
     }
 }
 
-int handleXError(Display *dpy, XErrorEvent *e) {
+int handleXError(Display *dpy, XErrorEvent *e)
+{
     if (e->error_code == BadAccess && e->resourceid == RootWindow(dpy, DefaultScreen(dpy)) ) {
         cerr << "root window unavailable (maybe another wm is running?)" << endl;
         exit(1);
@@ -47,7 +50,8 @@ int handleXError(Display *dpy, XErrorEvent *e) {
     return 0;
 }
 
-int main(int argc, char **argv) {
-    WindowManager wm(argc, argv);
+int main(int argc, char **argv)
+{
+    WindowManager aewm(argc, argv);
     return 0;
 }

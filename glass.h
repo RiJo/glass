@@ -1,10 +1,9 @@
 #ifndef _GLASS_H_
 #define _GLASS_H_
 
-#define PROGRAM_NAME "glass"
-#define PROGRAM_VERSION "0.4.0"
-
-#define DATE "2010-03-22"
+#define PROGRAM_NAME        "glass"
+#define PROGRAM_VERSION     "0.4.0"
+#define PROGRAM_DATE        "2010-03-22"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -13,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
+#include <getopt.h> /* getopt_long() */
 #include <list>
 #include <set>
 
@@ -36,8 +36,8 @@ using namespace std;
 #define UNFOCUSED_BORDER_COLOR "#555555" // window border
 #define FOCUSED_WINDOW_TITLE_COLOR "#dddddd"
 
-#define DEF_NEW1        "xterm -ls -sb -bg white -fg black"
 #define DEF_BW          1
+#define DEF_TJ          RIGHT_JUSTIFY
 #define SPACE           3
 #define MINSIZE         15
 #define EDGE_SNAP       "true"
@@ -51,18 +51,15 @@ using namespace std;
 #define TRANSIENT_WINDOW_HEIGHT 8
 
 enum { LEFT_JUSTIFY, CENTER_JUSTIFY, RIGHT_JUSTIFY };
-enum { FOCUS_FOLLOW, FOCUS_SLOPPY, FOCUS_CLICK };
 enum { APPLY_GRAVITY=1, REMOVE_GRAVITY=-1 };
 enum { PIXELS=0, INCREMENTS=1 };
 
 // Border width accessor to handle hints/no hints
-#define BW (has_border ? wm->getOptBW() : 0)
+#define BW (has_border ? 1 : 0)
 
 // defined in main.cc
 void forkExec(char *);
 int handleXError(Display *, XErrorEvent *);
-
-class Client;
 
 #include "client.h"
 #include "windowmanager.h"

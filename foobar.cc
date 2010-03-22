@@ -19,30 +19,22 @@ FooBar::~FooBar()
 }
 
 void FooBar::setupColors() {
-    colormap = DefaultColormap(dpy, 0);
+    XColor background_color, active_color, inactive_color, text_color, dummyc;
 
-    XColor background_color;
     background_gc = XCreateGC(dpy, root, 0, 0);
-    XParseColor(dpy, colormap, COLOR_BACKGROUND, &background_color);
-    XAllocColor(dpy, colormap, &background_color);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_BACKGROUND, &background_color, &dummyc);
     XSetForeground(dpy, background_gc, background_color.pixel);
 
-    XColor active_color;
     active_gc = XCreateGC(dpy, root, 0, 0);
-    XParseColor(dpy, colormap, COLOR_ACTIVE, &active_color);
-    XAllocColor(dpy, colormap, &active_color);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_ACTIVE, &active_color, &dummyc);
     XSetForeground(dpy, active_gc, active_color.pixel);
 
-    XColor inactive_color;
     inactive_gc = XCreateGC(dpy, root, 0, 0);
-    XParseColor(dpy, colormap, COLOR_INACTIVE, &inactive_color);
-    XAllocColor(dpy, colormap, &inactive_color);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_INACTIVE, &inactive_color, &dummyc);
     XSetForeground(dpy, inactive_gc, inactive_color.pixel);
 
-    XColor text_color;
     text_gc = XCreateGC(dpy, root, 0, 0);
-    XParseColor(dpy, colormap, COLOR_TEXT, &text_color);
-    XAllocColor(dpy, colormap, &text_color);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_TEXT, &text_color, &dummyc);
     XSetForeground(dpy, text_gc, text_color.pixel);
 }
 
@@ -162,7 +154,6 @@ void FooBar::handleButtonEvent(XButtonEvent *e)
 
 void FooBar::handleKeyEvent(XKeyEvent *e)
 {
-    printf("process id: %ld\n", (long)getpid());
     KeySym ks = XKeycodeToKeysym(dpy, e->keycode, 0);
     if (ks == NoSymbol)
         return;

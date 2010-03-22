@@ -36,34 +36,22 @@ private: /* member variables */
     int shape, shape_event;
 
     string  command_line;
-    char     workspace_count;
-    int     focus_model;
-    char    *opt_display,
-            *opt_fc,
-            *opt_fg,
-            *opt_fm,
-            *opt_bg,
-            *opt_bd,
-            *opt_tj,
-            *opt_wm,
-            *opt_wp,
-            *opt_es,
-            *opt_new1;
+    char workspace_count;
+    int focus_model;
+    char *display, *opt_wm, *opt_wp, *opt_es;
 
-    int     opt_bw;
-    int     opt_text_justify;
-    bool    wire_move;
-    bool    rand_window_placement;
-    bool    edge_snap;
+    bool wire_move;
+    bool rand_window_placement;
+    bool edge_snap;
 
     static KeySym alt_keys[];
 
-    Atom    atom_wm_state;
-    Atom    atom_wm_change_state;
-    Atom    atom_wm_protos;
-    Atom    atom_wm_delete;
-    Atom    atom_wm_cmapwins;
-    Atom    atom_wm_takefocus;
+    Atom atom_wm_state;
+    Atom atom_wm_change_state;
+    Atom atom_wm_protos;
+    Atom atom_wm_delete;
+    Atom atom_wm_cmapwins;
+    Atom atom_wm_takefocus;
 
 private: /* Member Functions */
 
@@ -72,6 +60,10 @@ private: /* Member Functions */
     void cleanup();
     void doEventLoop();
     void scanWins();
+
+    void print_help();
+    void print_usage();
+    void print_version();
 
     void handleKeyPressEvent(XEvent *ev);
     void handleButtonPressEvent(XEvent *ev);
@@ -142,27 +134,6 @@ public: /* Member Functions */
     inline char getCurrentWorkspace() const { return current_workspace; }
     bool setCurrentWorkspace(char);
 
-    // Returns a number corresponding to the current focus model.
-    inline int getFocusModel() const { return focus_model; }
-
-    // Accepts a number corresponding to a new focus model.
-    inline void setFocusModel(int new_fm)
-    {
-        switch (new_fm)
-        {
-            case FOCUS_FOLLOW:
-            case FOCUS_SLOPPY:
-            case FOCUS_CLICK:
-                focus_model = new_fm;
-            break;
-
-            default:
-                focus_model=FOCUS_CLICK;
-            break;
-        }
-    }
-
-    inline int getTextJustify()    const { return opt_text_justify; }
     inline bool getWireMove()     const { return wire_move; }
     inline bool getEdgeSnap()     const { return edge_snap; }
     inline bool getRandPlacement()     const { return rand_window_placement; }
@@ -172,8 +143,6 @@ public: /* Member Functions */
     inline int getYRes() const { return yres; }
 
     void setWorkspaceCount(char x) { workspace_count = x; }
-
-    inline int getOptBW()     const { return opt_bw;         }
 
     inline Atom getWMChangeStateAtom() const { return atom_wm_change_state; }
     inline Atom getWMProtosAtom() const { return atom_wm_protos; }
