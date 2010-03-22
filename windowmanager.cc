@@ -1,47 +1,43 @@
 #include "glass.h"
 
+WindowManager* wm;
+
 /*##############################################################################
 #   TEST   #####################################################################
 ##############################################################################*/
 
-enum command {
-    CMD_QUIT,
-    CMD_RESTART,
-    CMD_NEXT_CLIENT,
-    CMD_CLOSE_CLIENT,
-    CMD_RUN_DIALOG,
-    CMD_WS_SHIFT_RIGHT,
-    CMD_WS_SHIFT_LEFT,
-    CMD_EXEC
+enum wm_action {
+    WM_QUIT,
+    WM_RESTART,
+    WM_NEXT_CLIENT,
+    WM_CLOSE_CLIENT,
+    WM_RUN_DIALOG,
+    WM_WS_SHIFT_RIGHT,
+    WM_WS_SHIFT_LEFT,
+    WM_EXEC
 };
-
-WindowManager* wm;
-
-#define EXEC_TERMINAL       "xterm -geometry 100x30"
-#define EXEC_WEBBROWSER     "firefox"
-#define EXEC_EDITOR         "scite"
 
 struct key_binding {
     KeySym key;
     unsigned int mod;
-    command cmd;
-    char *foo;
+    wm_action type;
+    char *command;
 };
 
-unsigned int GOTO_WORKSPACE_MODIFIER    = Mod4Mask;
-unsigned int TAG_CLIENT_MODIFIER        = (ControlMask|Mod1Mask);
+#define GOTO_WORKSPACE_MODIFIER     Mod4Mask
+#define TAG_CLIENT_MODIFIER         (ControlMask|Mod1Mask)
 
-key_binding key_bindings[] = {
-    {XK_End,        (ControlMask|Mod1Mask), CMD_QUIT,               NULL},
-    {XK_Home,       (ControlMask|Mod1Mask), CMD_RESTART,            NULL},
-    {XK_Tab,        (Mod1Mask),             CMD_NEXT_CLIENT,        NULL},
-    {XK_F4,         (Mod1Mask),             CMD_CLOSE_CLIENT,       NULL},
-    {XK_Right,      (Mod4Mask),             CMD_WS_SHIFT_RIGHT,     NULL},
-    {XK_Left,       (Mod4Mask),             CMD_WS_SHIFT_LEFT,      NULL},
-    {XK_r,          (Mod4Mask),             CMD_RUN_DIALOG,         NULL},
-    {XK_Return,     (Mod4Mask),             CMD_EXEC,               (char *)EXEC_TERMINAL},
-    {XK_w,          (Mod4Mask),             CMD_EXEC,               (char *)EXEC_WEBBROWSER},
-    {XK_s,          (Mod4Mask),             CMD_EXEC,               (char *)EXEC_EDITOR}
+const key_binding key_bindings[] = {
+    {XK_End,        (ControlMask|Mod1Mask), WM_QUIT,               NULL},
+    {XK_Home,       (ControlMask|Mod1Mask), WM_RESTART,            NULL},
+    {XK_Tab,        (Mod1Mask),             WM_NEXT_CLIENT,        NULL},
+    {XK_F4,         (Mod1Mask),             WM_CLOSE_CLIENT,       NULL},
+    {XK_Right,      (Mod4Mask),             WM_WS_SHIFT_RIGHT,     NULL},
+    {XK_Left,       (Mod4Mask),             WM_WS_SHIFT_LEFT,      NULL},
+    {XK_r,          (Mod4Mask),             WM_RUN_DIALOG,         NULL},
+    {XK_Return,     (Mod4Mask),             WM_EXEC,               (char *)EXEC_TERMINAL},
+    {XK_w,          (Mod4Mask),             WM_EXEC,               (char *)EXEC_WEBBROWSER},
+    {XK_s,          (Mod4Mask),             WM_EXEC,               (char *)EXEC_EDITOR}
 };
 #define KEY_BINDING_COUNT 10
 
@@ -104,7 +100,7 @@ void WindowManager::parseCommandLine(int argc, char** argv)
     while((arg = getopt_long(argc, argv, "d:hvw:", opt_list, NULL)) != EOF) {
         switch (arg) {
             case 'd':
-                // to c'ish??
+                // too c'ish??
                 display = (char *)malloc(strlen(optarg) + 1);
                 strcpy(display, optarg);
                 display[strlen(optarg) + 1] = '\0';
@@ -182,14 +178,11 @@ void WindowManager::goToWorkspace(char x)
 
         // Preserve stacking order
         XQueryTree(dpy, root, &dummyw1, &dummyw2, &wins, &nwins);
-        for (i = 0; i < nwins; i++)
-        {
+        for (i = 0; i < nwins; i++) {
             c = findClient(wins[i]);
 
-            if(c)
-            {
-                if(c->isTagged(current_workspace))
-                {
+            if(c) {
+                if(c->isTagged(current_workspace)) {
                     if(! (c->isIconified()))
                     c->unhide();
                 }
@@ -211,11 +204,9 @@ void WindowManager::scanWins(void)
     Client *c=NULL;
 
     XQueryTree(dpy, root, &dummyw1, &dummyw2, &wins, &nwins);
-    for(i = 0; i < nwins; i++)
-    {
+    for(i = 0; i < nwins; i++) {
         XGetWindowAttributes(dpy, wins[i], &attr);
-        if (!attr.override_redirect && attr.map_state == IsViewable)
-        {
+        if (!attr.override_redirect && attr.map_state == IsViewable) {
             client_window_list.push_back(wins[i]);
             c = new Client(dpy, wins[i]);
         }
@@ -254,25 +245,17 @@ void WindowManager::setupDisplay()
     XSetErrorHandler(handleXError);
 
     // ICCCM atoms
-    atom_wm_state         = XInternAtom(dpy, "WM_STATE", False);
-    atom_wm_change_state     = XInternAtom(dpy, "WM_CHANGE_STATE", False);
-    atom_wm_protos         = XInternAtom(dpy, "WM_PROTOCOLS", False);
-    atom_wm_delete         = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
-    atom_wm_cmapwins     = XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
-    atom_wm_takefocus     = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
+    atom_wm_state = XInternAtom(dpy, "WM_STATE", False);
+    atom_wm_change_state = XInternAtom(dpy, "WM_CHANGE_STATE", False);
+    atom_wm_protos = XInternAtom(dpy, "WM_PROTOCOLS", False);
+    atom_wm_delete = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+    atom_wm_cmapwins = XInternAtom(dpy, "WM_COLORMAP_WINDOWS", False);
+    atom_wm_takefocus = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
 
     XSetWindowAttributes pattr;
     pattr.override_redirect=True;
     _button_proxy_win=XCreateSimpleWindow(dpy, root, -80, -80, 24, 24,0,0,0);
     XChangeWindowAttributes(dpy, _button_proxy_win, CWOverrideRedirect, &pattr);
-
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), DEF_FG, &fg, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), DEF_BG, &bg, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), DEF_BD, &bd, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), DEF_FC, &fc, &dummyc);
-
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), FOCUSED_BORDER_COLOR, &focused_border, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), UNFOCUSED_BORDER_COLOR, &unfocused_border, &dummyc);
 
     font = XLoadQueryFont(dpy, DEF_FONT);
     if (!font) { cerr << "The default font cannot be found, exiting..." << endl; exit(1); }
@@ -284,38 +267,73 @@ void WindowManager::setupDisplay()
 
     XDefineCursor(dpy, root, arrow_curs);
 
-    gv.function = GXcopy;
-    gv.foreground = fg.pixel;
-    gv.font = font->fid;
-    string_gc = XCreateGC(dpy, root, GCFunction|GCForeground|GCFont, &gv);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_TITLE_FG_FOCUS, &col_fg_focus, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_TITLE_FG_UNFOCUS, &col_fg_unfocus, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_TITLE_BG_FOCUS, &col_bg_focus, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_TITLE_BG_UNFOCUS, &col_bg_unfocus, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_TITLE_BD_FOCUS, &col_title_bd_focus, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_TITLE_BD_UNFOCUS, &col_title_bd_unfocus, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_CLIENT_BD_FOCUS, &col_cli_bd_focus, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_CLIENT_BD_UNFOCUS, &col_cli_bd_unfocus, &dummyc);
 
-    gv.foreground = unfocused_border.pixel;
+    gv.foreground = col_fg_focus.pixel;
+    gv.font = font->fid;
+    focused_title_fg_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
+
+    gv.foreground = col_fg_unfocus.pixel;
+    gv.font = font->fid;
+    unfocused_title_fg_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
+
+    gv.foreground = col_bg_focus.pixel;
+    gv.font = font->fid;
+    focused_title_bg_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
+
+    gv.foreground = col_bg_unfocus.pixel;
+    gv.font = font->fid;
+    unfocused_title_bg_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
+
+    gv.foreground = col_cli_bd_focus.pixel;
+    gv.line_width = 1;
+    focused_border_gc = XCreateGC(dpy, root, GCForeground|GCLineWidth, &gv);
+
+    gv.foreground = col_cli_bd_unfocus.pixel;
+    gv.line_width = 1;
+    unfocused_border_gc = XCreateGC(dpy, root, GCForeground|GCLineWidth, &gv);
+
+    gv.foreground = col_title_bd_focus.pixel;
+    gv.line_width = 1;
+    focused_border2_gc = XCreateGC(dpy, root, GCForeground|GCLineWidth, &gv);
+
+    gv.foreground = col_title_bd_unfocus.pixel;
+    gv.line_width = 1;
+    unfocused_border2_gc = XCreateGC(dpy, root, GCForeground|GCLineWidth, &gv);
+
+/*
+    gv.foreground = col_cli_bd_unfocus.pixel;
     gv.font = font->fid;
     unfocused_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
 
-    gv.foreground = fg.pixel;
+    gv.function = GXcopy;
+    gv.foreground = col_fg_focus.pixel;
     gv.font = font->fid;
-    focused_title_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
+    string_gc = XCreateGC(dpy, root, GCFunction|GCForeground|GCFont, &gv);
 
-    gv.foreground = bd.pixel;
-    gv.line_width = DEF_BW;
-    border_gc = XCreateGC(dpy, root, GCFunction|GCForeground|GCLineWidth, &gv);
-
-    gv.foreground = fg.pixel;
+    gv.foreground = col_fg_focus.pixel;
     gv.function = GXinvert;
     gv.subwindow_mode = IncludeInferiors;
     invert_gc = XCreateGC(dpy, root, GCForeground|GCFunction|GCSubwindowMode|GCLineWidth|GCFont, &gv);
+*/
 
-    sattr.event_mask = SubstructureRedirectMask    |
-                SubstructureNotifyMask      |
-                ColormapChangeMask        |
-                ButtonPressMask        |
-                ButtonReleaseMask        |
-                FocusChangeMask        |
-                EnterWindowMask        |
-                LeaveWindowMask        |
-                PropertyChangeMask       |
-                ButtonMotionMask        ;
+    sattr.event_mask = SubstructureRedirectMask |
+                SubstructureNotifyMask |
+                ColormapChangeMask |
+                ButtonPressMask |
+                ButtonReleaseMask |
+                FocusChangeMask |
+                EnterWindowMask |
+                LeaveWindowMask |
+                PropertyChangeMask |
+                ButtonMotionMask;
 
     XChangeWindowAttributes(dpy, root, CWEventMask, &sattr);
 
@@ -326,13 +344,10 @@ void WindowManager::doEventLoop()
 {
     XEvent ev;
 
-
-    for (;;)
-    {
+    while (1) {
         XNextEvent(dpy, &ev);
 
-        switch (ev.type)
-        {
+        switch (ev.type) {
             case KeyPress:
                 handleKeyPressEvent(&ev);
             break;
@@ -401,7 +416,7 @@ void WindowManager::doEventLoop()
                 handleDefaultEvent(&ev);
             break;
         }
-        
+        // Where to put this?!??
         foobar->redraw();
     }
 }
@@ -458,39 +473,39 @@ void WindowManager::handleKeyPressEvent(XEvent *ev)
     // Key bindings
     for (int i = 0; i < KEY_BINDING_COUNT; i++) {
         if (key_bindings[i].key == ks && key_bindings[i].mod == state) {
-            switch (key_bindings[i].cmd) {
-                case CMD_QUIT:
+            switch (key_bindings[i].type) {
+                case WM_QUIT:
                     quitNicely();
                 break;
-                case CMD_RESTART:
+                case WM_RESTART:
                     restart();
                 break;
-                case CMD_NEXT_CLIENT:
+                case WM_NEXT_CLIENT:
                     nextClient();
                 break;
-                case CMD_CLOSE_CLIENT:
+                case WM_CLOSE_CLIENT:
                     closeFocusedClient();
                 break;
-                case CMD_WS_SHIFT_RIGHT:
+                case WM_WS_SHIFT_RIGHT:
                     nextWorkspace();
                 break;
-                case CMD_WS_SHIFT_LEFT:
+                case WM_WS_SHIFT_LEFT:
                     previousWorkspace();
                 break;
-                case CMD_RUN_DIALOG:
+                case WM_RUN_DIALOG:
                     runDialog();
                 break;
-                case CMD_EXEC:
-                    forkExec(key_bindings[i].foo);
+                case WM_EXEC:
+                    forkExec(key_bindings[i].command);
                 break;
                 default:
-                    fprintf(stderr, "Warning: not a valid command: %d\n", key_bindings[i].cmd);
+                    fprintf(stderr, "Warning: not a valid action type: %d\n", key_bindings[i].type);
                 break;
             }
             return;
         }
     }
-    
+
     foobar->handleKeyEvent(&ev->xkey);
 }
 
@@ -667,7 +682,7 @@ void WindowManager::handleFocusInEvent(XEvent *ev)
 {
     if((ev->xfocus.mode == NotifyGrab) || (ev->xfocus.mode == NotifyUngrab))
         return;
-    
+
     list<Window>::iterator iter;
 
     for(iter=client_window_list.begin(); iter != client_window_list.end(); iter++) {
@@ -774,7 +789,7 @@ void WindowManager::focusPreviousWindowInStackingOrder()
             list<Client*>::iterator iter = client_list_for_current_workspace.end();
 
             iter--;
-            
+
             if( (*iter) ) {
                 XSetInputFocus(dpy, (*iter)->getAppWindow(), RevertToNone, CurrentTime);
                 client_list_for_current_workspace.clear();
@@ -888,11 +903,14 @@ void WindowManager::cleanup()
     XFreeCursor(dpy, move_curs);
     XFreeCursor(dpy, arrow_curs);
 
-    XFreeGC(dpy, invert_gc);
-    XFreeGC(dpy, border_gc);
-    XFreeGC(dpy, string_gc);
-    XFreeGC(dpy, unfocused_gc);
-    XFreeGC(dpy, focused_title_gc);
+    XFreeGC(dpy, focused_title_fg_gc);
+    XFreeGC(dpy, unfocused_title_fg_gc);
+    XFreeGC(dpy, focused_title_bg_gc);
+    XFreeGC(dpy, unfocused_title_bg_gc);
+    XFreeGC(dpy, focused_border_gc);
+    XFreeGC(dpy, unfocused_border_gc);
+    XFreeGC(dpy, focused_border2_gc);
+    XFreeGC(dpy, unfocused_border2_gc);
 
     XInstallColormap(dpy, DefaultColormap(dpy, screen));
     XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
@@ -900,10 +918,10 @@ void WindowManager::cleanup()
 }
 
 /* If we can't find a wm->wm_state we're going to have to assume
- * Withdrawn. This is not exactly optimal, since we can't really
- * distinguish between the case where no WM has run yet and when the
- * state was explicitly removed (Clients are allowed to either set the
- * atom to Withdrawn or just remove it... yuck.) */
+    * Withdrawn. This is not exactly optimal, since we can't really
+    * distinguish between the case where no WM has run yet and when the
+    * state was explicitly removed (Clients are allowed to either set the
+    * atom to Withdrawn or just remove it... yuck.) */
 long WindowManager::getWMState(Window window)
 {
         Atom real_type; int real_format;
@@ -921,7 +939,7 @@ long WindowManager::getWMState(Window window)
 }
 
 /* Attempt to follow the ICCCM by explicity specifying 32 bits for
- * this property. Does this goof up on 64 bit systems? */
+    * this property. Does this goof up on 64 bit systems? */
 void WindowManager::setWMState(Window window, int state)
 {
         CARD32 data[2];
