@@ -1,13 +1,11 @@
 CC       =  g++
 CCFLAGS  =  -g -O2 -march=core2 -Wall
-
-#prefix   = /usr
-INCLUDES =  -I$/usr/X11R6
-LDPATH   =  -L/usr/X11R6/lib
+INCLUDES =  -I/usr/include
+LDPATH   =  -L/usr/lib64
 LIBS     =  -lXext -lX11
 NAME     =  glass
 
-HEADERS  =  glass.h 		\
+HEADERS  =  $(NAME).h 		\
             client.h 		\
             foobar.h 		\
             windowmanager.h
@@ -24,10 +22,6 @@ $(NAME): $(OBJS) Makefile
 
 $(OBJS): %.o: %.cc $(HEADERS)
 	$(CC) $(CFLAGS) $(CCFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
-
-#install: all
-#	mkdir -p $(DESTDIR)$(prefix)/bin
-#	install -s $(NAME) $(DESTDIR)$(prefix)/bin
 
 clean:
 	rm -f $(NAME) $(OBJS)

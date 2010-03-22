@@ -17,7 +17,7 @@ enum command {
 
 WindowManager* wm;
 
-#define EXEC_TERMINAL       "xterm"
+#define EXEC_TERMINAL       "xterm -geometry 100x30"
 #define EXEC_WEBBROWSER     "firefox"
 #define EXEC_EDITOR         "scite"
 
@@ -52,139 +52,97 @@ key_binding key_bindings[] = {
 WindowManager::WindowManager(int argc, char** argv)
 {
     wm = this;
-
+    display = NULL;
+    workspace_count = DEFAULT_WORKSPACE_COUNT;
     current_workspace = 1;
-
-    focused_client=NULL;
+    focused_client = NULL;
+    rand_window_placement = false;
+    edge_snap = false;
+    wire_move = false;
 
     parseCommandLine(argc, argv);
-
-    if(workspace_count <= 0) workspace_count = DEFAULT_WORKSPACE_COUNT;
 
     setupSignalHandlers();
     setupDisplay();
     scanWins();
-    
-    // TEST
+
     foobar = new FooBar(dpy, root, workspace_count, current_workspace);
-    // TEST
 
     doEventLoop();
 }
 
+void WindowManager::print_help() {
+    printf("Usage: %s [-hv] [-d DISPLAY] [-w WORKSPACES]\n", PROGRAM_NAME);
+    printf("Windowmanager blah blah\n\n");
+    printf("  -d DISPLAY        specifies a display to start the window manager on, default is %s\n", getenv("DISPLAY"));
+    printf("  -h                display this help and exit\n");
+    printf("  -v                display version information and exit\n");
+    printf("  -w WORKSPACES     specify the number of workspaces, default is %d\n", DEFAULT_WORKSPACE_COUNT);
+}
+
+void WindowManager::print_usage() {
+    printf("Usage: %s [-hv] [-d DISPLAY] [-w WORKSPACES]\n", PROGRAM_NAME);
+    printf("Try '%s --help' for more information.\n", PROGRAM_NAME);
+}
+
+void WindowManager::print_version() {
+    printf("%s, version %s, released %s\n", PROGRAM_NAME, PROGRAM_VERSION, PROGRAM_DATE);
+    printf("   compiled %s, %s\n\n", __DATE__, __TIME__);
+    printf("Rikard Johansson, 2010\n");
+}
+
 void WindowManager::parseCommandLine(int argc, char** argv)
 {
-    // Make the default options equal something
-    opt_fm = (char*) DEF_FM;
-    opt_fg = (char*) DEF_FG;
-    opt_fc = (char*) DEF_FC;
-    opt_bg = (char*) DEF_BG;
-    opt_bd = (char*) DEF_BD;
-    opt_tj = (char*) TEXT_JUSTIFY;
-    opt_wm = (char*) WIRE_MOVE;
-    opt_es = (char*) EDGE_SNAP;
-    opt_new1 = (char*) DEF_NEW1;
-    opt_bw = DEF_BW;
-    opt_wp = (char*) DEF_WP;
-    opt_display=NULL;
-    workspace_count=DEFAULT_WORKSPACE_COUNT;
-
-#define OPT_STR(name, variable)                                      \
-    if (strcmp(argv[i], name) == 0 && i+1<argc) {                    \
-        variable = argv[++i];                                        \
-        continue;                                                    \
-    }
-#define OPT_INT(name, variable)                                      \
-    if (strcmp(argv[i], name) == 0 && i+1<argc) {                    \
-        variable = atoi(argv[++i]);                                  \
-        continue;                                                    \
-    }
-
-    // Create a command line string, i.e. the command line used to
-    // run this iteration of the window manager. If the user restarts
-    // the window manager while running we will restart it with the same
-    // options used to start it the first time.
-    for (int i = 0; i < argc; i++) command_line = command_line + argv[i] + " ";
-
-    // Get the args and test for different options
-    for (int i = 1; i < argc; i++)
-    {
-        OPT_STR("-fg", opt_fg)
-        OPT_STR("-bg", opt_bg)
-        OPT_STR("-fc", opt_fc)
-        OPT_STR("-fm", opt_fm)
-        OPT_STR("-bd", opt_bd)
-        OPT_STR("-new1", opt_new1)
-        OPT_STR("-display", opt_display)
-        OPT_STR("-tj", opt_tj)
-        OPT_STR("-wm", opt_wm)
-        OPT_STR("-es", opt_es)
-        OPT_STR("-wp", opt_wp)
-
-        OPT_INT("-bw", opt_bw)
-        OPT_INT("-md", workspace_count)
-
-        if (strcmp(argv[i], "-version") == 0)
-        {
-            cout << "Version: " << PROGRAM_VERSION << endl;
-            cout << "Date: " << DATE << endl;
-                    exit(0);
-        }
-
-        if(strcmp(argv[i], "-usage")==0)
-        {
-            cerr << "usage: " << PROGRAM_NAME << " [options]" << endl;
-            cerr << "   options are: -display <display>, -fg|-bg|-bd <color>, " << endl;
-            cerr << "   -bw <width>, -md <workspace count>, -tj <left|center|right>, -wm <true|false>," << endl;
-            cerr << "    -new1|-new2 <cmd>, -fm (follow|sloppy|click), -wp (mouse|random), -usage, -help" << endl;
-            exit(0);
-        }
-
-        if(strcmp(argv[i], "-help")==0)
-        {
-            cerr << "help: " << PROGRAM_NAME << endl << endl;
-            cerr << "-display specifies a display to start the window manager on, The default is display :0." << endl;
-            cerr << "-fg, -bg and -bd are colors you wish the foreground, background and border to be for window titlebars." << endl;
-            cerr << "-bw is the border width of the window." << endl;
-            cerr << "-md is the number of workspaces, the default is 4." << endl;
-            cerr << "-tj is the text justify variable, its default is center, but you can specify left or right also." << endl;
-            cerr << "-new1 and -new2 are commands you wish the first and second mouse buttons to execute when pressed on the root window." << endl;
-            cerr << "-fm is the focus model you want to use, the default is click to focus." << endl;
-            cerr << "-wp is the window placement model you want to use, the default is place by mouse." << endl;
-            cerr << "-es is for edge snapping, pass either true or false here." << endl;
-            cerr << "-usage prints a reduced version of this information." << endl;
-            cerr << "-help prints this message." << endl << endl;
-
-            exit(0);
+    struct option opt_list[] = {
+        {"display",     0, NULL, 'd'},
+        {"help",        0, NULL, 'h'},
+        {"version",     0, NULL, 'v'},
+        {"workspaces",  0, NULL, 'w'},
+        {0,0,0,0}
+    };
+    int arg = EOF;
+    while((arg = getopt_long(argc, argv, "d:hvw:", opt_list, NULL)) != EOF) {
+        switch (arg) {
+            case 'd':
+                // to c'ish??
+                display = (char *)malloc(strlen(optarg) + 1);
+                strcpy(display, optarg);
+                display[strlen(optarg) + 1] = '\0';
+                break;
+            case 'h':
+                print_help();
+                exit(EXIT_SUCCESS);
+            case 'v':
+                print_version();
+                exit(EXIT_SUCCESS);
+            case 'w':
+                workspace_count = atoi(optarg);
+                if(workspace_count <= 0)
+                    workspace_count = DEFAULT_WORKSPACE_COUNT;
+                break;
+            default:
+                print_usage();
+                exit(EXIT_FAILURE);
         }
     }
+}
 
-    // Set the focus model based on user defined option
-    if (strcmp(opt_fm, "follow")==0) setFocusModel(FOCUS_FOLLOW);
-    else if (strcmp(opt_fm, "sloppy")==0) setFocusModel(FOCUS_SLOPPY);
-    else if (strcmp(opt_fm, "click")==0) setFocusModel(FOCUS_CLICK);
-    else setFocusModel(FOCUS_SLOPPY);
+void WindowManager::sigHandler(int signal)
+{
+    switch (signal) {
+        case SIGINT:
+        case SIGTERM:
+            wm->quitNicely();
+        break;
 
-    // Set up the window title justification per user defined option
-    if(strcmp(opt_tj, "left")==0) opt_text_justify = LEFT_JUSTIFY;
-    else if(strcmp(opt_tj, "center")==0) opt_text_justify = CENTER_JUSTIFY;
-    else if(strcmp(opt_tj, "right")==0) opt_text_justify = RIGHT_JUSTIFY;
-    else opt_text_justify = LEFT_JUSTIFY;
+        case SIGHUP:
+            wm->restart();
+        break;
 
-    // Set wire move based on user defined option
-    if(strcmp(opt_wm, "true")==0) wire_move=true;
-    else if(strcmp(opt_wm, "false")==0) wire_move=false;
-    else wire_move=false;
-
-    // Set edge snapping based on user defined option
-    if(strcmp(opt_es, "true")==0) edge_snap=true;
-    else if(strcmp(opt_es, "false")==0) edge_snap=false;
-    else edge_snap=false;
-
-    // Set window placement model
-    if (strcmp(opt_wp,"random")==0) rand_window_placement = true;
-    else if (strcmp(opt_wp,"mouse")==0) rand_window_placement = false;
-    else rand_window_placement = false;
+        case SIGCHLD:
+            wait(NULL);
+        break;
+    }
 }
 
 void WindowManager::setupSignalHandlers()
@@ -276,14 +234,13 @@ void WindowManager::setupDisplay()
     XSetWindowAttributes sattr;
     int dummy;
 
-    if (opt_display)
-        setenv("DISPLAY", opt_display, 1);
+    if (display)
+        setenv("DISPLAY", display, 1);
     else
-        opt_display = getenv("DISPLAY");
+        display = getenv("DISPLAY");
 
-        dpy = XOpenDisplay(opt_display);
-
-        if (!dpy) {
+    dpy = XOpenDisplay(display);
+    if (!dpy) {
         cerr << "can't open display! check your DISPLAY variable." << endl;
         exit(1);
     }
@@ -309,10 +266,10 @@ void WindowManager::setupDisplay()
     _button_proxy_win=XCreateSimpleWindow(dpy, root, -80, -80, 24, 24,0,0,0);
     XChangeWindowAttributes(dpy, _button_proxy_win, CWOverrideRedirect, &pattr);
 
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), opt_fg, &fg, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), opt_bg, &bg, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), opt_bd, &bd, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), opt_fc, &fc, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), DEF_FG, &fg, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), DEF_BG, &bg, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), DEF_BD, &bd, &dummyc);
+    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), DEF_FC, &fc, &dummyc);
 
     XAllocNamedColor(dpy, DefaultColormap(dpy, screen), FOCUSED_BORDER_COLOR, &focused_border, &dummyc);
     XAllocNamedColor(dpy, DefaultColormap(dpy, screen), UNFOCUSED_BORDER_COLOR, &unfocused_border, &dummyc);
@@ -341,7 +298,7 @@ void WindowManager::setupDisplay()
     focused_title_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
 
     gv.foreground = bd.pixel;
-    gv.line_width = opt_bw;
+    gv.line_width = DEF_BW;
     border_gc = XCreateGC(dpy, root, GCFunction|GCForeground|GCLineWidth, &gv);
 
     gv.foreground = fg.pixel;
@@ -576,30 +533,18 @@ void WindowManager::handleButtonPressEvent(XEvent *ev)
             if(!XGrabPointer(dpy, c->getFrameWindow(), False, PointerMotionMask|ButtonReleaseMask, GrabModeAsync, GrabModeAsync, None, wm->getMoveCursor(), CurrentTime) == GrabSuccess) return;
         }
 
-        switch (focus_model)
+
+        // if this is the first time the client window's clicked, focus it
+        if(c && c != focused_client)
         {
-            case FOCUS_FOLLOW:
-            case FOCUS_SLOPPY:
-                if(c)
-                {
-                    c->handleButtonEvent(&ev->xbutton);
-                    focused_client = c;
-                }
-            break;
-
-            case FOCUS_CLICK:
-                // if this is the first time the client window's clicked, focus it
-                if(c && c != focused_client)
-                {
-                    XSetInputFocus(dpy, c->getAppWindow(), RevertToNone, CurrentTime);
-                    focused_client = c;
-                }
-
-                // otherwise, handle the button click as usual
-                if(c && c == focused_client)
-                    c->handleButtonEvent(&ev->xbutton);
-            break;
+            XSetInputFocus(dpy, c->getAppWindow(), RevertToNone, CurrentTime);
+            focused_client = c;
         }
+
+        // otherwise, handle the button click as usual
+        if(c && c == focused_client)
+            c->handleButtonEvent(&ev->xbutton);
+
     }
 
     //if(ev->xbutton.window==root)
@@ -710,34 +655,12 @@ void WindowManager::handleDestroyNotifyEvent(XEvent *ev)
 
 void WindowManager::handleEnterNotifyEvent(XEvent *ev)
 {
-    Client* c = findClient(ev->xcrossing.window);
-
-    switch (focus_model)
-    {
-        case FOCUS_FOLLOW:
-            if(c)
-            {
-                c->handleEnterEvent(&ev->xcrossing);
-                focused_client = c;
-            }
-            else
-                XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
-        break;
-
-        case FOCUS_SLOPPY:
-            // if the pointer's not on a client now, don't change focus
-            if(c)
-            {
-                c->handleEnterEvent(&ev->xcrossing);
-                focused_client = c;
-            }
-        break;
-    }
+    //printf("WindowManager::handleEnterNotifyEvent): when does this happen???\n");
 }
 
 void WindowManager::handleLeaveNotifyEvent(XEvent *ev)
 {
-    printf("handleLeaveNotifyEvent(): when does this happen???\n");
+    //printf("WindowManager::handleLeaveNotifyEvent(): when does this happen???\n");
 }
 
 void WindowManager::handleFocusInEvent(XEvent *ev)
@@ -756,10 +679,6 @@ void WindowManager::handleFocusInEvent(XEvent *ev)
                 focused_client = c;
                 grabKeys( (*iter) );
             }
-        }
-        else {
-            if(ev->xfocus.window==root && focus_model==FOCUS_FOLLOW)
-                unfocusAnyStrayClients();
         }
     }
 }
@@ -1045,24 +964,6 @@ int WindowManager::sendXMessage(Window w, Atom a, long mask, long x)
         e.xclient.data.l[1] = CurrentTime;
 
         return XSendEvent(dpy, w, False, mask, &e);
-}
-
-void WindowManager::sigHandler(int signal)
-{
-    switch (signal) {
-        case SIGINT:
-        case SIGTERM:
-            wm->quitNicely();
-        break;
-
-        case SIGHUP:
-            wm->restart();
-        break;
-
-        case SIGCHLD:
-            wait(NULL);
-        break;
-    }
 }
 
 Client *WindowManager::focusedClient() {

@@ -65,7 +65,7 @@ void Client::initialize(Display *d)
     descent                 = 0;
     text_width              = 0;
     text_justify            = 0;
-    justify_style           = wm->getTextJustify();
+    justify_style           = DEF_TJ;
 
     screen                  = DefaultScreen(dpy);
     root                    = RootWindow(dpy, screen);
@@ -143,8 +143,7 @@ void Client::makeNewClient(Window w)
     {
         unhide();
 
-        if(wm->getFocusModel() == FOCUS_CLICK)
-            XSetInputFocus(dpy, window, RevertToNone, CurrentTime);
+        XSetInputFocus(dpy, window, RevertToNone, CurrentTime);
     }
 
     XSync(dpy, False);
@@ -363,8 +362,7 @@ void Client::unhide()
 
         wm->setWMState(window, NormalState);
 
-        if(wm->getFocusModel() == FOCUS_CLICK)
-            XSetInputFocus(dpy, window, RevertToNone, CurrentTime);
+        XSetInputFocus(dpy, window, RevertToNone, CurrentTime);
 
         is_visible=true;
     }

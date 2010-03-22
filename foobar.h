@@ -25,8 +25,7 @@ class FooBar
 private: /* Member Variables */
     Display *dpy;
     Window root;
-
-    Colormap colormap;
+;
     GC background_gc;
     GC active_gc;
     GC inactive_gc;

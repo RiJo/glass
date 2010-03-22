@@ -7,18 +7,18 @@ class Client
 {
 private: /* Member Variables */
 
-    Display         *dpy;
-    Window          root;
-    XSizeHints      *size;
-    Colormap        cmap;
-    int             screen;
+    Display *dpy;
+    Window root;
+    XSizeHints *size;
+    Colormap cmap;
+    int screen;
 
-    char            *name;    // Name used to display in titlebar
+    char *name;    // Name used to display in titlebar
 
-    Window          window;   // actual client window
-    Window          frame;    // parent window which we reparent the client to
-    Window          title;    // window which holds title
-    Window          trans;    // window id for which this client is transient for
+    Window window;   // actual client window
+    Window frame;    // parent window which we reparent the client to
+    Window title;    // window which holds title
+    Window trans;    // window id for which this client is transient for
 
     set<char> tags;
 
