@@ -2,9 +2,9 @@
 #define _GLASS_H_
 
 #define PROGRAM_NAME "glass"
-#define PROGRAM_VERSION "0.3.0"
+#define PROGRAM_VERSION "0.4.0"
 
-#define DATE "28 December 2008"
+#define DATE "2010-03-22"
 
 #include <stdio.h>
 #include <unistd.h>

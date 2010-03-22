@@ -20,9 +20,6 @@ WindowManager* wm;
 #define EXEC_TERMINAL       "xterm"
 #define EXEC_WEBBROWSER     "firefox"
 #define EXEC_EDITOR         "scite"
-// TEMP
-#define RUN_DIALOG          "fbrun"
-// TEMP
 
 struct key_binding {
     KeySym key;
@@ -380,10 +377,7 @@ void WindowManager::doEventLoop()
         switch (ev.type)
         {
             case KeyPress:
-                if (foobar->getRunfield())
-                    foobar->handleKeyEvent(&ev.xkey);
-                else
-                    handleKeyPressEvent(&ev);
+                handleKeyPressEvent(&ev);
             break;
 
             case ButtonPress:
@@ -485,7 +479,7 @@ void WindowManager::ungrabKeys(Window w)
 
 void WindowManager::handleKeyPressEvent(XEvent *ev)
 {
-    KeySym ks=XKeycodeToKeysym(dpy,ev->xkey.keycode,0);
+    KeySym ks = XKeycodeToKeysym(dpy, ev->xkey.keycode, 0);
     if (ks == NoSymbol)
         return;
     unsigned int state = ev->xkey.state;
@@ -530,13 +524,17 @@ void WindowManager::handleKeyPressEvent(XEvent *ev)
                     runDialog();
                 break;
                 case CMD_EXEC:
-                    printf("Executing: %s\n", key_bindings[i].foo);
                     forkExec(key_bindings[i].foo);
+                break;
+                default:
+                    fprintf(stderr, "Warning: not a valid command: %d\n", key_bindings[i].cmd);
                 break;
             }
             return;
         }
     }
+    
+    foobar->handleKeyEvent(&ev->xkey);
 }
 
 void WindowManager::handleButtonPressEvent(XEvent *ev)
@@ -780,30 +778,7 @@ void WindowManager::handleFocusOutEvent(XEvent *ev)
         }
     }
 
-    //if(focus_model == FOCUS_CLICK)
-        focusPreviousWindowInStackingOrder();
-    /*else if(focus_model == FOCUS_SLOPPY && client_list.size())
-    {
-        unsigned int nwins;
-        Window dummyw1, dummyw2, *wins;
-        Client *c=NULL;
-
-        XQueryTree(dpy, root, &dummyw1, &dummyw2, &wins, &nwins);
-        for (unsigned int i = 0; i < nwins; i++)
-        {
-            c = findClient(wins[i]);
-
-            if(c)
-            {
-                if(c->belongsToWhichDesktop()==current_desktop)
-                {
-                    focusPreviousWindowInStackingOrder();
-                                        return;
-                }
-            }
-        }
-        XSetInputFocus(dpy, PointerRoot, RevertToNone, CurrentTime);
-    }*/
+    focusPreviousWindowInStackingOrder();
 }
 
 void WindowManager::handleClientMessageEvent(XEvent *ev)
@@ -1017,8 +992,8 @@ long WindowManager::getWMState(Window window)
         unsigned char *data, state = WithdrawnState;
 
         if (XGetWindowProperty(dpy, window, atom_wm_state, 0L, 2L, False,
-            wm->atom_wm_state, &real_type, &real_format, &items_read, &items_left,
-            &data) == Success && items_read) {
+                wm->atom_wm_state, &real_type, &real_format, &items_read, &items_left,
+                &data) == Success && items_read) {
             state = *data;
             XFree(data);
         }

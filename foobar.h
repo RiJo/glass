@@ -4,17 +4,19 @@
 #include "glass.h"
 
 #define WORKSPACE_WIDTH     30
-#define WORKSPACES_WIDTH    ((WORKSPACE_WIDTH+ITEM_PADDING)*(workspace_count + 1))
+#define WORKSPACE_OFFSET(x) ((WORKSPACE_WIDTH + ITEM_PADDING) * x)
+#define WORKSPACES_WIDTH    WORKSPACE_OFFSET(5) /* make this dynamic!!! */
 #define RUNFIELD_WIDTH      (5 * WORKSPACE_WIDTH)
 #define BAR_HEIGHT          20
-#define BAR_WIDTH           (((WORKSPACE_WIDTH+ITEM_PADDING)*(workspace_count + 1)) + RUNFIELD_WIDTH)
+#define BAR_WIDTH           (WORKSPACES_WIDTH + RUNFIELD_WIDTH)
 #define ITEM_PADDING        3
-#define COLOR_BACKGROUND    "#050505"
+#define COLOR_BACKGROUND    "#070707"
 #define COLOR_ACTIVE        "#ff0000"
 #define COLOR_INACTIVE      "#555555"
 #define COLOR_TEXT          "#333333"
 
 #define RUNFIELD_BUFFER     255
+#define RUNFIELD_MAX_LENGTH 20
 
 #define MAGIC_NUMBER 15
 
@@ -38,7 +40,7 @@ private: /* Member Variables */
     char *runfield;
     unsigned int current_character;
 
-private:
+private: /* Member Functions */
     void setupColors();
     void redrawWorkspaces();
     void redrawRunField();
@@ -51,13 +53,12 @@ public: /* Member Functions */
     ~FooBar();
 
     void redraw();
-
-    void setRunfield(bool active) { runfield_active = active; }
-    bool getRunfield() { return runfield_active; }
-    void resetRunField();
-
     void handleButtonEvent(XButtonEvent *);
     void handleKeyEvent(XKeyEvent *);
+
+    void setRunfield(bool);
+    bool getRunfield() { return runfield_active; }
+    void resetRunField();
 };
 
 
