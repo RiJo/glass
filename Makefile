@@ -5,11 +5,14 @@ LDPATH   =  -L/usr/lib64
 LIBS     =  -lXext -lX11
 NAME     =  glass
 
-HEADERS  =  $(NAME).h 		\
-            client.h 		\
-            resources.h 		\
-            foobar.h 		\
-            windowmanager.h
+SRC=./src/
+DST=./bin/
+
+HEADERS  =  $(SRC)$(NAME).h 		\
+            $(SRC)client.h 		\
+            $(SRC)resources.h 		\
+            $(SRC)foobar.h 		\
+            $(SRC)windowmanager.h
 
 OBJS     =  windowmanager.o 	\
             client.o 		\
@@ -22,7 +25,7 @@ all: $(NAME)
 $(NAME): $(OBJS) Makefile
 	$(CC) $(OBJS) $(LDPATH) $(LIBS) -o $@
 
-$(OBJS): %.o: %.cc $(HEADERS)
+$(OBJS): %.o: ./src/%.cpp $(HEADERS)
 	$(CC) $(CFLAGS) $(CCFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 clean:
