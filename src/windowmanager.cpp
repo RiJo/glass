@@ -69,11 +69,11 @@ WindowManager::WindowManager(int argc, char** argv)
 
 void WindowManager::print_help() {
     printf("Usage: %s [-hv] [-d DISPLAY] [-w WORKSPACES]\n", PROGRAM_NAME);
-    printf("Windowmanager blah blah\n\n");
-    printf("  -d DISPLAY        specifies a display to start the window manager on, default is %s\n", getenv("DISPLAY"));
-    printf("  -h                display this help and exit\n");
-    printf("  -v                display version information and exit\n");
-    printf("  -w WORKSPACES     specify the number of workspaces, default is %d\n", DEFAULT_WORKSPACE_COUNT);
+    printf("Small windowmanager\n\n");
+    printf("  -d, --display DISPLAY          the display to start the window manager on, default is %s\n", getenv("DISPLAY"));
+    printf("  -h, --help                     display this help and exit\n");
+    printf("  -v, --version                  display version information and exit\n");
+    printf("  -w, --workspaces WORKSPACES    specify the number of workspaces, default is %d\n", DEFAULT_WORKSPACE_COUNT);
 }
 
 void WindowManager::print_usage() {
