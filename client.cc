@@ -210,19 +210,21 @@ void Client::redraw()
     if (!has_title) return;
 
     GC gc;
+    
+    // Title decoration
     if(has_focus)
-        gc = wm->getFocusedBorder2GC();
+        gc = wm->getResources()->getGC(COLOR_DECORATION_FOCUSED);
     else
-        gc = wm->getUnfocusedBorder2GC();
+        gc = wm->getResources()->getGC(COLOR_DECORATION_UNFOCUSED);
 
     XDrawLine(dpy, title, gc, 0, theight() - BW + BW/2, width, theight() - BW + BW/2);
     XDrawLine(dpy, title, gc, width - theight()+ BW/2, 0, width - theight()+ BW/2, theight());
 
     // Title text
     if(has_focus)
-        gc = wm->getFocusedTitleFGGC();
+        gc = wm->getResources()->getGC(COLOR_FOREGROUND_FOCUSED);
     else
-        gc = wm->getUnfocusedTitleFGGC();
+        gc = wm->getResources()->getGC(COLOR_FOREGROUND_UNFOCUSED);
 
     if (!trans && name) {
         switch(justify_style) {
@@ -601,16 +603,16 @@ void Client::handleMotionNotifyEvent(XMotionEvent *ev)
 void Client::drawOutline()
 {
     if (!is_shaded) {
-        XDrawRectangle(dpy, root, wm->getFocusedBorderGC(),
+        XDrawRectangle(dpy, root, wm->getResources()->getGC(COLOR_BORDER_FOCUSED),
                 x + BW/2, y - theight() + BW/2,
                 width + BW, height + theight() + BW);
 
-        XDrawRectangle(dpy, root, wm->getFocusedBorderGC(),
+        XDrawRectangle(dpy, root, wm->getResources()->getGC(COLOR_BORDER_FOCUSED),
                 x + BW/2 + 4, y - theight() + BW/2 + 4,
                 width + BW - 8, height + theight() + BW - 8);
     }
     else {
-        XDrawRectangle(dpy, root, wm->getFocusedBorderGC(),
+        XDrawRectangle(dpy, root, wm->getResources()->getGC(COLOR_BORDER_FOCUSED),
                 x + BW/2,
                 y - theight() + BW/2,
                 width + BW,
@@ -735,8 +737,8 @@ void Client::reparent()
     XGrabServer(dpy);
 
     XSetWindowAttributes pattr;
-    pattr.background_pixel = wm->getFCColor().pixel;
-    pattr.border_pixel = wm->getBDColor().pixel;
+    pattr.background_pixel = wm->getResources()->getColor(COLOR_BACKGROUND_FOCUSED).pixel;
+    pattr.border_pixel = wm->getResources()->getColor(COLOR_BORDER_FOCUSED).pixel;
     pattr.do_not_propagate_mask = ButtonPressMask|ButtonReleaseMask|ButtonMotionMask;
     pattr.override_redirect=False;
     pattr.event_mask = ButtonMotionMask        |
@@ -988,12 +990,12 @@ void Client::setFocus(bool focus)
     {
         if(has_focus)
         {
-            XSetWindowBackground(dpy, title, wm->getBGColor().pixel);
-            XSetWindowBorder(dpy, frame, wm->getFocusedBorderColor().pixel);
+            XSetWindowBackground(dpy, title, wm->getResources()->getColor(COLOR_BACKGROUND_FOCUSED).pixel);
+            XSetWindowBorder(dpy, frame, wm->getResources()->getColor(COLOR_BORDER_FOCUSED).pixel);
         }
         else  {
-            XSetWindowBackground(dpy, title, wm->getFCColor().pixel);
-            XSetWindowBorder(dpy, frame, wm->getUnFocusedBorderColor().pixel);
+            XSetWindowBackground(dpy, title, wm->getResources()->getColor(COLOR_BACKGROUND_UNFOCUSED).pixel);
+            XSetWindowBorder(dpy, frame, wm->getResources()->getColor(COLOR_BORDER_UNFOCUSED).pixel);
         }
         XClearWindow(dpy, title);
         redraw();

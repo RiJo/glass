@@ -52,6 +52,22 @@ void Resources::loadGC(COLOR key)
     values.line_width = 1;
     values.foreground = getColor(key).pixel;
     gcs[key] = XCreateGC(dpy, root, GCForeground|GCFont|GCLineWidth, &values);
+
+/*
+    gv.foreground = col_cli_bd_unfocus.pixel;
+    gv.font = font->fid;
+    unfocused_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
+
+    gv.function = GXcopy;
+    gv.foreground = col_fg_focus.pixel;
+    gv.font = font->fid;
+    string_gc = XCreateGC(dpy, root, GCFunction|GCForeground|GCFont, &gv);
+
+    gv.foreground = col_fg_focus.pixel;
+    gv.function = GXinvert;
+    gv.subwindow_mode = IncludeInferiors;
+    invert_gc = XCreateGC(dpy, root, GCForeground|GCFunction|GCSubwindowMode|GCLineWidth|GCFont, &gv);
+*/
 }
 
 void Resources::loadFonts()
