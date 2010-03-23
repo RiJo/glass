@@ -266,40 +266,6 @@ void WindowManager::setupDisplay()
     arrow_curs = XCreateFontCursor(dpy, XC_left_ptr);
     XDefineCursor(dpy, root, arrow_curs);
 
-    col_fg_focus = resources->getColor(COLOR_FOREGROUND_FOCUSED);
-    col_fg_unfocus = resources->getColor(COLOR_FOREGROUND_UNFOCUSED);
-    col_bg_focus = resources->getColor(COLOR_BACKGROUND_FOCUSED);
-    col_bg_unfocus = resources->getColor(COLOR_BACKGROUND_UNFOCUSED);
-    col_title_bd_focus = resources->getColor(COLOR_DECORATION_FOCUSED);
-    col_title_bd_unfocus = resources->getColor(COLOR_DECORATION_UNFOCUSED);
-    col_cli_bd_focus = resources->getColor(COLOR_BORDER_FOCUSED);
-    col_cli_bd_unfocus = resources->getColor(COLOR_BORDER_UNFOCUSED);
-
-    focused_title_fg_gc = resources->getGC(COLOR_FOREGROUND_FOCUSED);
-    unfocused_title_fg_gc = resources->getGC(COLOR_FOREGROUND_UNFOCUSED);
-    focused_title_bg_gc = resources->getGC(COLOR_BACKGROUND_FOCUSED);
-    unfocused_title_bg_gc = resources->getGC(COLOR_BACKGROUND_UNFOCUSED);
-    focused_border2_gc = resources->getGC(COLOR_DECORATION_FOCUSED);
-    unfocused_border2_gc = resources->getGC(COLOR_DECORATION_UNFOCUSED);
-    focused_border_gc = resources->getGC(COLOR_BORDER_FOCUSED);
-    unfocused_border_gc = resources->getGC(COLOR_BORDER_UNFOCUSED);
-
-/*
-    gv.foreground = col_cli_bd_unfocus.pixel;
-    gv.font = font->fid;
-    unfocused_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
-
-    gv.function = GXcopy;
-    gv.foreground = col_fg_focus.pixel;
-    gv.font = font->fid;
-    string_gc = XCreateGC(dpy, root, GCFunction|GCForeground|GCFont, &gv);
-
-    gv.foreground = col_fg_focus.pixel;
-    gv.function = GXinvert;
-    gv.subwindow_mode = IncludeInferiors;
-    invert_gc = XCreateGC(dpy, root, GCForeground|GCFunction|GCSubwindowMode|GCLineWidth|GCFont, &gv);
-*/
-
     sattr.event_mask = SubstructureRedirectMask |
                 SubstructureNotifyMask |
                 ColormapChangeMask |
@@ -551,19 +517,6 @@ void WindowManager::handleButtonReleaseEvent(XEvent *ev)
         XUngrabPointer(dpy, CurrentTime);
 
         c->handleButtonEvent(&ev->xbutton);
-    }
-    else
-    {
-        /*BaseMenu* mu = window_menu->findMenu(ev->xbutton.window);
-
-        if(!mu)
-            mu = icon_menu->findMenu(ev->xbutton.window);
-
-        if(mu)
-        {
-            mu->hide();
-            mu->handleButtonReleaseEvent(&ev->xbutton);
-        }*/
     }
 
     //if(ev->xbutton.window==root)

@@ -121,23 +121,7 @@ public: /* Member Functions */
 
     inline XFontStruct* getFont()   const { return font; }
 
-    inline GC getFocusedTitleFGGC()             const { return focused_title_fg_gc;     }
-    inline GC getUnfocusedTitleFGGC()           const { return unfocused_title_fg_gc;   }
-    inline GC getFocusedTitleBGGC()             const { return focused_title_bg_gc;     }
-    inline GC getUnfocusedTitleBGGC()           const { return unfocused_title_bg_gc;   }
-    inline GC getFocusedBorderGC()              const { return focused_border_gc;       }
-    inline GC getUnfocusedBorderGC()            const { return unfocused_border_gc;     }
-    inline GC getFocusedBorder2GC()             const { return focused_border2_gc;      }
-    inline GC getUnfocusedBorder2GC()           const { return unfocused_border2_gc;    }
-
-    inline XColor getFGColor()                  const { return col_fg_focus;            }
-    inline XColor getFRColor()                  const { return col_fg_unfocus;          }
-    inline XColor getBGColor()                  const { return col_bg_focus;            }
-    inline XColor getFCColor()                  const { return col_bg_unfocus;          }
-    inline XColor getBRColor()                  const { return col_title_bd_focus;      }
-    inline XColor getBDColor()                  const { return col_title_bd_unfocus;    }
-    inline XColor getFocusedBorderColor()       const { return col_cli_bd_focus;        }
-    inline XColor getUnFocusedBorderColor()     const { return col_cli_bd_unfocus;      }
+    inline Resources *getResources()             const { return resources;               }
 
     inline Cursor getMoveCursor()   const { return move_curs;           }
     inline Cursor getArrowCursor()  const { return arrow_curs;          }
