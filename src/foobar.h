@@ -5,7 +5,7 @@
 
 #define WORKSPACE_WIDTH     30
 #define WORKSPACE_OFFSET(x) ((WORKSPACE_WIDTH + ITEM_PADDING) * x)
-#define WORKSPACES_WIDTH    WORKSPACE_OFFSET(5) /* make this dynamic!!! */
+#define WORKSPACES_WIDTH    WORKSPACE_OFFSET( (workspace_count + 1) )
 #define RUNFIELD_WIDTH      (5 * WORKSPACE_WIDTH)
 #define BAR_HEIGHT          20
 #define BAR_WIDTH           (WORKSPACES_WIDTH + RUNFIELD_WIDTH)
