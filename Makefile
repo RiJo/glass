@@ -5,8 +5,8 @@ LDPATH   =  -L/usr/lib64
 LIBS     =  -lXext -lX11
 NAME     =  glass
 
-SRC=./src/
-DST=./bin/
+SRC=src/
+DST=bin/
 
 HEADERS  =  $(SRC)$(NAME).h 		\
             $(SRC)client.h 		\
