@@ -30,17 +30,6 @@ using namespace std;
 #define EXEC_WEBBROWSER             "firefox"
 #define EXEC_EDITOR                 "scite"
 
-#define DEF_FONT                    "Fixed"
-
-#define COLOR_TITLE_FG_FOCUS        "#dddddd"
-#define COLOR_TITLE_FG_UNFOCUS      "#bbbbbb"
-#define COLOR_TITLE_BG_FOCUS        "#000000"
-#define COLOR_TITLE_BG_UNFOCUS      "#000000"
-#define COLOR_TITLE_BD_FOCUS        "#333333"
-#define COLOR_TITLE_BD_UNFOCUS      "#333333"
-#define COLOR_CLIENT_BD_FOCUS       "#ff0000"
-#define COLOR_CLIENT_BD_UNFOCUS     "#333333"
-
 #define SPACE                       3
 #define MINSIZE                     15
 #define EDGE_SNAP                   "true"
