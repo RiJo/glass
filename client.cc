@@ -325,8 +325,8 @@ void Client::iconify()
     is_visible=false;
 }
 
-bool Client::isTagged(char workspace) const {
-    
+bool Client::isTagged(char workspace) const
+{
     return (workspace <= 0) ? true : (tags.find(workspace) != tags.end());
 }
 

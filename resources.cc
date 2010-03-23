@@ -75,10 +75,6 @@ void Resources::loadGC(COLOR key)
     gcs[key] = XCreateGC(dpy, root, GCForeground|GCFont|GCLineWidth, &values);
 
 /*
-    gv.foreground = col_cli_bd_unfocus.pixel;
-    gv.font = font->fid;
-    unfocused_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
-
     gv.function = GXcopy;
     gv.foreground = col_fg_focus.pixel;
     gv.font = font->fid;
