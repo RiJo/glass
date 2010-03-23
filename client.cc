@@ -75,16 +75,14 @@ void Client::initialize(Display *d)
 
 void Client::getXClientName()
 {
-    if(name) XFree(name);
+    if(name)
+        XFree(name);
 
     XFetchName(dpy, window, &name);
 
-    if(name)
-    {
-        XTextExtents(wm->getFont(), name , strlen(name),
-            &direction, &ascent,
-                    &descent, &overall);
-
+    if(name) {
+        XTextExtents(wm->getResources()->getFont(FONT_NORMAL), name , strlen(name),
+                &direction, &ascent, &descent, &overall);
         text_width = overall.width;
     }
 }
@@ -114,17 +112,16 @@ void Client::makeNewClient(Window w)
     size = XAllocSizeHints();
     XGetWMNormalHints(dpy, window, size, &dummy);
 
-    old_x        = x;
-    old_y        = y;
-    old_width     = width;
-    old_height     = height;
+    old_x = x;
+    old_y = y;
+    old_width = width;
+    old_height = height;
 
-    if (attr.map_state == IsViewable) ignore_unmap++;
-    {
+    if (attr.map_state == IsViewable) {
+        ignore_unmap++;
         initPosition();
 
-        if ((hints = XGetWMHints(dpy, w)))
-        {
+        if ((hints = XGetWMHints(dpy, w))) {
             if (hints->flags & StateHint)
                 wm->setWMState(window, hints->initial_state);
             else wm->setWMState(window, NormalState);
@@ -139,15 +136,14 @@ void Client::makeNewClient(Window w)
 
     if (wm->getWMState(window) == IconicState)
         iconify();
-    else
-    {
+    else {
         unhide();
 
         XSetInputFocus(dpy, window, RevertToNone, CurrentTime);
     }
 
     XSync(dpy, False);
-        XUngrabServer(dpy);
+    XUngrabServer(dpy);
 }
 
 void Client::removeClient()
@@ -179,7 +175,7 @@ int Client::theight()
 {
     if (!has_title) return 0;
 
-    int title_size = wm->getFont()->ascent + wm->getFont()->descent + SPACE;
+    int title_size = wm->getResources()->getFont(FONT_NORMAL)->ascent + wm->getResources()->getFont(FONT_NORMAL)->descent + SPACE;
 
     if(trans)
         return TRANSIENT_WINDOW_HEIGHT;
@@ -207,11 +203,11 @@ void Client::sendConfig()
 
 void Client::redraw()
 {
-    if (!has_title) return;
-
-    GC gc;
+    if (!has_title)
+        return;
     
     // Title decoration
+    GC gc;
     if(has_focus)
         gc = wm->getResources()->getGC(COLOR_DECORATION_FOCUSED);
     else
@@ -242,7 +238,7 @@ void Client::redraw()
         }
 
         if(name != NULL) {
-            XDrawString(dpy, title, gc, text_justify, wm->getFont()->ascent+1,name, strlen(name));
+            XDrawString(dpy, title, gc, text_justify, wm->getResources()->getFont(FONT_NORMAL)->ascent+1,name, strlen(name));
         }
     }
 }
@@ -250,16 +246,19 @@ void Client::redraw()
 void Client::gravitate(int multiplier)
 {
         int dy = 0;
-        int gravity = (size->flags & PWinGravity) ?
-            size->win_gravity : NorthWestGravity;
+        int gravity = (size->flags & PWinGravity) ? size->win_gravity : NorthWestGravity;
 
         switch (gravity) {
             case NorthWestGravity:
             case NorthEastGravity:
-            case NorthGravity: dy = theight(); break;
-            case CenterGravity: dy = theight()/2; break;
-        }
+            case NorthGravity:
+                dy = theight();
+            break;
 
+            case CenterGravity:
+                dy = theight() / 2;
+            break;
+        }
         y += multiplier * dy;
 }
 
@@ -333,9 +332,11 @@ bool Client::isTagged(char workspace) const {
 
 void Client::hide()
 {
-    if (!ignore_unmap) ignore_unmap++;
+    if (!ignore_unmap)
+        ignore_unmap++;
 
-    if(has_focus) setFocus(false);
+    if(has_focus)
+        setFocus(false);
 
     XUnmapSubwindows(dpy, frame);
     XUnmapWindow(dpy, frame);
@@ -349,13 +350,13 @@ void Client::unhide()
 {
     if(isTagged(wm->getCurrentWorkspace()))
     {
-        if(trans) wm->findTransientsToMapOrUnmap(window, false);
+        if(trans)
+            wm->findTransientsToMapOrUnmap(window, false);
 
         XMapSubwindows(dpy, frame);
         XMapRaised(dpy, frame);
 
-        if(is_iconified)
-        {
+        if(is_iconified) {
             is_iconified=false;
         }
 
@@ -369,97 +370,87 @@ void Client::unhide()
 
 void Client::initPosition()
 {
-        int mouse_x, mouse_y;
+    int mouse_x, mouse_y;
 
     unsigned int w, h;
     unsigned int border_width, depth;
 
-        XWindowAttributes attr;
+    XWindowAttributes attr;
 
-        XGetWindowAttributes(dpy, window, &attr);
+    XGetWindowAttributes(dpy, window, &attr);
 
-    if (attr.map_state == IsViewable) return;
+    if (attr.map_state == IsViewable)
+        return;
 
     XGetGeometry(dpy, window, &root, &x, &y, &w, &h, &border_width, &depth);
 
     width = (int)w;
     height = (int)h;
 
-        if (size->flags & PPosition)
-    {
+    if (size->flags & PPosition) {
             if(!x) x = size->x;
             if(!y) y = size->y;
+    }
+    else {
+        if (size->flags & USPosition) {
+            if(!x)
+                x = size->x;
+            if(!y)
+                y = size->y;
         }
-    else
-    {
-        if (size->flags & USPosition)
-        {
-            if(!x) x = size->x;
-                    if(!y) y = size->y;
-        }
-        else
-        if ( (x==0) || (y==0)  )
-            {
-            if(width>=wm->getXRes() && height>=wm->getYRes())
-            {
+        else if ( (x==0) || (y==0)  ) {
+            if(width>=wm->getXRes() && height>=wm->getYRes()) {
                 x=0;
                 y=0;
                 width=wm->getXRes();
                 height=wm->getYRes()-theight();
             }
-            else
-            {
+            else {
                 wm->getMousePosition(&mouse_x, &mouse_y);
 
-                if(mouse_x && mouse_y)
-                {
+                if(mouse_x && mouse_y) {
 
-                    if (wm->getRandPlacement())
-                    {
+                    if (wm->getRandPlacement()) {
                         x = (rand() % (unsigned int) ((wm->getXRes() - width) * 0.94)) + ((unsigned int) (wm->getXRes() * 0.03));
                         y = (rand() % (unsigned int) ((wm->getYRes() - height) * 0.94)) + ((unsigned int) (wm->getYRes() * 0.03));
-                    } else {
-
+                    }
+                    else {
                         x = (int) (((long) (wm->getXRes() - width)
                                     * (long) mouse_x) / (long) wm->getXRes());
-                            y = (int) (((long) (wm->getYRes() - height - theight())
+                        y = (int) (((long) (wm->getYRes() - height - theight())
                                     * (long) mouse_y) / (long) wm->getYRes());
-                            y = (y<theight()) ? theight() : y;
+                        y = (y<theight()) ? theight() : y;
                     }
-
-                            gravitate(REMOVE_GRAVITY);
+                    gravitate(REMOVE_GRAVITY);
                 }
             }
-            }
         }
+    }
 }
 
 void Client::maximize()
 {
     if(trans) return;
 
-    if(is_shaded)
-    {
+    if(is_shaded) {
         shade();
         return;
     }
 
-    if(! is_maximized)
-    {
+    if(! is_maximized) {
         old_x=x;
         old_y=y;
         old_width=width;
         old_height=height;
 
         if (size->flags & PMaxSize) {
-
             width = size->max_width;
-                height = size->max_height;
+            height = size->max_height;
 
             XMoveResizeWindow(dpy, frame, x, y-theight(), width, height+theight());
 
-            } else {
-
+        }
+        else {
             x=0;
             y=0;
             width=wm->getXRes()-2;
@@ -470,21 +461,20 @@ void Client::maximize()
             y = theight();
             height -= theight();
         }
-
         is_maximized=true;
-    } else {
+    }
+    else {
+        x = old_x;
+        y = old_y;
+        width = old_width;
+        height = old_height;
 
-        x=old_x;
-        y=old_y;
-        width=old_width;
-        height=old_height;
+        XMoveResizeWindow(dpy, frame, old_x, old_y - theight(), old_width, old_height + theight());
 
-        XMoveResizeWindow(dpy, frame,
-                old_x, old_y - theight(), old_width, old_height + theight());
+        is_maximized = false;
 
-        is_maximized=false;
-
-        if(is_shaded) is_shaded=false;
+        if(is_shaded)
+            is_shaded = false;
     }
 
     XResizeWindow(dpy, title, width, theight());
@@ -497,101 +487,109 @@ void Client::handleMotionNotifyEvent(XMotionEvent *ev)
 {
     int nx=0, ny=0;
 
-    if((ev->state & Button1Mask) && (wm->getFocusedClient() == this))
-    {
-            if(! do_drawoutline_once && wire_move)
-            {
+    if((ev->state & Button1Mask) && (wm->getFocusedClient() == this)) {
+            if(! do_drawoutline_once && wire_move) {
                 XGrabServer(dpy);
                 drawOutline();
                 do_drawoutline_once=true;
                 is_being_dragged=true;
             }
 
-            if(wire_move) drawOutline();
+            if(wire_move)
+                drawOutline();
 
             nx = old_cx + (ev->x_root - pointer_x);
             ny = old_cy + (ev->y_root - pointer_y);
 
-            if(wm->getEdgeSnap())
-            {
+            if(wm->getEdgeSnap()) {
                 // Move beyond edges of screen
-                if(nx == wm->getXRes() - width) nx = wm->getXRes() - width + 1;
-                else if(nx == 0) nx = -1;
+                if (nx == wm->getXRes() - width)
+                    nx = wm->getXRes() - width + 1;
+                else if (nx == 0)
+                    nx = -1;
 
-                if(ny == wm->getYRes() - SNAP) ny = wm->getYRes() - SNAP - 1;
-                else if(ny == theight()) ny = theight() - 1;
+                if (ny == wm->getYRes() - SNAP)
+                    ny = wm->getYRes() - SNAP - 1;
+                else if (ny == theight())
+                    ny = theight() - 1;
 
                 // Snap to edges of screen
-                if( (nx + width >= wm->getXRes() - SNAP) && (nx + width <= wm->getXRes()) ) nx = wm->getXRes() - width;
-                else if( (nx <= SNAP) && (nx >= 0) ) nx = 0;
+                if ( (nx + width >= wm->getXRes() - SNAP) && (nx + width <= wm->getXRes()) )
+                    nx = wm->getXRes() - width;
+                else if ( (nx <= SNAP) && (nx >= 0) )
+                    nx = 0;
 
-                if(is_shaded)
-                {
-                        if( (ny  >= wm->getYRes() - SNAP) && (ny  <= wm->getYRes()) ) ny = wm->getYRes();
-                    else if( (ny - theight() <= SNAP) && (ny - theight() >= 0)) ny = theight();
+                if (is_shaded) {
+                    if ( (ny  >= wm->getYRes() - SNAP) && (ny  <= wm->getYRes()) )
+                        ny = wm->getYRes();
+                    else if ( (ny - theight() <= SNAP) && (ny - theight() >= 0))
+                        ny = theight();
                 }
-                else
-                {
-                    if( (ny + height >= wm->getYRes() - SNAP) && (ny + height <= wm->getYRes()) ) ny = wm->getYRes() - height;
-                    else if( (ny - theight() <= SNAP) && (ny - theight() >= 0)) ny = theight();
+                else {
+                    if ( (ny + height >= wm->getYRes() - SNAP) && (ny + height <= wm->getYRes()) )
+                        ny = wm->getYRes() - height;
+                    else if ( (ny - theight() <= SNAP) && (ny - theight() >= 0))
+                        ny = theight();
                 }
             }
 
-            x=nx; y=ny;
+            x = nx;
+            y = ny;
 
-            if(!wire_move)
-            {
+            if(!wire_move) {
                 XMoveWindow(dpy, frame, nx, ny-theight());
                 sendConfig();
             }
 
-            if(wire_move) drawOutline();
+            if(wire_move)
+                drawOutline();
     }
-    else
-    if(ev->state & Button3Mask)
-    {
-        if(! is_being_resized)
-        {
-                    int in_box = (ev->x >= width - theight()) && (ev->y <= theight());
+    else if(ev->state & Button3Mask) {
+        if(! is_being_resized) {
+            int in_box = (ev->x >= width - theight()) && (ev->y <= theight());
 
-            if(! in_box) return;
+            if(! in_box)
+                return;
         }
 
-        if(! do_drawoutline_once)
-        {
+        if(! do_drawoutline_once) {
             XGrabServer(dpy);
             is_being_resized=true;
             do_drawoutline_once=true;
             drawOutline();
             XWarpPointer(dpy, None, frame, 0, 0, 0, 0, width, height+theight());
         }
-            else
-        {
-            if((ev->x > 50) && (ev->y > 50))
-            {
+        else {
+            if((ev->x > 50) && (ev->y > 50)) {
                 drawOutline();
 
                 width =  ev->x;
                 height = ev->y - theight();
 
-                    getIncsize(&width, &height, PIXELS);
+                getIncsize(&width, &height, PIXELS);
 
-                    if (size->flags & PMinSize)
-                {
-                        if (width < size->min_width) width = size->min_width;
-                        if (height < size->min_height) height = size->min_height;
+                if (size->flags & PMinSize) {
+                    if (width < size->min_width)
+                        width = size->min_width;
+                    if (height < size->min_height)
+                        height = size->min_height;
 
-                    if(width<100) width=100;
-                    if(height<50) height=50;
+                    if(width < 100)
+                        width = 100;
+                    if(height < 50)
+                        height = 50;
                 }
 
-                if (size->flags & PMaxSize)
-                {
-                            if (width > size->max_width) width = size->max_width;
-                            if (height > size->max_height) height = size->max_height;
+                if (size->flags & PMaxSize) {
+                    if (width > size->max_width)
+                        width = size->max_width;
+                    if (height > size->max_height)
+                        height = size->max_height;
 
-                    if(width>wm->getXRes()) width=wm->getXRes();
-                    if(height>wm->getYRes()) height=wm->getYRes();
+                    if(width > wm->getXRes())
+                        width = wm->getXRes();
+                    if(height > wm->getYRes())
+                        height = wm->getYRes();
                 }
 
                 drawOutline();
@@ -622,30 +620,25 @@ void Client::drawOutline()
 
 int Client::getIncsize(int *x_ret, int *y_ret, int mode)
 {
-        int basex, basey;
+    int basex, basey;
 
-        if (size->flags & PResizeInc)
-    {
-            basex = (size->flags & PBaseSize) ? size->base_width :
+    if (size->flags & PResizeInc) {
+        basex = (size->flags & PBaseSize) ? size->base_width :
                 (size->flags & PMinSize) ? size->min_width : 0;
 
         basey = (size->flags & PBaseSize) ? size->base_height :
                 (size->flags & PMinSize) ? size->min_height : 0;
 
-        if (mode == PIXELS)
-        {
-                    *x_ret = width - ((width - basex) % size->width_inc);
-                    *y_ret = height - ((height - basey) % size->height_inc);
-            }
-        else // INCREMENTS
-        {
-                        *x_ret = (width - basex) / size->width_inc;
-                    *y_ret = (height - basey) / size->height_inc;
-            }
-
-        return 1;
+        if (mode == PIXELS) {
+            *x_ret = width - ((width - basex) % size->width_inc);
+            *y_ret = height - ((height - basey) % size->height_inc);
         }
-
+        else { // INCREMENTS
+            *x_ret = (width - basex) / size->width_inc;
+            *y_ret = (height - basey) / size->height_inc;
+        }
+        return 1;
+    }
     return 0;
 }
 
@@ -653,11 +646,11 @@ void Client::shade()
 {
     XRaiseWindow(dpy, frame);
 
-    if(! is_shaded)
-    {
+    if(! is_shaded) {
         XResizeWindow(dpy, frame, width, theight() - 1);
         is_shaded=true;
-    } else {
+    }
+    else {
         XResizeWindow(dpy, frame, width, height + theight());
         is_shaded=false;
     }
@@ -672,23 +665,23 @@ void Client::handleConfigureRequest(XConfigureRequestEvent *e)
         if (e->value_mask & CWHeight) height = e->height;
         gravitate(APPLY_GRAVITY);
 
-    if(! is_shaded)
-    {
+    if(!is_shaded) {
         XMoveResizeWindow(dpy, frame,x,y-theight(), width, height+theight());
         XResizeWindow(dpy, title, width, theight());
         XMoveResizeWindow(dpy, window,0,theight(),width,height);
     }
 
-    if( (x + width > wm->getXRes())         ||
+    if ( (x + width > wm->getXRes())         ||
         (height + theight() > wm->getYRes())     ||
         (x > wm->getXRes())             ||
         (y > wm->getYRes())            ||
         (x < 0)            ||
         (y < 0)
-        )
+    )
         initPosition();
 
-        if (e->value_mask & (CWWidth|CWHeight)) setShape();
+    if (e->value_mask & (CWWidth|CWHeight))
+        setShape();
 }
 
 void Client::handleMapRequest(XMapRequestEvent *e)
@@ -910,7 +903,8 @@ void Client::handleButtonEvent(XButtonEvent *e)
                 {
                     if(e->type == ButtonPress)
                     {
-                        if(is_shaded) shade();
+                        if(is_shaded)
+                            shade();
 
                         XRaiseWindow(dpy, frame);
                     }

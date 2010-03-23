@@ -257,14 +257,9 @@ void WindowManager::setupDisplay()
     _button_proxy_win=XCreateSimpleWindow(dpy, root, -80, -80, 24, 24,0,0,0);
     XChangeWindowAttributes(dpy, _button_proxy_win, CWOverrideRedirect, &pattr);
 
-    font = resources->getFont(FONT_NORMAL);
-    if (!font) { cerr << "The default font cannot be found, exiting..." << endl; exit(1); }
-
     shape = XShapeQueryExtension(dpy, &shape_event, &dummy);
 
-    move_curs = XCreateFontCursor(dpy, XC_fleur);
-    arrow_curs = XCreateFontCursor(dpy, XC_left_ptr);
-    XDefineCursor(dpy, root, arrow_curs);
+    XDefineCursor(dpy, root, wm->getResources()->getCursor(CURSOR_ARROW));
 
     sattr.event_mask = SubstructureRedirectMask |
                 SubstructureNotifyMask |
@@ -419,27 +414,35 @@ void WindowManager::handleKeyPressEvent(XEvent *ev)
                 case WM_QUIT:
                     quitNicely();
                 break;
+
                 case WM_RESTART:
                     restart();
                 break;
+
                 case WM_NEXT_CLIENT:
                     nextClient();
                 break;
+
                 case WM_CLOSE_CLIENT:
                     closeFocusedClient();
                 break;
+
                 case WM_WS_SHIFT_RIGHT:
                     nextWorkspace();
                 break;
+
                 case WM_WS_SHIFT_LEFT:
                     previousWorkspace();
                 break;
+
                 case WM_RUN_DIALOG:
                     runDialog();
                 break;
+
                 case WM_EXEC:
                     forkExec(key_bindings[i].command);
                 break;
+
                 default:
                     fprintf(stderr, "Warning: not a valid action type: %d\n", key_bindings[i].type);
                 break;
@@ -487,9 +490,10 @@ void WindowManager::handleButtonPressEvent(XEvent *ev)
                 (ev->xbutton.state==Mod1Mask) &&
                 (c->getFrameWindow() == ev->xbutton.window)
             )
-            if(!XGrabPointer(dpy, c->getFrameWindow(), False, PointerMotionMask|ButtonReleaseMask, GrabModeAsync, GrabModeAsync, None, wm->getMoveCursor(), CurrentTime) == GrabSuccess) return;
+            if(!XGrabPointer(dpy, c->getFrameWindow(), False, PointerMotionMask|ButtonReleaseMask,
+                    GrabModeAsync, GrabModeAsync, None, wm->getResources()->getCursor(CURSOR_MOVE), CurrentTime) == GrabSuccess)
+                return;
         }
-
 
         // if this is the first time the client window's clicked, focus it
         if(c && c != focused_client)
@@ -501,7 +505,6 @@ void WindowManager::handleButtonPressEvent(XEvent *ev)
         // otherwise, handle the button click as usual
         if(c && c == focused_client)
             c->handleButtonEvent(&ev->xbutton);
-
     }
 
     //if(ev->xbutton.window==root)
@@ -512,7 +515,6 @@ void WindowManager::handleButtonPressEvent(XEvent *ev)
 void WindowManager::handleButtonReleaseEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xbutton.window);
-
     if(c) {
         XUngrabPointer(dpy, CurrentTime);
 
@@ -526,23 +528,21 @@ void WindowManager::handleButtonReleaseEvent(XEvent *ev)
 void WindowManager::handleConfigureRequestEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xconfigurerequest.window);
-
-    if(c)
+    if(c) {
         c->handleConfigureRequest(&ev->xconfigurerequest);
-    else
-    {
+    }
+    else {
         // Since this window isn't yet a client lets delegate
         // the configure request back to the window so it can
         // use it.
 
         XWindowChanges wc;
-
-            wc.x = ev->xconfigurerequest.x;
+        wc.x = ev->xconfigurerequest.x;
         wc.y = ev->xconfigurerequest.y;
         wc.width = ev->xconfigurerequest.width;
         wc.height = ev->xconfigurerequest.height;
-            wc.sibling = ev->xconfigurerequest.above;
-            wc.stack_mode = ev->xconfigurerequest.detail;
+        wc.sibling = ev->xconfigurerequest.above;
+        wc.stack_mode = ev->xconfigurerequest.detail;
         XConfigureWindow(dpy, ev->xconfigurerequest.window, ev->xconfigurerequest.value_mask, &wc);
     }
 }
@@ -550,21 +550,17 @@ void WindowManager::handleConfigureRequestEvent(XEvent *ev)
 void WindowManager::handleMotionNotifyEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xmotion.window);
-
-    if(c)
+    if(c) {
         c->handleMotionNotifyEvent(&ev->xmotion);
-    else
-    {
-
     }
 }
 
 void WindowManager::handleMapRequestEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xmaprequest.window);
-
-    if(c)
+    if(c) {
         c->handleMapRequest(&ev->xmaprequest);
+    }
     else {
         client_window_list.push_back(ev->xmaprequest.window);
         c = new Client(dpy, ev->xmaprequest.window);
@@ -574,9 +570,7 @@ void WindowManager::handleMapRequestEvent(XEvent *ev)
 void WindowManager::handleUnmapNotifyEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xunmap.window);
-
-    if(c)
-    {
+    if(c) {
         c->handleUnmapEvent(&ev->xunmap);
         // if unmapping it, note that it's no longer focused
         focused_client = NULL;
@@ -586,9 +580,7 @@ void WindowManager::handleUnmapNotifyEvent(XEvent *ev)
 void WindowManager::handleDestroyNotifyEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xdestroywindow.window);
-
-    if(c)
-    {
+    if(c) {
         c->handleDestroyEvent(&ev->xdestroywindow);
         // if destroying it, note that it's no longer focused
         focused_client = NULL;
@@ -599,12 +591,12 @@ void WindowManager::handleDestroyNotifyEvent(XEvent *ev)
 
 void WindowManager::handleEnterNotifyEvent(XEvent *ev)
 {
-    //printf("WindowManager::handleEnterNotifyEvent): when does this happen???\n");
+    // not in use
 }
 
 void WindowManager::handleLeaveNotifyEvent(XEvent *ev)
 {
-    //printf("WindowManager::handleLeaveNotifyEvent(): when does this happen???\n");
+    // not in use
 }
 
 void WindowManager::handleFocusInEvent(XEvent *ev)
@@ -814,32 +806,17 @@ void WindowManager::cleanup()
     // Preserve stacking order when removing the clients
     // from the list.
     XQueryTree(dpy, root, &dummyw1, &dummyw2, &wins, &nwins);
-    for (i = 0; i < nwins; i++)
-    {
+    for (i = 0; i < nwins; i++) {
         c = findClient(wins[i]);
-
-        if(c)
-        {
+        if(c) {
             XMapWindow(dpy, c->getAppWindow());
-
             delete c;
         }
     }
     XFree(wins);
-
-    XFreeFont(dpy, font);
-
-    XFreeCursor(dpy, move_curs);
-    XFreeCursor(dpy, arrow_curs);
-
-    XFreeGC(dpy, focused_title_fg_gc);
-    XFreeGC(dpy, unfocused_title_fg_gc);
-    XFreeGC(dpy, focused_title_bg_gc);
-    XFreeGC(dpy, unfocused_title_bg_gc);
-    XFreeGC(dpy, focused_border_gc);
-    XFreeGC(dpy, unfocused_border_gc);
-    XFreeGC(dpy, focused_border2_gc);
-    XFreeGC(dpy, unfocused_border2_gc);
+    
+    delete foobar;
+    delete resources;
 
     XInstallColormap(dpy, DefaultColormap(dpy, screen));
     XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);

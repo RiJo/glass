@@ -9,8 +9,29 @@ Resources::Resources(Display *d, Window w, int s)
     loadResources();
 }
 
+Resources::~Resources() {
+    // fonts
+    for( map<FONT, XFontStruct *>::iterator iter = fonts.begin(); iter != fonts.end(); iter++) {
+        cout << "freeing XFontStruct\n";
+        XFreeFont(dpy, (*iter).second);
+    }
+    // gcs
+    for( map<COLOR, GC>::iterator iter = gcs.begin(); iter != gcs.end(); iter++) {
+        cout << "freeing GC\n";
+        XFreeGC(dpy, (*iter).second);
+    }
+    // cursors
+    for( map<CURSOR, Cursor>::iterator iter = cursors.begin(); iter != cursors.end(); iter++) {
+        cout << "freeing Cursor\n";
+        XFreeCursor(dpy, (*iter).second);
+    }
+
+    cout << "all X resources freed\n";
+}
+
 void Resources::loadResources()
 {
+    loadCursors();
     loadFonts();
     loadColors();
     loadGCs();
@@ -70,6 +91,17 @@ void Resources::loadGC(COLOR key)
 */
 }
 
+void Resources::loadCursors()
+{
+    loadCursor(CURSOR_MOVE, XC_fleur);
+    loadCursor(CURSOR_ARROW, XC_left_ptr);
+}
+
+void Resources::loadCursor(CURSOR key, unsigned int shape)
+{
+    cursors[key] = XCreateFontCursor(dpy, shape);
+}
+
 void Resources::loadFonts()
 {
     loadFont(FONT_NORMAL, FONT_DEFAULT);
@@ -78,18 +110,8 @@ void Resources::loadFonts()
 void Resources::loadFont(FONT key, char *font_name)
 {
     fonts[key] = XLoadQueryFont(dpy, font_name);
-}
-
-XColor Resources::getColor(COLOR key)
-{
-    return colors[key];
-}
-
-GC Resources::getGC(COLOR key)
-{
-    return gcs[key];
-}
-
-XFontStruct *Resources::getFont(FONT key) {
-    return fonts[key];
+    if (!fonts[key]) {
+        cerr << "The font cannot be found, exiting..." << endl;
+        exit(EXIT_FAILURE);
+    }
 }
