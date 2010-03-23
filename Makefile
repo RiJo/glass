@@ -1,6 +1,6 @@
 CC       =  g++
 CCFLAGS  =  -O2 -march=core2 -Wall
-DEBUG    =  -g -D=DEBUG
+DEBUG    =  -g -D=_DEBUG_
 INCLUDES =  -I/usr/include
 LDPATH   =  -L/usr/lib64
 LIBS     =  -lXext -lX11

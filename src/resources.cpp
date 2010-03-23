@@ -12,21 +12,20 @@ Resources::Resources(Display *d, Window w, int s)
 Resources::~Resources() {
     // fonts
     for( map<FONT, XFontStruct *>::iterator iter = fonts.begin(); iter != fonts.end(); iter++) {
-        cout << "freeing XFontStruct\n";
+        DEBUG("freeing XFontStruct\n");
         XFreeFont(dpy, (*iter).second);
     }
     // gcs
     for( map<COLOR, GC>::iterator iter = gcs.begin(); iter != gcs.end(); iter++) {
-        cout << "freeing GC\n";
+        DEBUG("freeing GC\n");
         XFreeGC(dpy, (*iter).second);
     }
     // cursors
     for( map<CURSOR, Cursor>::iterator iter = cursors.begin(); iter != cursors.end(); iter++) {
-        cout << "freeing Cursor\n";
+        DEBUG("freeing Cursor\n");
         XFreeCursor(dpy, (*iter).second);
     }
-
-    cout << "all X resources freed\n";
+    DEBUG("all X resources freed\n");
 }
 
 void Resources::loadResources()

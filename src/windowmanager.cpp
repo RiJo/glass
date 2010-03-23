@@ -113,7 +113,7 @@ void WindowManager::parseCommandLine(int argc, char** argv)
                 exit(EXIT_SUCCESS);
             case 'w':
                 workspace_count = atoi(optarg);
-                if(workspace_count <= 0)
+                if (workspace_count <= 0)
                     workspace_count = DEFAULT_WORKSPACE_COUNT;
                 break;
             default:
@@ -158,8 +158,9 @@ bool WindowManager::setCurrentWorkspace(char x)
         x = workspace_count;
     }
 
-    if(x != current_workspace) {
+    if (x != current_workspace) {
         current_workspace = x;
+        DEBUG("workspace changed to %d\n", x);
         return true;
     }
     else {
@@ -181,13 +182,13 @@ void WindowManager::goToWorkspace(char x)
         for (i = 0; i < nwins; i++) {
             c = findClient(wins[i]);
 
-            if(c) {
-                if(c->isTagged(current_workspace)) {
-                    if(! (c->isIconified()))
+            if (c) {
+                if (c->isTagged(current_workspace)) {
+                    if (! (c->isIconified()))
                     c->unhide();
                 }
                 else {
-                    if(! (c->isIconified()))
+                    if (! (c->isIconified()))
                     c->hide();
                 }
             }
@@ -369,7 +370,8 @@ void WindowManager::grabKeys(Window w)
     }
     // Keybindings
     for (int i = 0; i <= KEY_BINDING_COUNT; i++) {
-        XGrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].mod, w,True,GrabModeAsync,GrabModeAsync);
+        XGrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].mod,
+                w,True,GrabModeAsync,GrabModeAsync);
     }
 }
 
@@ -479,39 +481,37 @@ void WindowManager::handleButtonPressEvent(XEvent *ev)
             break;
         }
     }
-    else
-    {
+    else {
         Client* c = findClient(ev->xbutton.window);
 
-        if(c && c->hasWindowDecorations())
-        {
-            if( (ev->xbutton.button == Button1) &&
-                (ev->xbutton.type==ButtonPress) &&
-                (ev->xbutton.state==Mod1Mask) &&
+        if (c && c->hasWindowDecorations()) {
+            if ( (ev->xbutton.button == Button1) &&
+                (ev->xbutton.type == ButtonPress) &&
+                (ev->xbutton.state == Mod1Mask) &&
                 (c->getFrameWindow() == ev->xbutton.window)
             )
-            if(!XGrabPointer(dpy, c->getFrameWindow(), False, PointerMotionMask|ButtonReleaseMask,
+            if (!XGrabPointer(dpy, c->getFrameWindow(), False, PointerMotionMask|ButtonReleaseMask,
                     GrabModeAsync, GrabModeAsync, None, wm->getResources()->getCursor(CURSOR_MOVE), CurrentTime) == GrabSuccess)
                 return;
         }
 
         // if this is the first time the client window's clicked, focus it
-        if(c && c != focused_client)
-        {
+        if (c && c != focused_client) {
             XSetInputFocus(dpy, c->getAppWindow(), RevertToNone, CurrentTime);
             focused_client = c;
         }
 
         // otherwise, handle the button click as usual
-        if(c && c == focused_client)
+        if (c && c == focused_client) {
             c->handleButtonEvent(&ev->xbutton);
+        }
     }
 }
 
 void WindowManager::handleButtonReleaseEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xbutton.window);
-    if(c) {
+    if (c) {
         XUngrabPointer(dpy, CurrentTime);
 
         c->handleButtonEvent(&ev->xbutton);
@@ -521,7 +521,7 @@ void WindowManager::handleButtonReleaseEvent(XEvent *ev)
 void WindowManager::handleConfigureRequestEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xconfigurerequest.window);
-    if(c) {
+    if (c) {
         c->handleConfigureRequest(&ev->xconfigurerequest);
     }
     else {
@@ -543,7 +543,7 @@ void WindowManager::handleConfigureRequestEvent(XEvent *ev)
 void WindowManager::handleMotionNotifyEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xmotion.window);
-    if(c) {
+    if (c) {
         c->handleMotionNotifyEvent(&ev->xmotion);
     }
 }
@@ -551,7 +551,7 @@ void WindowManager::handleMotionNotifyEvent(XEvent *ev)
 void WindowManager::handleMapRequestEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xmaprequest.window);
-    if(c) {
+    if (c) {
         c->handleMapRequest(&ev->xmaprequest);
     }
     else {
@@ -563,7 +563,7 @@ void WindowManager::handleMapRequestEvent(XEvent *ev)
 void WindowManager::handleUnmapNotifyEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xunmap.window);
-    if(c) {
+    if (c) {
         c->handleUnmapEvent(&ev->xunmap);
         // if unmapping it, note that it's no longer focused
         focused_client = NULL;
@@ -573,7 +573,7 @@ void WindowManager::handleUnmapNotifyEvent(XEvent *ev)
 void WindowManager::handleDestroyNotifyEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xdestroywindow.window);
-    if(c) {
+    if (c) {
         c->handleDestroyEvent(&ev->xdestroywindow);
         // if destroying it, note that it's no longer focused
         focused_client = NULL;
@@ -594,15 +594,15 @@ void WindowManager::handleLeaveNotifyEvent(XEvent *ev)
 
 void WindowManager::handleFocusInEvent(XEvent *ev)
 {
-    if((ev->xfocus.mode == NotifyGrab) || (ev->xfocus.mode == NotifyUngrab))
+    if ((ev->xfocus.mode == NotifyGrab) || (ev->xfocus.mode == NotifyUngrab))
         return;
 
     list<Window>::iterator iter;
 
     for(iter=client_window_list.begin(); iter != client_window_list.end(); iter++) {
-        if(ev->xfocus.window == (*iter)) {
+        if (ev->xfocus.window == (*iter)) {
             Client *c = findClient( (*iter) );
-            if(c) {
+            if (c) {
                 unfocusAnyStrayClients();
                 c->handleFocusInEvent(&ev->xfocus);
                 focused_client = c;
@@ -616,9 +616,9 @@ void WindowManager::handleFocusOutEvent(XEvent *ev)
 {
     list<Window>::iterator iter;
     for(iter=client_window_list.begin(); iter != client_window_list.end(); iter++) {
-        if(ev->xfocus.window == (*iter)) {
+        if (ev->xfocus.window == (*iter)) {
             Client *c = findClient( (*iter) );
-            if(c) {
+            if (c) {
                 focused_client = NULL;
                 ungrabKeys( (*iter) );
                 return;
@@ -632,35 +632,35 @@ void WindowManager::handleFocusOutEvent(XEvent *ev)
 void WindowManager::handleClientMessageEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xclient.window);
-    if(c)
+    if (c)
         c->handleClientMessage(&ev->xclient);
 }
 
 void WindowManager::handleColormapNotifyEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xcolormap.window);
-    if(c)
+    if (c)
         c->handleColormapChange(&ev->xcolormap);
 }
 
 void WindowManager::handlePropertyNotifyEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xproperty.window);
-    if(c)
+    if (c)
         c->handlePropertyChange(&ev->xproperty);
 }
 
 void WindowManager::handleExposeEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xexpose.window);
-    if(c)
+    if (c)
         c->handleExposeEvent(&ev->xexpose);
 }
 
 void WindowManager::handleDefaultEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xany.window);
-    if(c) {
+    if (c) {
         if (shape && ev->type == shape_event)
             c->handleShapeChange((XShapeEvent *)ev);
     }
@@ -686,25 +686,25 @@ void WindowManager::focusPreviousWindowInStackingOrder()
 
     XQueryTree(dpy, root, &dummyw1, &dummyw2, &wins, &nwins);
 
-    if(client_list.size()) {
+    if (client_list.size()) {
         list<Client*> client_list_for_current_workspace;
 
         for (i = 0; i < nwins; i++) {
             c = findClient(wins[i]);
 
-            if(c) {
-                if((c->isTagged(current_workspace)
+            if (c) {
+                if ((c->isTagged(current_workspace)
                 && c->hasWindowDecorations() && (c->isIconified() == false) ))
                 client_list_for_current_workspace.push_back(c);
             }
         }
 
-        if(client_list_for_current_workspace.size()) {
+        if (client_list_for_current_workspace.size()) {
             list<Client*>::iterator iter = client_list_for_current_workspace.end();
 
             iter--;
 
-            if( (*iter) ) {
+            if ( (*iter) ) {
                 XSetInputFocus(dpy, (*iter)->getAppWindow(), RevertToNone, CurrentTime);
                 client_list_for_current_workspace.clear();
                 XFree(wins);
@@ -739,7 +739,7 @@ void WindowManager::removeClient(Client* c)
 
 Client* WindowManager::findClient(Window w)
 {
-    if(client_list.size()) {
+    if (client_list.size()) {
         list<Client*>::iterator iter = client_list.begin();
 
         for(; iter != client_list.end(); iter++) {
@@ -756,15 +756,15 @@ void WindowManager::findTransientsToMapOrUnmap(Window win, bool hide)
 {
     list<Client*>::iterator iter;
 
-    if(client_list.size()) {
+    if (client_list.size()) {
         for(iter=client_list.begin(); iter!= client_list.end(); iter++) {
-            if((*iter)->getTransientWindow() == win) {
-                if(hide) {
-                    if(! (*iter)->isIconified())
+            if ((*iter)->getTransientWindow() == win) {
+                if (hide) {
+                    if (! (*iter)->isIconified())
                         (*iter)->iconify();
                 }
                 else {
-                    if((*iter)->isIconified())
+                    if ((*iter)->isIconified())
                         (*iter)->unhide();
                 }
             }
@@ -800,7 +800,7 @@ void WindowManager::cleanup()
     XQueryTree(dpy, root, &dummyw1, &dummyw2, &wins, &nwins);
     for (i = 0; i < nwins; i++) {
         c = findClient(wins[i]);
-        if(c) {
+        if (c) {
             XMapWindow(dpy, c->getAppWindow());
             delete c;
         }
@@ -885,7 +885,7 @@ int WindowManager::sendXMessage(Window w, Atom a, long mask, long x)
 Client *WindowManager::focusedClient() {
     list<Client*>::iterator it;
     for(it = client_list.begin(); it != client_list.end(); it++) {
-        if((*it)->hasFocus() && (*it)->isTagged(current_workspace)) {
+        if ((*it)->hasFocus() && (*it)->isTagged(current_workspace)) {
             return (*it);
         }
     }
