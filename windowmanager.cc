@@ -506,10 +506,6 @@ void WindowManager::handleButtonPressEvent(XEvent *ev)
         if(c && c == focused_client)
             c->handleButtonEvent(&ev->xbutton);
     }
-
-    //if(ev->xbutton.window==root)
-    //    XSendEvent(dpy, _button_proxy_win, False, SubstructureNotifyMask, ev);
-
 }
 
 void WindowManager::handleButtonReleaseEvent(XEvent *ev)
@@ -520,9 +516,6 @@ void WindowManager::handleButtonReleaseEvent(XEvent *ev)
 
         c->handleButtonEvent(&ev->xbutton);
     }
-
-    //if(ev->xbutton.window==root)
-    //    XSendEvent(dpy, _button_proxy_win, False, SubstructureNotifyMask, ev);
 }
 
 void WindowManager::handleConfigureRequestEvent(XEvent *ev)
@@ -803,8 +796,7 @@ void WindowManager::cleanup()
 
     ungrabKeys(root);
 
-    // Preserve stacking order when removing the clients
-    // from the list.
+    // Preserve stacking order when removing the clients from the list.
     XQueryTree(dpy, root, &dummyw1, &dummyw2, &wins, &nwins);
     for (i = 0; i < nwins; i++) {
         c = findClient(wins[i]);

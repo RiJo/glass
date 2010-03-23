@@ -23,8 +23,8 @@
 using namespace std;
 
 #define PROGRAM_NAME                "glass"
-#define PROGRAM_VERSION             "0.4.0"
-#define PROGRAM_DATE                "2010-03-22"
+#define PROGRAM_VERSION             "0.5.0"
+#define PROGRAM_DATE                "2010-03-23"
 
 #define EXEC_TERMINAL               "xterm -geometry 100x30"
 #define EXEC_WEBBROWSER             "firefox"

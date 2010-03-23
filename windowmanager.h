@@ -14,10 +14,7 @@ private: /* member variables */
 
     Resources *resources;
     FooBar *foobar;
-
     Client* focused_client;
-
-    //Cursor move_curs, arrow_curs;
 
     Display *dpy;
     Window root;
