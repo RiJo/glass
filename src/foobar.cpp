@@ -77,7 +77,7 @@ void FooBar::redrawRunField()
 
     int x = WORKSPACES_WIDTH;
     int y = 1;
-    
+
     XFillRectangle(dpy, root, background_gc, x, y, RUNFIELD_WIDTH, BAR_HEIGHT);
     XDrawRectangle(dpy, root, gc, x, y, RUNFIELD_WIDTH, BAR_HEIGHT);
 
