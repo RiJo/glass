@@ -16,26 +16,8 @@ private: /* member variables */
     FooBar *foobar;
 
     Client* focused_client;
-    XFontStruct *font;
-    GC      focused_title_fg_gc,
-            unfocused_title_fg_gc,
-            focused_title_bg_gc,
-            unfocused_title_bg_gc,
-            focused_border_gc,
-            unfocused_border_gc,
-            focused_border2_gc,
-            unfocused_border2_gc;
 
-    XColor  col_fg_focus,
-            col_fg_unfocus,
-            col_bg_focus,
-            col_bg_unfocus,
-            col_title_bd_focus,
-            col_title_bd_unfocus,
-            col_cli_bd_focus,
-            col_cli_bd_unfocus;
-
-    Cursor move_curs, arrow_curs;
+    //Cursor move_curs, arrow_curs;
 
     Display *dpy;
     Window root;
@@ -119,12 +101,7 @@ public: /* Member Functions */
     void unfocusAnyStrayClients();
     void findTransientsToMapOrUnmap(Window win, bool hide);
 
-    inline XFontStruct* getFont()   const { return font; }
-
     inline Resources *getResources()             const { return resources;               }
-
-    inline Cursor getMoveCursor()   const { return move_curs;           }
-    inline Cursor getArrowCursor()  const { return arrow_curs;          }
 
     inline int getShape()         const { return shape; }
     inline int getShapeEvent()     const { return shape_event; }

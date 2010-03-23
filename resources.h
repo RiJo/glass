@@ -10,6 +10,8 @@
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>
 #include <X11/extensions/shape.h>
+#include <stdlib.h>
+#include <iostream>
 #include <map>
 
 using namespace std;
@@ -36,6 +38,11 @@ enum COLOR {
     COLOR_BORDER_UNFOCUSED
 };
 
+enum CURSOR {
+    CURSOR_MOVE,
+    CURSOR_ARROW
+};
+
 enum FONT {
     FONT_NORMAL
 };
@@ -49,6 +56,7 @@ private: /* Member Variables */
 
     map<COLOR, GC> gcs;
     map<COLOR, XColor> colors;
+    map<CURSOR, Cursor> cursors;
     map<FONT, XFontStruct *> fonts;
 
 private: /* Member Functions */
@@ -57,6 +65,8 @@ private: /* Member Functions */
     void loadColors();
     void loadGC(COLOR);
     void loadGCs();
+    void loadCursor(CURSOR, unsigned int);
+    void loadCursors();
     void loadFont(FONT, char *);
     void loadFonts();
 
@@ -65,9 +75,10 @@ public: /* Member Functions */
     Resources(Display *, Window, int);
     ~Resources();
 
-    XColor getColor(COLOR);
-    GC getGC(COLOR);
-    XFontStruct *getFont(FONT);
+    XColor getColor(COLOR key)      { return colors[key]; }
+    GC getGC(COLOR key)             { return gcs[key]; }
+    Cursor getCursor(CURSOR key)    { return cursors[key]; }
+    XFontStruct *getFont(FONT key)  { return fonts[key]; }
 };
 
 
