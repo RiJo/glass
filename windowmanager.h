@@ -2,6 +2,7 @@
 #define _WINDOWMANAGER_H_
 
 #include "glass.h"
+#include "resources.h"
 #include "foobar.h"
 
 class WindowManager
@@ -11,6 +12,7 @@ private: /* member variables */
     list<Client*> client_list;
     list<Window> client_window_list;
 
+    Resources *resources;
     FooBar *foobar;
 
     Client* focused_client;

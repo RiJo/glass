@@ -220,8 +220,6 @@ void WindowManager::scanWins(void)
 
 void WindowManager::setupDisplay()
 {
-    XColor dummyc;
-    XGCValues gv;
     XSetWindowAttributes sattr;
     int dummy;
 
@@ -238,6 +236,8 @@ void WindowManager::setupDisplay()
 
     screen = DefaultScreen(dpy);
     root = RootWindow(dpy, screen);
+    
+    resources = new Resources(dpy, root, screen);
 
     xres = DisplayWidth(dpy, screen);
     yres = DisplayHeight(dpy, screen);
@@ -257,56 +257,32 @@ void WindowManager::setupDisplay()
     _button_proxy_win=XCreateSimpleWindow(dpy, root, -80, -80, 24, 24,0,0,0);
     XChangeWindowAttributes(dpy, _button_proxy_win, CWOverrideRedirect, &pattr);
 
-    font = XLoadQueryFont(dpy, DEF_FONT);
+    font = resources->getFont(FONT_NORMAL);
     if (!font) { cerr << "The default font cannot be found, exiting..." << endl; exit(1); }
 
     shape = XShapeQueryExtension(dpy, &shape_event, &dummy);
 
     move_curs = XCreateFontCursor(dpy, XC_fleur);
     arrow_curs = XCreateFontCursor(dpy, XC_left_ptr);
-
     XDefineCursor(dpy, root, arrow_curs);
 
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_TITLE_FG_FOCUS, &col_fg_focus, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_TITLE_FG_UNFOCUS, &col_fg_unfocus, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_TITLE_BG_FOCUS, &col_bg_focus, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_TITLE_BG_UNFOCUS, &col_bg_unfocus, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_TITLE_BD_FOCUS, &col_title_bd_focus, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_TITLE_BD_UNFOCUS, &col_title_bd_unfocus, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_CLIENT_BD_FOCUS, &col_cli_bd_focus, &dummyc);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, screen), COLOR_CLIENT_BD_UNFOCUS, &col_cli_bd_unfocus, &dummyc);
+    col_fg_focus = resources->getColor(COLOR_FOREGROUND_FOCUSED);
+    col_fg_unfocus = resources->getColor(COLOR_FOREGROUND_UNFOCUSED);
+    col_bg_focus = resources->getColor(COLOR_BACKGROUND_FOCUSED);
+    col_bg_unfocus = resources->getColor(COLOR_BACKGROUND_UNFOCUSED);
+    col_title_bd_focus = resources->getColor(COLOR_DECORATION_FOCUSED);
+    col_title_bd_unfocus = resources->getColor(COLOR_DECORATION_UNFOCUSED);
+    col_cli_bd_focus = resources->getColor(COLOR_BORDER_FOCUSED);
+    col_cli_bd_unfocus = resources->getColor(COLOR_BORDER_UNFOCUSED);
 
-    gv.foreground = col_fg_focus.pixel;
-    gv.font = font->fid;
-    focused_title_fg_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
-
-    gv.foreground = col_fg_unfocus.pixel;
-    gv.font = font->fid;
-    unfocused_title_fg_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
-
-    gv.foreground = col_bg_focus.pixel;
-    gv.font = font->fid;
-    focused_title_bg_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
-
-    gv.foreground = col_bg_unfocus.pixel;
-    gv.font = font->fid;
-    unfocused_title_bg_gc = XCreateGC(dpy, root, GCForeground|GCFont, &gv);
-
-    gv.foreground = col_cli_bd_focus.pixel;
-    gv.line_width = 1;
-    focused_border_gc = XCreateGC(dpy, root, GCForeground|GCLineWidth, &gv);
-
-    gv.foreground = col_cli_bd_unfocus.pixel;
-    gv.line_width = 1;
-    unfocused_border_gc = XCreateGC(dpy, root, GCForeground|GCLineWidth, &gv);
-
-    gv.foreground = col_title_bd_focus.pixel;
-    gv.line_width = 1;
-    focused_border2_gc = XCreateGC(dpy, root, GCForeground|GCLineWidth, &gv);
-
-    gv.foreground = col_title_bd_unfocus.pixel;
-    gv.line_width = 1;
-    unfocused_border2_gc = XCreateGC(dpy, root, GCForeground|GCLineWidth, &gv);
+    focused_title_fg_gc = resources->getGC(COLOR_FOREGROUND_FOCUSED);
+    unfocused_title_fg_gc = resources->getGC(COLOR_FOREGROUND_UNFOCUSED);
+    focused_title_bg_gc = resources->getGC(COLOR_BACKGROUND_FOCUSED);
+    unfocused_title_bg_gc = resources->getGC(COLOR_BACKGROUND_UNFOCUSED);
+    focused_border2_gc = resources->getGC(COLOR_DECORATION_FOCUSED);
+    unfocused_border2_gc = resources->getGC(COLOR_DECORATION_UNFOCUSED);
+    focused_border_gc = resources->getGC(COLOR_BORDER_FOCUSED);
+    unfocused_border_gc = resources->getGC(COLOR_BORDER_UNFOCUSED);
 
 /*
     gv.foreground = col_cli_bd_unfocus.pixel;

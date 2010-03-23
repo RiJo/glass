@@ -7,11 +7,13 @@ NAME     =  glass
 
 HEADERS  =  $(NAME).h 		\
             client.h 		\
+            resources.h 		\
             foobar.h 		\
             windowmanager.h
 
 OBJS     =  windowmanager.o 	\
             client.o 		\
+            resources.o 		\
             foobar.o 		\
             main.o
 
