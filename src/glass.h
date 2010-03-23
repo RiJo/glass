@@ -39,6 +39,12 @@ using namespace std;
 #define DEFAULT_WORKSPACE_COUNT     4
 #define TRANSIENT_WINDOW_HEIGHT     8
 
+#ifdef _DEBUG_
+#define DEBUG printf("[debug] ");printf
+#else
+#define DEBUG(arg1,...)
+#endif
+
 // Border width accessor to handle hints/no hints
 #define BW                          (has_border ? 1 : 0)
 
