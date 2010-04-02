@@ -157,30 +157,41 @@ void FooBar::handleButtonEvent(XButtonEvent *e)
 
 void FooBar::handleKeyEvent(XKeyEvent *e)
 {
-    //~ int keysyms_per_keycode_return;
-    //~ KeySym *baz = XGetKeyboardMapping(dpy, e->keycode, 1, &keysyms_per_keycode_return);
-    //~ XFree(baz);
-
-    KeySym ks = XKeycodeToKeysym(dpy, e->keycode, 0);
-
-    if (ks == NoSymbol)
-        return;
-
+    KeySym ks = XKeycodeToKeysym(dpy, e->keycode, e->state & ShiftMask);
     switch (ks) {
+        case NoSymbol:
+            return;
+        // Modifiers
+        case XK_Shift_L:
+        case XK_Shift_R:
+        case XK_Control_L:
+        case XK_Control_R:
+        case XK_Caps_Lock:
+        case XK_Shift_Lock:
+        case XK_Meta_L:
+        case XK_Meta_R:
+        case XK_Alt_L:
+        case XK_Alt_R:
+        case XK_Super_L:
+        case XK_Super_R:
+        case XK_Hyper_L:
+        case XK_Hyper_R:
+            return;
         case XK_Return:
             if (strlen(runfield) > 0)
                 forkExec(runfield);
-        case XK_Escape: // fallthrough
+            //break;
+        case XK_Escape:
             setRunfield(false);
-        break;
+            break;
         case XK_BackSpace:
             if (current_character > 0)
                 runfield[--current_character] = '\0';
-        break;
+            break;
         default:
-            if (current_character < RUNFIELD_BUFFER)
-            runfield[current_character++] = ks;
-            //~ runfield[current_character++] = *XKeysymToString(ks);
-        break;
+            if (current_character < RUNFIELD_BUFFER) {
+                runfield[current_character++] = ks;
+            }
+            break;
     }
 }
