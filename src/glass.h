@@ -30,6 +30,17 @@ using namespace std;
 #define EXEC_WEBBROWSER             "firefox"
 #define EXEC_EDITOR                 "scite"
 
+#define FONT_DEFAULT                (char *)"Fixed"
+
+#define COLOR_TITLE_FG_FOCUS        (char *)"#dddddd"
+#define COLOR_TITLE_FG_UNFOCUS      (char *)"#bbbbbb"
+#define COLOR_TITLE_BG_FOCUS        (char *)"#000000"
+#define COLOR_TITLE_BG_UNFOCUS      (char *)"#000000"
+#define COLOR_TITLE_BD_FOCUS        (char *)"#333333"
+#define COLOR_TITLE_BD_UNFOCUS      (char *)"#333333"
+#define COLOR_CLIENT_BD_FOCUS       (char *)"#ff0000"
+#define COLOR_CLIENT_BD_UNFOCUS     (char *)"#333333"
+
 #define SPACE                       3
 #define MINSIZE                     15
 #define EDGE_SNAP                   "true"
@@ -52,11 +63,10 @@ enum { LEFT_JUSTIFY, CENTER_JUSTIFY, RIGHT_JUSTIFY };
 enum { APPLY_GRAVITY=1, REMOVE_GRAVITY=-1 };
 enum { PIXELS=0, INCREMENTS=1 };
 
-// defined in main.cc
 void forkExec(char *);
 int handleXError(Display *, XErrorEvent *);
 
 #include "client.h"
-#include "windowmanager.h"
+
 
 #endif // _GLASS_H_

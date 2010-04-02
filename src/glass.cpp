@@ -19,31 +19,31 @@
     http://code.google.com/p/aewmpp
 */
 
-#include "glass.h"
+#include "windowmanager.h"
 
 void forkExec(char *cmd) {
-    if (! (strlen(cmd) > 0)) return;
+    if (!cmd || strlen(cmd) == 0) {
+        return;
+    }
 
     DEBUG("executing: \"%s\"\n", cmd);
 
     pid_t pid = fork();
-
-    switch (pid) {
-        case 0:
-            execlp("/bin/sh", "sh", "-c", cmd, NULL);
-            cerr << "exec failed, cleaning up child" << endl;
-            exit(1);
-        case -1:
-            cerr << "can't fork" << endl;
+    if (pid < 0) {
+        fprintf(stderr, "Error: could not fork\n");
+    }
+    else if (pid == 0) {
+        execlp("/bin/sh", "sh", "-c", cmd, NULL);
+        fprintf(stderr, "Error: exec failed, cleaning up child\n");
+        exit(EXIT_FAILURE);
     }
 }
 
 int handleXError(Display *dpy, XErrorEvent *e) {
     if (e->error_code == BadAccess && e->resourceid == RootWindow(dpy, DefaultScreen(dpy)) ) {
-        cerr << "root window unavailable (maybe another wm is running?)" << endl;
-        exit(1);
+        fprintf(stderr, "Error: root window unavailable (maybe another wm is running?)\n");
+        exit(EXIT_FAILURE);
     }
-
     return 0;
 }
 

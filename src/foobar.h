@@ -3,6 +3,7 @@
 
 #include "glass.h"
 
+
 #define WORKSPACE_WIDTH     30
 #define WORKSPACE_OFFSET(x) ((WORKSPACE_WIDTH + ITEM_PADDING) * x)
 #define WORKSPACES_WIDTH    WORKSPACE_OFFSET( (workspace_count + 1) )

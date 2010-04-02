@@ -1,4 +1,5 @@
-#include "glass.h"
+#include "foobar.h"
+#include "windowmanager.h"
 
 FooBar::FooBar(Display *d, Window w, char &count, char &current) :
 workspace_count(count), current_workspace(current)
@@ -152,12 +153,19 @@ void FooBar::handleButtonEvent(XButtonEvent *e)
     }
 }
 
+//char FooBar::keysymToChar(
+
 void FooBar::handleKeyEvent(XKeyEvent *e)
 {
+    //~ int keysyms_per_keycode_return;
+    //~ KeySym *baz = XGetKeyboardMapping(dpy, e->keycode, 1, &keysyms_per_keycode_return);
+    //~ XFree(baz);
+
     KeySym ks = XKeycodeToKeysym(dpy, e->keycode, 0);
+
     if (ks == NoSymbol)
         return;
-    //printf("handle key: %d\t keysym: %ld\tstring: %s\n", e->keycode, (long)ks, XKeysymToString(ks));
+
     switch (ks) {
         case XK_Return:
             if (strlen(runfield) > 0)
@@ -171,7 +179,8 @@ void FooBar::handleKeyEvent(XKeyEvent *e)
         break;
         default:
             if (current_character < RUNFIELD_BUFFER)
-            runfield[current_character++] = *XKeysymToString(ks);
+            runfield[current_character++] = ks;
+            //~ runfield[current_character++] = *XKeysymToString(ks);
         break;
     }
 }

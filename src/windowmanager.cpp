@@ -1,4 +1,4 @@
-#include "glass.h"
+#include "windowmanager.h"
 
 WindowManager* wm;
 
@@ -287,70 +287,87 @@ void WindowManager::doEventLoop()
 
         switch (ev.type) {
             case KeyPress:
+                DEBUG("* KeyPress\n");
                 handleKeyPressEvent(&ev);
             break;
 
             case ButtonPress:
+                DEBUG("* ButtonPress\n");
                 handleButtonPressEvent(&ev);
             break;
 
             case ButtonRelease:
+                DEBUG("* ButtonRelease\n");
                 handleButtonReleaseEvent(&ev);
             break;
 
             case ConfigureRequest:
+                DEBUG("* ConfigureRequest\n");
                 handleConfigureRequestEvent(&ev);
             break;
 
             case MotionNotify:
+                DEBUG("* MotionNotify\n");
                 handleMotionNotifyEvent(&ev);
             break;
 
             case MapRequest:
+                DEBUG("* MapRequest\n");
                 handleMapRequestEvent(&ev);
             break;
 
             case UnmapNotify:
+                DEBUG("* UnmapNotify\n");
                 handleUnmapNotifyEvent(&ev);
             break;
 
             case DestroyNotify:
+                DEBUG("* DestroyNotify\n");
                 handleDestroyNotifyEvent(&ev);
             break;
 
             case EnterNotify:
+                DEBUG("* EnterNotify\n");
                 handleEnterNotifyEvent(&ev);
             break;
 
             case LeaveNotify:
+                DEBUG("* LeaveNotify\n");
                 handleLeaveNotifyEvent(&ev);
             break;
 
             case FocusIn:
+                DEBUG("* FocusIn\n");
                 handleFocusInEvent(&ev);
             break;
 
             case FocusOut:
+                DEBUG("* FocusOut\n");
                 handleFocusOutEvent(&ev);
             break;
 
             case ClientMessage:
+                DEBUG("* ClientMessage\n");
                 handleClientMessageEvent(&ev);
             break;
 
             case ColormapNotify:
+                DEBUG("* ColormapNotify\n");
                 handleColormapNotifyEvent(&ev);
             break;
 
             case PropertyNotify:
+                DEBUG("* PropertyNotify\n");
                 handlePropertyNotifyEvent(&ev);
             break;
 
             case Expose:
+                DEBUG("* Expose\n");
                 handleExposeEvent(&ev);
             break;
 
             default:
+                DEBUG("* Unhandled type: %d\n", ev.type);
                 handleDefaultEvent(&ev);
             break;
         }
