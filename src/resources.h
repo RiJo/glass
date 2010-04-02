@@ -12,26 +12,9 @@
 #include <iostream>
 #include <map>
 
+#include "glass.h"
+
 using namespace std;
-
-#define FONT_DEFAULT                (char *)"Fixed"
-
-#define COLOR_TITLE_FG_FOCUS        (char *)"#dddddd"
-#define COLOR_TITLE_FG_UNFOCUS      (char *)"#bbbbbb"
-#define COLOR_TITLE_BG_FOCUS        (char *)"#000000"
-#define COLOR_TITLE_BG_UNFOCUS      (char *)"#000000"
-#define COLOR_TITLE_BD_FOCUS        (char *)"#333333"
-#define COLOR_TITLE_BD_UNFOCUS      (char *)"#333333"
-#define COLOR_CLIENT_BD_FOCUS       (char *)"#ff0000"
-#define COLOR_CLIENT_BD_UNFOCUS     (char *)"#333333"
-
-// temp
-#ifdef _DEBUG_
-#define DEBUG printf("[debug] ");printf
-#else
-#define DEBUG(arg1,...)
-#endif
-// temp
 
 enum COLOR {
     COLOR_FOREGROUND_FOCUSED,

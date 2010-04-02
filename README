@@ -1,8 +1,10 @@
 --------------------------------------------------------------------------------
 
-   glass
-   current version:     0.5.1
-   by:                  Rikard Johansson
+    glass
+    current version:     0.5.1
+    by:                  Rikard Johansson
+
+    DESCRIPTION HERE!
 
 --------------------------------------------------------------------------------
 
@@ -92,4 +94,7 @@
  version x.x.x, xxxx-xx-xx
 --------------------------------------------------------------------------------
     * Fixed bug in foobar with dynamic number of workspaces
+    * Added support for special characters in runfield
+    * Added debug option to Makefile, cleaned up Makefile
+    * Added debug printout when compiled as debug
 --------------------------------------------------------------------------------

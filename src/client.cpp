@@ -1,4 +1,5 @@
-#include "glass.h"
+#include "client.h"
+#include "windowmanager.h"
 
 Client::Client(Display *d, Window new_client)
 {
