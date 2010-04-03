@@ -5,6 +5,17 @@
 #include "resources.h"
 #include "foobar.h"
 
+enum wm_action {
+    WM_QUIT,
+    WM_RESTART,
+    WM_NEXT_CLIENT,
+    WM_CLOSE_CLIENT,
+    WM_RUN_DIALOG,
+    WM_WS_SHIFT_RIGHT,
+    WM_WS_SHIFT_LEFT,
+    WM_EXEC
+};
+
 class WindowManager
 {
 private: /* member variables */
