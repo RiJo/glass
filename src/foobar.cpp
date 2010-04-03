@@ -64,8 +64,8 @@ void FooBar::redrawWorkspaces()
         }
     }
 
-    delete [] text->chars;
-    delete [] text;
+    free(text->chars);
+    delete text;
 }
 
 void FooBar::redrawRunField()
@@ -94,7 +94,7 @@ void FooBar::redrawRunField()
 
     XDrawText(dpy, root, text_gc, x + MAGIC_NUMBER, y + MAGIC_NUMBER, text, 1);
 
-    delete [] text;
+    delete text;
 }
 
 void FooBar::redraw()
@@ -160,7 +160,6 @@ void FooBar::handleKeyEvent(XKeyEvent *e)
     KeySym ks = XKeycodeToKeysym(dpy, e->keycode, e->state & ShiftMask);
     switch (ks) {
         case NoSymbol:
-            return;
         // Modifiers
         case XK_Shift_L:
         case XK_Shift_R:
@@ -185,11 +184,12 @@ void FooBar::handleKeyEvent(XKeyEvent *e)
             setRunfield(false);
             break;
         case XK_BackSpace:
-            if (current_character > 0)
+            if (current_character > 0) {
                 runfield[--current_character] = '\0';
+            }
             break;
         default:
-            if (current_character < RUNFIELD_BUFFER) {
+            if (current_character < RUNFIELD_BUFFER - 1) {
                 runfield[current_character++] = ks;
             }
             break;

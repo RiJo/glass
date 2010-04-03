@@ -97,4 +97,5 @@
     * Added support for special characters in runfield
     * Added debug option to Makefile, cleaned up Makefile
     * Added debug printout when compiled as debug
+    * Bugfix: corrected warnings from valgrind, still memory leaks though
 --------------------------------------------------------------------------------
