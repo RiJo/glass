@@ -25,8 +25,7 @@ struct key_binding {
 alias aliases[] = {
     {(char *)"terminal",    (char *)EXEC_TERMINAL},
     {(char *)"webbrowser",  (char *)EXEC_WEBBROWSER},
-    {(char *)"editor",      (char *)EXEC_EDITOR},
-    {(char *)"foo",         (char *)"xterm -e sleep 3"}
+    {(char *)"editor",      (char *)EXEC_EDITOR}
 };
 #define ALIASES_COUNT (unsigned int)(sizeof(aliases)/sizeof(alias))
 
@@ -152,7 +151,7 @@ void WindowManager::setupSignalHandlers()
 }
 
 void WindowManager::execute(char *command) {
-    for (register unsigned int i = 0; i <= ALIASES_COUNT; i++) {
+    for (register unsigned int i = 0; i < ALIASES_COUNT; i++) {
         if (strcmp(aliases[i].identifier, command) == 0) {
             forkExec(aliases[i].command);
             return;
