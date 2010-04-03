@@ -1,6 +1,14 @@
 #ifndef _GLASS_H_
 #define _GLASS_H_
 
+/*
+    TODO:
+        * change all x and y to point (or similar)
+        * create own class for point, with calculations
+        * dynamic/static allocations of all strings (EXEC_*. etc...)
+
+*/
+
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -8,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
-#include <getopt.h> /* getopt_long() */
+#include <getopt.h>
 #include <list>
 #include <set>
 
@@ -29,6 +37,9 @@ using namespace std;
 #define EXEC_TERMINAL               "xterm -geometry 100x30"
 #define EXEC_WEBBROWSER             "firefox &> /dev/null"
 #define EXEC_EDITOR                 "scite"
+
+#define MODIFIER_GOTO_WORKSPACE     Mod4Mask
+#define MODIFIER_TAG_CLIENT         (ControlMask|Mod1Mask)
 
 #define FONT_DEFAULT                (char *)"Fixed"
 
