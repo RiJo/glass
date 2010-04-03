@@ -178,7 +178,7 @@ void FooBar::handleKeyEvent(XKeyEvent *e)
             return;
         case XK_Return:
             if (strlen(runfield) > 0)
-                forkExec(runfield);
+                wm->execute(runfield);
             //break;
         case XK_Escape:
             setRunfield(false);

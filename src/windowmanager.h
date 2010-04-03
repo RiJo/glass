@@ -86,6 +86,8 @@ public: /* Member Functions */
     void quitNicely();
     void restart();
 
+    void execute(char *);
+
     Client* getFocusedClient() { return focused_client; }
 
     inline list<Client*> getClientList() const { return client_list; }

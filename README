@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 
     glass
-    current version:     0.5.1
+    current version:     0.6.0
     by:                  Rikard Johansson
 
     DESCRIPTION HERE!
@@ -91,11 +91,12 @@
 
 
 --------------------------------------------------------------------------------
- version x.x.x, xxxx-xx-xx
+ version 0.6.0, 2010-04-03
 --------------------------------------------------------------------------------
-    * Fixed bug in foobar with dynamic number of workspaces
     * Added support for special characters in runfield
+    * Added aliases to the fork-exec functionality
     * Added debug option to Makefile, cleaned up Makefile
     * Added debug printout when compiled as debug
-    * Bugfix: corrected warnings from valgrind, still memory leaks though
+    * Corrected warnings from valgrind, still memory leaks though
+    * Bugfix: foobar could not handle dynamic number of workspaces
 --------------------------------------------------------------------------------

@@ -17,15 +17,30 @@ enum wm_action {
     WM_EXEC
 };
 
+struct alias {
+    char *identifier;
+    char *command;
+};
+
 struct key_binding {
     KeySym key;
     unsigned int mod;
     wm_action type;
-    char *command;
+    alias *action;
 };
 
 #define GOTO_WORKSPACE_MODIFIER     Mod4Mask
 #define TAG_CLIENT_MODIFIER         (ControlMask|Mod1Mask)
+
+// Make this nicer!! Without char* maybe?
+alias aliases[] = {
+    {(char *)"terminal",    (char *)EXEC_TERMINAL},
+    {(char *)"webbrowser",  (char *)EXEC_WEBBROWSER},
+    {(char *)"editor",      (char *)EXEC_EDITOR},
+    {(char *)"foo",         (char *)"xterm -e sleep 3"}
+};
+// improve!!
+#define ALIASES_COUNT 4
 
 const key_binding key_bindings[] = {
     {XK_End,        (ControlMask|Mod1Mask), WM_QUIT,               NULL},
@@ -35,10 +50,11 @@ const key_binding key_bindings[] = {
     {XK_Right,      (Mod4Mask),             WM_WS_SHIFT_RIGHT,     NULL},
     {XK_Left,       (Mod4Mask),             WM_WS_SHIFT_LEFT,      NULL},
     {XK_r,          (Mod4Mask),             WM_RUN_DIALOG,         NULL},
-    {XK_Return,     (Mod4Mask),             WM_EXEC,               (char *)EXEC_TERMINAL},
-    {XK_w,          (Mod4Mask),             WM_EXEC,               (char *)EXEC_WEBBROWSER},
-    {XK_s,          (Mod4Mask),             WM_EXEC,               (char *)EXEC_EDITOR}
+    {XK_Return,     (Mod4Mask),             WM_EXEC,               &aliases[0]},
+    {XK_w,          (Mod4Mask),             WM_EXEC,               &aliases[1]},
+    {XK_s,          (Mod4Mask),             WM_EXEC,               &aliases[2]}
 };
+// improve!!
 #define KEY_BINDING_COUNT 10
 
 /*##############################################################################
@@ -146,6 +162,16 @@ void WindowManager::setupSignalHandlers()
     signal(SIGTERM, sigHandler);
     signal(SIGHUP, sigHandler);
     signal(SIGCHLD, sigHandler);
+}
+
+void WindowManager::execute(char *command) {
+    for (register unsigned int i = 0; i <= ALIASES_COUNT; i++) {
+        if (strcmp(aliases[i].identifier, command) == 0) {
+            forkExec(aliases[i].command);
+            return;
+        }
+    }
+    forkExec(command);
 }
 
 bool WindowManager::setCurrentWorkspace(char x)
@@ -458,7 +484,7 @@ void WindowManager::handleKeyPressEvent(XEvent *ev)
                 break;
 
                 case WM_EXEC:
-                    forkExec(key_bindings[i].command);
+                    execute(key_bindings[i].action->command);
                 break;
 
                 default:
