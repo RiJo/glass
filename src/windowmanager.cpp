@@ -18,9 +18,6 @@ struct key_binding {
     alias *action;
 };
 
-#define GOTO_WORKSPACE_MODIFIER     Mod4Mask
-#define TAG_CLIENT_MODIFIER         (ControlMask|Mod1Mask)
-
 // Make this nicer!! Without char* maybe?
 alias aliases[] = {
     {(char *)"terminal",    (char *)EXEC_TERMINAL},
@@ -248,11 +245,11 @@ void WindowManager::setupDisplay()
 
     screen = DefaultScreen(dpy);
     root = RootWindow(dpy, screen);
-    
+
     resources = new Resources(dpy, root, screen);
 
-    xres = DisplayWidth(dpy, screen);
-    yres = DisplayHeight(dpy, screen);
+    screen_size.x = DisplayWidth(dpy, screen);
+    screen_size.y = DisplayHeight(dpy, screen);
 
     XSetErrorHandler(handleXError);
 
@@ -391,9 +388,9 @@ void WindowManager::grabKeys(Window w)
 {
     // Workspace/tag switchers
     for (int i = 0; i <= workspace_count; i++) {
-        XGrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), GOTO_WORKSPACE_MODIFIER,
+        XGrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), MODIFIER_GOTO_WORKSPACE,
                 w, True, GrabModeAsync, GrabModeAsync);
-        XGrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), TAG_CLIENT_MODIFIER,
+        XGrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), MODIFIER_TAG_CLIENT,
                 w, True, GrabModeAsync, GrabModeAsync);
     }
     // Keybindings
@@ -407,8 +404,8 @@ void WindowManager::ungrabKeys(Window w)
 {
     // Workspace/tag switchers
     for (int i = 0; i <= workspace_count; i++) {
-        XUngrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), GOTO_WORKSPACE_MODIFIER, w);
-        XUngrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), TAG_CLIENT_MODIFIER, w);
+        XUngrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), MODIFIER_GOTO_WORKSPACE, w);
+        XUngrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), MODIFIER_TAG_CLIENT, w);
     }
     // Keybindings
     for (unsigned int i = 0; i <= KEY_BINDING_COUNT; i++) {
@@ -425,11 +422,11 @@ void WindowManager::handleKeyPressEvent(XEvent *ev)
 
     // Switch workspace
     for (int i = 0; i <= workspace_count; i++) {
-        if (ks == (unsigned int)(XK_0 + i) && state == GOTO_WORKSPACE_MODIFIER) {
+        if (ks == (unsigned int)(XK_0 + i) && state == MODIFIER_GOTO_WORKSPACE) {
             goToWorkspace(i);
             return;
         }
-        if (ks == (unsigned int)(XK_0 + i) && state == TAG_CLIENT_MODIFIER) {
+        if (ks == (unsigned int)(XK_0 + i) && state == MODIFIER_TAG_CLIENT) {
             Client *focused = focusedClient();
             if (focused)
                 focused->toggleTag(i);
@@ -834,7 +831,7 @@ void WindowManager::cleanup()
         }
     }
     XFree(wins);
-    
+
     delete foobar;
     delete resources;
 

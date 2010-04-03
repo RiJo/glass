@@ -16,6 +16,11 @@ enum wm_action {
     WM_EXEC
 };
 
+struct point {
+    int x;
+    int y;
+};
+
 class WindowManager
 {
 private: /* member variables */
@@ -34,8 +39,7 @@ private: /* member variables */
     int screen;
     char current_workspace;
 
-    // The screen max resolutions (x,y)
-    int xres, yres;
+    point screen_size;
 
     int shape, shape_event;
 
@@ -131,8 +135,8 @@ public: /* Member Functions */
     inline bool getRandPlacement()     const { return rand_window_placement; }
     inline char getWorkspaceCount()     const { return workspace_count; }
 
-    inline int getXRes() const { return xres; }
-    inline int getYRes() const { return yres; }
+    inline int getXRes() const { return screen_size.x; }
+    inline int getYRes() const { return screen_size.y; }
 
     void setWorkspaceCount(char x) { workspace_count = x; }
 
