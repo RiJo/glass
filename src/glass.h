@@ -27,7 +27,7 @@ using namespace std;
 #define PROGRAM_DATE                "2010-04-03"
 
 #define EXEC_TERMINAL               "xterm -geometry 100x30"
-#define EXEC_WEBBROWSER             "firefox"
+#define EXEC_WEBBROWSER             "firefox &> /dev/null"
 #define EXEC_EDITOR                 "scite"
 
 #define FONT_DEFAULT                (char *)"Fixed"
