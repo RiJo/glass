@@ -123,6 +123,7 @@ void WindowManager::parseCommandLine(int argc, char** argv)
 
 void WindowManager::sigHandler(int signal)
 {
+    DEBUG("signal received: %d\n", signal);
     switch (signal) {
         case SIGINT:
         case SIGTERM:
@@ -232,7 +233,6 @@ void WindowManager::setupDisplay()
         cerr << "can't open display! check your DISPLAY variable." << endl;
         exit(1);
     }
-    free(display);
 
     screen = DefaultScreen(dpy);
     root = RootWindow(dpy, screen);
