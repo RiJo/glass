@@ -100,10 +100,8 @@ void WindowManager::parseCommandLine(int argc, char** argv)
     while((arg = getopt_long(argc, argv, "d:hvw:", opt_list, NULL)) != EOF) {
         switch (arg) {
             case 'd':
-                // too c'ish??
                 display = (char *)malloc(strlen(optarg) + 1);
                 strcpy(display, optarg);
-                display[strlen(optarg) + 1] = '\0';
                 break;
             case 'h':
                 print_help();
@@ -234,6 +232,7 @@ void WindowManager::setupDisplay()
         cerr << "can't open display! check your DISPLAY variable." << endl;
         exit(1);
     }
+    free(display);
 
     screen = DefaultScreen(dpy);
     root = RootWindow(dpy, screen);
