@@ -6,17 +6,6 @@ WindowManager* wm;
 #   TEST   #####################################################################
 ##############################################################################*/
 
-enum wm_action {
-    WM_QUIT,
-    WM_RESTART,
-    WM_NEXT_CLIENT,
-    WM_CLOSE_CLIENT,
-    WM_RUN_DIALOG,
-    WM_WS_SHIFT_RIGHT,
-    WM_WS_SHIFT_LEFT,
-    WM_EXEC
-};
-
 struct alias {
     char *identifier;
     char *command;
@@ -39,8 +28,7 @@ alias aliases[] = {
     {(char *)"editor",      (char *)EXEC_EDITOR},
     {(char *)"foo",         (char *)"xterm -e sleep 3"}
 };
-// improve!!
-#define ALIASES_COUNT 4
+#define ALIASES_COUNT (unsigned int)(sizeof(aliases)/sizeof(alias))
 
 const key_binding key_bindings[] = {
     {XK_End,        (ControlMask|Mod1Mask), WM_QUIT,               NULL},
@@ -54,8 +42,7 @@ const key_binding key_bindings[] = {
     {XK_w,          (Mod4Mask),             WM_EXEC,               &aliases[1]},
     {XK_s,          (Mod4Mask),             WM_EXEC,               &aliases[2]}
 };
-// improve!!
-#define KEY_BINDING_COUNT 10
+#define KEY_BINDING_COUNT (unsigned int)(sizeof(key_bindings)/sizeof(key_binding))
 
 /*##############################################################################
 #   TEST   #####################################################################
@@ -411,7 +398,7 @@ void WindowManager::grabKeys(Window w)
                 w, True, GrabModeAsync, GrabModeAsync);
     }
     // Keybindings
-    for (int i = 0; i <= KEY_BINDING_COUNT; i++) {
+    for (unsigned int i = 0; i <= KEY_BINDING_COUNT; i++) {
         XGrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].mod,
                 w,True,GrabModeAsync,GrabModeAsync);
     }
@@ -425,7 +412,7 @@ void WindowManager::ungrabKeys(Window w)
         XUngrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), TAG_CLIENT_MODIFIER, w);
     }
     // Keybindings
-    for (int i = 0; i <= KEY_BINDING_COUNT; i++) {
+    for (unsigned int i = 0; i <= KEY_BINDING_COUNT; i++) {
         XUngrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].mod,w);
     }
 }
@@ -452,7 +439,7 @@ void WindowManager::handleKeyPressEvent(XEvent *ev)
     }
 
     // Key bindings
-    for (int i = 0; i < KEY_BINDING_COUNT; i++) {
+    for (unsigned int i = 0; i < KEY_BINDING_COUNT; i++) {
         if (key_bindings[i].key == ks && key_bindings[i].mod == state) {
             switch (key_bindings[i].type) {
                 case WM_QUIT:
