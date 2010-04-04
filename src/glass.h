@@ -6,19 +6,14 @@
         * change all x and y to point (or similar)
         * create own class for point, with calculations
         * dynamic/static allocations of all strings (EXEC_*. etc...)
+        * fix command_line in windowmanager.h
 
 */
 
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <signal.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
-#include <iostream>
-#include <getopt.h>
-#include <list>
-#include <set>
+#include <iostream> // temp
 
 #include <X11/cursorfont.h>
 #include <X11/Xlib.h>
@@ -29,6 +24,7 @@
 #include <X11/extensions/shape.h>
 
 using namespace std;
+
 
 #define PROGRAM_NAME                "glass"
 #define PROGRAM_VERSION             "0.6.0"
@@ -61,22 +57,17 @@ using namespace std;
 #define DEFAULT_WORKSPACE_COUNT     4
 #define TRANSIENT_WINDOW_HEIGHT     8
 
+// Border width accessor to handle hints/no hints
+#define BW                          (has_border ? 1 : 0)
+
 #ifdef _DEBUG_
 #define DEBUG printf("[debug] ");printf
 #else
 #define DEBUG(arg1,...)
 #endif
 
-// Border width accessor to handle hints/no hints
-#define BW                          (has_border ? 1 : 0)
-
 enum { LEFT_JUSTIFY, CENTER_JUSTIFY, RIGHT_JUSTIFY };
 enum { APPLY_GRAVITY=1, REMOVE_GRAVITY=-1 };
 enum { PIXELS=0, INCREMENTS=1 };
-
-int handleXError(Display *, XErrorEvent *);
-
-#include "client.h"
-
 
 #endif // _GLASS_H_
