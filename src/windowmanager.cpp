@@ -124,15 +124,13 @@ void WindowManager::sigHandler(int signal)
         case SIGINT:
         case SIGTERM:
             wm->quitNicely();
-        break;
-
+            break;
         case SIGHUP:
             wm->restart();
-        break;
-
+            break;
         case SIGCHLD:
             wait(NULL);
-        break;
+            break;
     }
 }
 
@@ -146,6 +144,7 @@ void WindowManager::setupSignalHandlers()
 
 void WindowManager::forkExec(char *cmd) {
     if (!cmd || strlen(cmd) == 0) {
+        DEBUG("no command to execute\n");
         return;
     }
 

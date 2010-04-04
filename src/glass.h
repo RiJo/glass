@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <iostream> // temp
+#include <iostream>
 
 #include <X11/cursorfont.h>
 #include <X11/Xlib.h>

@@ -3,16 +3,16 @@
 
 #include "glass.h"
 
-#define WORKSPACE_WIDTH     30
-#define WORKSPACE_OFFSET(x) ((WORKSPACE_WIDTH + ITEM_PADDING) * x)
-#define WORKSPACES_WIDTH    WORKSPACE_OFFSET( (workspace_count + 1) )
-#define RUNFIELD_WIDTH      (5 * WORKSPACE_WIDTH)
-#define BAR_HEIGHT          20
-#define BAR_WIDTH           (WORKSPACES_WIDTH + RUNFIELD_WIDTH)
-#define ITEM_PADDING        3
+#define WORKSPACE_WIDTH         30
+#define WORKSPACE_OFFSET(x)     ((WORKSPACE_WIDTH + ITEM_PADDING) * x)
+#define WORKSPACES_WIDTH        WORKSPACE_OFFSET( (workspace_count + 1) )
+#define RUNFIELD_WIDTH          (5 * WORKSPACE_WIDTH)
+#define BAR_HEIGHT              20
+#define BAR_WIDTH               (WORKSPACES_WIDTH + RUNFIELD_WIDTH)
+#define ITEM_PADDING            3
 
-#define RUNFIELD_BUFFER     255
-#define RUNFIELD_MAX_LENGTH 20
+#define RUNFIELD_BUFFER         255
+#define RUNFIELD_MAX_WIDTH      20
 
 #define MAGIC_NUMBER 15
 
@@ -30,9 +30,10 @@ private: /* Member Variables */
     // Workspaces
     char &workspace_count;
     char &current_workspace;
+
     // Run field
     bool runfield_active;
-    char *runfield;
+    char runfield[RUNFIELD_BUFFER];
     unsigned int current_character;
 
 private: /* Member Functions */
@@ -45,7 +46,6 @@ private: /* Member Functions */
 
 public: /* Member Functions */
     FooBar(Display *, Window, char &, char &);
-    ~FooBar();
 
     void redraw();
     void handleButtonEvent(XButtonEvent *);

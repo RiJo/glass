@@ -68,14 +68,13 @@ void Client::initialize(Display *d)
 
     screen                  = DefaultScreen(dpy);
     root                    = RootWindow(dpy, screen);
-
-    button_pressed          = false;
 }
 
 void Client::getXClientName()
 {
-    if(name)
+    if(name) {
         XFree(name);
+    }
 
     XFetchName(dpy, window, &name);
 
@@ -90,8 +89,6 @@ void Client::makeNewClient(Window w)
 {
     XWindowAttributes attr;
     XWMHints *hints;
-
-    long dummy;
 
     XGrabServer(dpy);
 
@@ -109,6 +106,8 @@ void Client::makeNewClient(Window w)
     border_width = attr.border_width;
     cmap = attr.colormap;
     size = XAllocSizeHints();
+    
+    long dummy;
     XGetWMNormalHints(dpy, window, size, &dummy);
 
     old_x = x;
@@ -823,111 +822,67 @@ void Client::handleButtonEvent(XButtonEvent *e)
 
     switch (e->button)
     {
-        //case Button4:
-        //case Button5:
-        //{
-            /* if(is_being_resized)
-            {
-                drawOutline();
-                do_drawoutline_once=false;
-                is_being_resized=false;
-
-                XResizeWindow(dpy, frame, width, height + theight());
-                XResizeWindow(dpy, title, width, theight());
-                XResizeWindow(dpy, window, width, height);
-
-                sendConfig();
-
-                XUngrabServer(dpy);
-                XSync(dpy, False);
-
-                return;
-            } */
-        //}
-        //break;
-
-        case Button1:
-        {
-        if (e->type == ButtonPress)
-        {
-            if(e->window == window || e->subwindow == window)
-            {
-                XRaiseWindow(dpy, frame);
-            }
-
-            if (e->window == title)
-            {
-                if (in_box)
-                    wm->sendWMDelete(window);
-                else
+        case Button1: {
+            if (e->type == ButtonPress) {
+                if(e->window == window || e->subwindow == window) {
                     XRaiseWindow(dpy, frame);
-            }
-        }
+                }
 
-        if (e->type == ButtonRelease)
-        {
-            if(is_being_dragged)
-            {
-                is_being_dragged=false;
-                do_drawoutline_once=false;
-                drawOutline();
-                XMoveWindow(dpy, frame, x, y-theight());
-                sendConfig();
-
-                XUngrabServer(dpy);
-                XSync(dpy, False);
+                if (e->window == title) {
+                    if (in_box)
+                        wm->sendWMDelete(window);
+                    else
+                        XRaiseWindow(dpy, frame);
+                }
             }
 
-            // Check for a double click then maximize
-            // the window.
-            if(e->time-last_button1_time<250)
-            {
-                maximize();
+            if (e->type == ButtonRelease) {
+                if(is_being_dragged) {
+                    is_being_dragged=false;
+                    do_drawoutline_once=false;
+                    drawOutline();
+                    XMoveWindow(dpy, frame, x, y-theight());
+                    sendConfig();
 
-                last_button1_time=0;
+                    XUngrabServer(dpy);
+                    XSync(dpy, False);
+                }
 
-                return;
-            } else
-                last_button1_time=e->time;
-        }
+                // Check for a double click then maximize the window.
+                if(e->time-last_button1_time<250) {
+                    maximize();
+                    last_button1_time = 0;
+                    return;
+                }
+                else {
+                    last_button1_time=e->time;
+                }
+            }
 
         }
         break;
 
-        case Button2:
-        {
-            if(e->window == title)
-            {
-                if(in_box)
-                {
-                    if(e->type == ButtonPress)
-                    {
+        case Button2: {
+            if(e->window == title) {
+                if(in_box) {
+                    if(e->type == ButtonPress) {
                         if(is_shaded)
                             shade();
-
                         XRaiseWindow(dpy, frame);
                     }
                 }
             }
 
-            if(e->type == ButtonRelease)
-            {
-                /*if((!trans)&&(in_box))
-                    iconify();
-                else*/
-                    shade();
+            if(e->type == ButtonRelease) {
+                shade();
             }
         }
         break;
 
-        case Button3:
-        {
-            if(e->window == title)
-            {
-                if (e->type == ButtonRelease)
-                {
-                    if(is_being_resized)
-                    {
+        case Button3: {
+            if(e->window == title) {
+                if (e->type == ButtonRelease) {
+                    if(is_being_resized) {
                         drawOutline();
                         do_drawoutline_once=false;
                         is_being_resized=false;
@@ -943,23 +898,11 @@ void Client::handleButtonEvent(XButtonEvent *e)
 
                         return;
                     }
-
-                    //if (in_box)
-                    //    wm->sendWMDelete(window);
-                    //else {
-                        /*if((!trans)&&(!in_box))
-                        {
-                            window_menu->setThisClient(this);
-                            window_menu->show();
-                        }*/
-                    //}
                 }
             }
-            }
-            break;
-
-
         }
+        break;
+    }
 }
 
 void Client::handleEnterEvent(XCrossingEvent *e)
@@ -979,14 +922,12 @@ void Client::setFocus(bool focus)
 {
     has_focus=focus;
 
-    if (has_title)
-    {
-        if(has_focus)
-        {
+    if (has_title) {
+        if(has_focus) {
             XSetWindowBackground(dpy, title, wm->getResources()->getColor(COLOR_BACKGROUND_FOCUSED).pixel);
             XSetWindowBorder(dpy, frame, wm->getResources()->getColor(COLOR_BORDER_FOCUSED).pixel);
         }
-        else  {
+        else {
             XSetWindowBackground(dpy, title, wm->getResources()->getColor(COLOR_BACKGROUND_UNFOCUSED).pixel);
             XSetWindowBorder(dpy, frame, wm->getResources()->getColor(COLOR_BORDER_UNFOCUSED).pixel);
         }
@@ -1005,8 +946,9 @@ void Client::handleColormapChange(XColormapEvent *e)
 
 void Client::handleExposeEvent(XExposeEvent *e)
 {
-    if (e->count == 0)
+    if (e->count == 0) {
         redraw();
+    }
 }
 
 void Client::handleShapeChange(XShapeEvent *e)
@@ -1019,16 +961,18 @@ void Client::setTag(char tag)
     tags.clear();
     tags.insert(tag);
 
-    if(!isTagged(wm->getCurrentWorkspace()))
+    if(!isTagged(wm->getCurrentWorkspace())) {
         hide();
+    }
 }
 
 void Client::addTag(char tag)
 {
     tags.insert(tag);
 
-    if(!isTagged(wm->getCurrentWorkspace()))
+    if(!isTagged(wm->getCurrentWorkspace())) {
         hide();
+    }
 }
 
 void Client::removeTag(char tag)
@@ -1037,8 +981,9 @@ void Client::removeTag(char tag)
         set<char>::iterator item = tags.find(tag);
         tags.erase(item);
 
-        if(!isTagged(wm->getCurrentWorkspace()))
+        if(!isTagged(wm->getCurrentWorkspace())) {
             hide();
+        }
     }
 }
 

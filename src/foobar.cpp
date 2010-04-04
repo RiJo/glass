@@ -10,13 +10,7 @@ workspace_count(count), current_workspace(current)
     setupColors();
 
     runfield_active = false;
-    runfield = (char *)malloc(RUNFIELD_BUFFER);
     resetRunField();
-}
-
-FooBar::~FooBar()
-{
-    delete [] runfield;
 }
 
 void FooBar::setupColors() {
@@ -83,13 +77,13 @@ void FooBar::redrawRunField()
     XDrawRectangle(dpy, root, gc, x, y, RUNFIELD_WIDTH, BAR_HEIGHT);
 
     XTextItem *text = new XTextItem();
-    if (strlen(runfield) <= RUNFIELD_MAX_LENGTH) {
+    if (strlen(runfield) <= RUNFIELD_MAX_WIDTH) {
         text->chars = runfield;
         text->nchars = strlen(runfield);
     }
     else {
-        text->chars = runfield + (strlen(runfield) - RUNFIELD_MAX_LENGTH);
-        text->nchars = RUNFIELD_MAX_LENGTH;
+        text->chars = runfield + (strlen(runfield) - RUNFIELD_MAX_WIDTH);
+        text->nchars = RUNFIELD_MAX_WIDTH;
     }
 
     XDrawText(dpy, root, text_gc, x + MAGIC_NUMBER, y + MAGIC_NUMBER, text, 1);
