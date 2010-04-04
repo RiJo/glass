@@ -36,15 +36,13 @@ void Client::initialize(Display *d)
     old_cx                  = 0;
     old_cy                  = 0;
 
-    wire_move               = wm->getWireMove();
-
     has_been_shaped         = false;
 
     has_title               = true;
     has_border              = true;
     has_focus               = false;
 
-    is_iconified            = false;
+    //is_iconified            = false;
 
     // Extra Window States
     is_shaded               = false;
@@ -135,13 +133,13 @@ void Client::makeNewClient(Window w)
 
     tags.insert(wm->getCurrentWorkspace());
 
-    if (wm->getWMState(window) == IconicState)
+    /*if (wm->getWMState(window) == IconicState)
         iconify();
-    else {
+    else {*/
         unhide();
 
         XSetInputFocus(dpy, window, RevertToNone, CurrentTime);
-    }
+    /*}*/
 
     XSync(dpy, False);
     XUngrabServer(dpy);
@@ -214,8 +212,8 @@ void Client::redraw()
     else
         gc = wm->getResources()->getGC(COLOR_DECORATION_UNFOCUSED);
 
-    XDrawLine(dpy, title, gc, 0, theight() - BW + BW/2, width, theight() - BW + BW/2);
-    XDrawLine(dpy, title, gc, width - theight()+ BW/2, 0, width - theight()+ BW/2, theight());
+    XDrawLine(dpy, title, gc, 0, theight() - border_width +border_width/2, width, theight() - border_width + border_width/2);
+    XDrawLine(dpy, title, gc, width - theight()+ border_width/2, 0, width - theight()+ border_width/2, theight());
 
     // Title text
     if(has_focus)
@@ -274,10 +272,10 @@ void Client::setShape()
         XShapeCombineShape(dpy, frame, ShapeBounding,
                 0, theight(), window, ShapeBounding, ShapeSet);
 
-        temp.x = -BW;
-        temp.y = -BW;
-        temp.width = width + 2*BW;
-        temp.height = theight() + BW;
+        temp.x = -border_width;
+        temp.y = -border_width;
+        temp.width = width + 2 * border_width;
+        temp.height = theight() + border_width;
 
         XShapeCombineRectangles(dpy, frame, ShapeBounding,
                 0, 0, &temp, 1, ShapeUnion, YXBanded);
@@ -285,7 +283,7 @@ void Client::setShape()
         temp.x = 0;
         temp.y = 0;
         temp.width = width;
-        temp.height = theight() - BW;
+        temp.height = theight() - border_width;
 
         XShapeCombineRectangles(dpy, frame, ShapeClip,
                 0, theight(), &temp, 1, ShapeUnion, YXBanded);
@@ -293,10 +291,10 @@ void Client::setShape()
         has_been_shaped = 1;
     }
     else if (has_been_shaped) {
-        temp.x = -BW;
-        temp.y = -BW;
-        temp.width = width + 2*BW;
-        temp.height = height + theight() + 2*BW;
+        temp.x = -border_width;
+        temp.y = -border_width;
+        temp.width = width + 2 * border_width;
+        temp.height = height + theight() + 2 * border_width;
 
         XShapeCombineRectangles(dpy, frame, ShapeBounding,
                 0, 0, &temp, 1, ShapeSet, YXBanded);
@@ -305,7 +303,7 @@ void Client::setShape()
     XFree(dummy);
 }
 
-void Client::iconify()
+/*void Client::iconify()
 {
     if (!ignore_unmap) ignore_unmap++;
 
@@ -324,7 +322,7 @@ void Client::iconify()
     }
 
     is_visible=false;
-}
+}*/
 
 bool Client::isTagged(char workspace) const
 {
@@ -333,39 +331,41 @@ bool Client::isTagged(char workspace) const
 
 void Client::hide()
 {
-    if (!ignore_unmap)
+    if (!ignore_unmap) {
         ignore_unmap++;
+    }
 
-    if(has_focus)
+    if(has_focus) {
         setFocus(false);
+    }
 
     XUnmapSubwindows(dpy, frame);
     XUnmapWindow(dpy, frame);
 
     wm->setWMState(window, WithdrawnState);
 
-    is_visible=false;
+    is_visible = false;
 }
 
 void Client::unhide()
 {
-    if(isTagged(wm->getCurrentWorkspace()))
-    {
-        if(trans)
+    if(isTagged(wm->getCurrentWorkspace())) {
+        if(trans) {
             wm->findTransientsToMapOrUnmap(window, false);
+        }
 
         XMapSubwindows(dpy, frame);
         XMapRaised(dpy, frame);
 
-        if(is_iconified) {
+        /*if(is_iconified) {
             is_iconified=false;
-        }
+        }*/
 
         wm->setWMState(window, NormalState);
 
         XSetInputFocus(dpy, window, RevertToNone, CurrentTime);
 
-        is_visible=true;
+        is_visible = true;
     }
 }
 
@@ -489,15 +489,16 @@ void Client::handleMotionNotifyEvent(XMotionEvent *ev)
     int nx=0, ny=0;
 
     if((ev->state & Button1Mask) && (wm->getFocusedClient() == this)) {
-            if(! do_drawoutline_once && wire_move) {
+            if(! do_drawoutline_once && wm->getWireMove()) {
                 XGrabServer(dpy);
                 drawOutline();
                 do_drawoutline_once=true;
                 is_being_dragged=true;
             }
 
-            if(wire_move)
+            if(wm->getWireMove()) {
                 drawOutline();
+            }
 
             nx = old_cx + (ev->x_root - pointer_x);
             ny = old_cy + (ev->y_root - pointer_y);
@@ -537,13 +538,14 @@ void Client::handleMotionNotifyEvent(XMotionEvent *ev)
             x = nx;
             y = ny;
 
-            if(!wire_move) {
+            if(!wm->getWireMove()) {
                 XMoveWindow(dpy, frame, nx, ny-theight());
                 sendConfig();
             }
 
-            if(wire_move)
+            if(wm->getWireMove()) {
                 drawOutline();
+            }
     }
     else if(ev->state & Button3Mask) {
         if(! is_being_resized) {
@@ -603,19 +605,19 @@ void Client::drawOutline()
 {
     if (!is_shaded) {
         XDrawRectangle(dpy, root, wm->getResources()->getGC(COLOR_BORDER_FOCUSED),
-                x + BW/2, y - theight() + BW/2,
-                width + BW, height + theight() + BW);
+                x + border_width/2, y - theight() + border_width/2,
+                width + border_width, height + theight() + border_width);
 
         XDrawRectangle(dpy, root, wm->getResources()->getGC(COLOR_BORDER_FOCUSED),
-                x + BW/2 + 4, y - theight() + BW/2 + 4,
-                width + BW - 8, height + theight() + BW - 8);
+                x + border_width/2 + 4, y - theight() + border_width/2 + 4,
+                width + border_width - 8, height + theight() + border_width - 8);
     }
     else {
         XDrawRectangle(dpy, root, wm->getResources()->getGC(COLOR_BORDER_FOCUSED),
-                x + BW/2,
-                y - theight() + BW/2,
-                width + BW,
-                theight() + BW);
+                x + border_width/2,
+                y - theight() + border_width/2,
+                width + border_width,
+                theight() + border_width);
     }
 }
 
@@ -703,9 +705,9 @@ void Client::handleDestroyEvent(XDestroyWindowEvent *e)
 
 void Client::handleClientMessage(XClientMessageEvent *e)
 {
-    if (e->message_type == wm->getWMChangeStateAtom() &&
+    /*if (e->message_type == wm->getWMChangeStateAtom() &&
         e->format == 32 && e->data.l[0] == IconicState)
-            iconify();
+            iconify();*/
 }
 
 void Client::handlePropertyChange(XPropertyEvent *e)
@@ -744,13 +746,9 @@ void Client::reparent()
                 EnterWindowMask         |
                 LeaveWindowMask        ;
 
-    int b_w = BW;
-
+    int b_w = 1;
     if(border_width) {
         b_w = border_width; XSetWindowBorderWidth(dpy, window, 0);
-    }
-    else {
-        b_w = BW;
     }
 
     frame = XCreateWindow(
@@ -914,9 +912,9 @@ void Client::handleButtonEvent(XButtonEvent *e)
 
             if(e->type == ButtonRelease)
             {
-                if((!trans)&&(in_box))
+                /*if((!trans)&&(in_box))
                     iconify();
-                else
+                else*/
                     shade();
             }
         }

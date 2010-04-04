@@ -19,7 +19,6 @@
     http://code.google.com/p/aewmpp
 */
 
-#include "glass.h"
 #include "windowmanager.h"
 
 int main(int argc, char **argv) {
