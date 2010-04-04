@@ -16,6 +16,22 @@ enum wm_action {
     WM_EXEC
 };
 
+struct action {
+    wm_action type;
+    char *command;
+};
+
+struct alias {
+    char *identifier;
+    action foo;
+};
+
+struct key_binding {
+    KeySym key;
+    unsigned int mod;
+    action foo;
+};
+
 struct point {
     int x;
     int y;
@@ -68,6 +84,8 @@ private: /* Member Functions */
     void cleanup();
     void doEventLoop();
     void scanWins();
+
+    void handleAction(action);
 
     void print_help();
     void print_usage();

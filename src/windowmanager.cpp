@@ -6,37 +6,26 @@ WindowManager* wm;
 #   TEST   #####################################################################
 ##############################################################################*/
 
-struct alias {
-    char *identifier;
-    char *command;
-};
-
-struct key_binding {
-    KeySym key;
-    unsigned int mod;
-    wm_action type;
-    alias *action;
-};
-
 // Make this nicer!! Without char* maybe?
 alias aliases[] = {
-    {(char *)"terminal",    (char *)EXEC_TERMINAL},
-    {(char *)"webbrowser",  (char *)EXEC_WEBBROWSER},
-    {(char *)"editor",      (char *)EXEC_EDITOR}
+    {(char *)"die",         {WM_QUIT,   NULL}                           },
+    {(char *)"terminal",    {WM_EXEC,   (char *)EXEC_TERMINAL}          },
+    {(char *)"webbrowser",  {WM_EXEC,   (char *)EXEC_WEBBROWSER}        },
+    {(char *)"editor",      {WM_EXEC,   (char *)EXEC_EDITOR}            }
 };
 #define ALIASES_COUNT (unsigned int)(sizeof(aliases)/sizeof(alias))
 
 const key_binding key_bindings[] = {
-    {XK_End,        (ControlMask|Mod1Mask), WM_QUIT,               NULL},
-    {XK_Home,       (ControlMask|Mod1Mask), WM_RESTART,            NULL},
-    {XK_Tab,        (Mod1Mask),             WM_NEXT_CLIENT,        NULL},
-    {XK_F4,         (Mod1Mask),             WM_CLOSE_CLIENT,       NULL},
-    {XK_Right,      (Mod4Mask),             WM_WS_SHIFT_RIGHT,     NULL},
-    {XK_Left,       (Mod4Mask),             WM_WS_SHIFT_LEFT,      NULL},
-    {XK_r,          (Mod4Mask),             WM_RUN_DIALOG,         NULL},
-    {XK_Return,     (Mod4Mask),             WM_EXEC,               &aliases[0]},
-    {XK_w,          (Mod4Mask),             WM_EXEC,               &aliases[1]},
-    {XK_s,          (Mod4Mask),             WM_EXEC,               &aliases[2]}
+    {XK_End,        (ControlMask|Mod1Mask), aliases[0].foo                  },
+    {XK_Home,       (ControlMask|Mod1Mask), {WM_RESTART,            NULL}   },
+    {XK_Tab,        (Mod1Mask),             {WM_NEXT_CLIENT,        NULL}   },
+    {XK_F4,         (Mod1Mask),             {WM_CLOSE_CLIENT,       NULL}   },
+    {XK_Right,      (Mod4Mask),             {WM_WS_SHIFT_RIGHT,     NULL}   },
+    {XK_Left,       (Mod4Mask),             {WM_WS_SHIFT_LEFT,      NULL}   },
+    {XK_r,          (Mod4Mask),             {WM_RUN_DIALOG,         NULL}   },
+    {XK_Return,     (Mod4Mask),             aliases[1].foo                  },
+    {XK_w,          (Mod4Mask),             aliases[2].foo                  },
+    {XK_s,          (Mod4Mask),             aliases[3].foo                  }
 };
 #define KEY_BINDING_COUNT (unsigned int)(sizeof(key_bindings)/sizeof(key_binding))
 
@@ -147,10 +136,52 @@ void WindowManager::setupSignalHandlers()
     signal(SIGCHLD, sigHandler);
 }
 
-void WindowManager::execute(char *command) {
+void WindowManager::handleAction(action a)
+{
+            switch (a.type) {
+                case WM_QUIT:
+                    quitNicely();
+                break;
+
+                case WM_RESTART:
+                    restart();
+                break;
+
+                case WM_NEXT_CLIENT:
+                    nextClient();
+                break;
+
+                case WM_CLOSE_CLIENT:
+                    closeFocusedClient();
+                break;
+
+                case WM_WS_SHIFT_RIGHT:
+                    nextWorkspace();
+                break;
+
+                case WM_WS_SHIFT_LEFT:
+                    previousWorkspace();
+                break;
+
+                case WM_RUN_DIALOG:
+                    runDialog();
+                break;
+
+                case WM_EXEC:
+                    forkExec(a.command);
+                break;
+
+                default:
+                    fprintf(stderr, "Warning: not a valid action type: %d\n", a.type);
+                break;
+            }
+}
+
+void WindowManager::execute(char *command)
+{
     for (register unsigned int i = 0; i < ALIASES_COUNT; i++) {
         if (strcmp(aliases[i].identifier, command) == 0) {
-            forkExec(aliases[i].command);
+            handleAction(aliases[i].foo);
             return;
         }
     }
@@ -437,43 +468,7 @@ void WindowManager::handleKeyPressEvent(XEvent *ev)
     // Key bindings
     for (unsigned int i = 0; i < KEY_BINDING_COUNT; i++) {
         if (key_bindings[i].key == ks && key_bindings[i].mod == state) {
-            switch (key_bindings[i].type) {
-                case WM_QUIT:
-                    quitNicely();
-                break;
-
-                case WM_RESTART:
-                    restart();
-                break;
-
-                case WM_NEXT_CLIENT:
-                    nextClient();
-                break;
-
-                case WM_CLOSE_CLIENT:
-                    closeFocusedClient();
-                break;
-
-                case WM_WS_SHIFT_RIGHT:
-                    nextWorkspace();
-                break;
-
-                case WM_WS_SHIFT_LEFT:
-                    previousWorkspace();
-                break;
-
-                case WM_RUN_DIALOG:
-                    runDialog();
-                break;
-
-                case WM_EXEC:
-                    execute(key_bindings[i].action->command);
-                break;
-
-                default:
-                    fprintf(stderr, "Warning: not a valid action type: %d\n", key_bindings[i].type);
-                break;
-            }
+            handleAction(key_bindings[i].foo);
             return;
         }
     }
