@@ -3,6 +3,8 @@
 
 #include "glass.h"
 
+#include <set>
+
 class Client
 {
 private: /* Member Variables */
@@ -34,12 +36,10 @@ private: /* Member Variables */
     bool is_being_resized;
     bool do_drawoutline_once; // used for wire move
     bool wire_move;
-
     bool is_shaded;
     bool is_iconified;
     bool is_maximized;
     bool is_visible;
-
     bool has_been_shaped;
 
     Time last_button1_time;

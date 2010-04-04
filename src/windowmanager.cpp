@@ -6,6 +6,14 @@ WindowManager* wm;
 #   TEST   #####################################################################
 ##############################################################################*/
 
+int handleXError(Display *dpy, XErrorEvent *e) {
+    if (e->error_code == BadAccess && e->resourceid == RootWindow(dpy, DefaultScreen(dpy)) ) {
+        fprintf(stderr, "Error: root window unavailable (maybe another wm is running?)\n");
+        exit(EXIT_FAILURE);
+    }
+    return 0;
+}
+
 static const alias aliases[] = {
     {(char *)"wm_die",      {WM_QUIT,       NULL}                           },
     {(char *)"wm_restart",  {WM_RESTART,    NULL}                           },

@@ -2,8 +2,16 @@
 #define _WINDOWMANAGER_H_
 
 #include "glass.h"
+#include "client.h"
 #include "resources.h"
 #include "foobar.h"
+
+#include <signal.h>
+#include <sys/wait.h>       /* wait() */
+#include <getopt.h>
+#include <list>
+
+class Client;
 
 enum wm_action {
     WM_QUIT,
@@ -59,7 +67,7 @@ private: /* member variables */
 
     int shape, shape_event;
 
-    string  command_line;
+    string command_line;
     char workspace_count;
     int focus_model;
     char *display, *opt_wm, *opt_wp, *opt_es;

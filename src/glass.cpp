@@ -19,15 +19,8 @@
     http://code.google.com/p/aewmpp
 */
 
+#include "glass.h"
 #include "windowmanager.h"
-
-int handleXError(Display *dpy, XErrorEvent *e) {
-    if (e->error_code == BadAccess && e->resourceid == RootWindow(dpy, DefaultScreen(dpy)) ) {
-        fprintf(stderr, "Error: root window unavailable (maybe another wm is running?)\n");
-        exit(EXIT_FAILURE);
-    }
-    return 0;
-}
 
 int main(int argc, char **argv) {
     WindowManager wm(argc, argv);

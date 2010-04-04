@@ -1,20 +1,9 @@
 #ifndef _RESOURCES_H_
 #define _RESOURCES_H_
 
-#include <X11/cursorfont.h>
-#include <X11/Xlib.h>
-#include <X11/keysym.h>
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>
-#include <X11/Xmd.h>
-#include <X11/extensions/shape.h>
-#include <stdlib.h>
-#include <iostream>
-#include <map>
-
 #include "glass.h"
 
-using namespace std;
+#include <map>
 
 enum COLOR {
     COLOR_FOREGROUND_FOCUSED,
