@@ -1,6 +1,7 @@
 CC       =  g++
 CCFLAGS  =  -O2 -march=core2 -Wall
-DEBUG    =  -g -D=_DEBUG_ -p
+DEBUG    =  -g -D=_DEBUG_
+PROFILE  =  -pg
 INCLUDES =  -I/usr/include
 LDPATH   =  -L/usr/lib64
 LIBS     =  -lXext -lX11
@@ -20,14 +21,14 @@ OBJS     =  $(NAME).o               \
 
 all: $(NAME)
 
-debug: CCFLAGS += $(DEBUG)
+debug: CCFLAGS += $(DEBUG) $(PROFILE)
 debug: $(NAME)
 
-$(NAME): $(OBJS) Makefile
-	$(CC) $(OBJS) $(LDPATH) $(LIBS) -o $@
+$(NAME): $(OBJS) $(HEADERS) Makefile
+	$(CC) $(CCFLAGS) $(OBJS) $(LDPATH) $(LIBS) -o $@
 
-$(OBJS): %.o: src/%.cpp $(HEADERS)
-	$(CC) $(CFLAGS) $(CCFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+$(OBJS): %.o: src/%.cpp
+	$(CC) $(CCFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
 	rm -f $(NAME) $(OBJS)
