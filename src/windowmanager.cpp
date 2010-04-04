@@ -705,11 +705,11 @@ void WindowManager::handleExposeEvent(XEvent *ev)
 
 void WindowManager::handleDefaultEvent(XEvent *ev)
 {
-    Client* c = findClient(ev->xany.window);
+    /*Client* c = findClient(ev->xany.window);
     if (c) {
         if (shape && ev->type == shape_event)
             c->handleShapeChange((XShapeEvent *)ev);
-    }
+    }*/
 }
 
 void WindowManager::unfocusAnyStrayClients()
