@@ -61,8 +61,6 @@ private: /* Member Variables */
     int pointer_x, pointer_y;
     int old_cx, old_cy;
 
-    bool button_pressed;
-
 private: /* Member Functions */
 
     void initialize(Display *d);
@@ -88,7 +86,7 @@ public: /* Member Functions */
     void makeNewClient(Window);
     void removeClient();
 
-    char* getClientName() const { return name; }
+    char *getClientName() const { return name; }
     //char* getClientIconName() const { return name; } // for now just return application name
 
     Window getFrameWindow() const    { return frame; }
