@@ -6,14 +6,6 @@ WindowManager* wm;
 #   TEST   #####################################################################
 ##############################################################################*/
 
-int handleXError(Display *dpy, XErrorEvent *e) {
-    if (e->error_code == BadAccess && e->resourceid == RootWindow(dpy, DefaultScreen(dpy)) ) {
-        fprintf(stderr, "Error: root window unavailable (maybe another wm is running?)\n");
-        exit(EXIT_FAILURE);
-    }
-    return 0;
-}
-
 static const alias aliases[] = {
     {(char *)"wm_die",      {WM_QUIT,       NULL}                           },
     {(char *)"wm_restart",  {WM_RESTART,    NULL}                           },
@@ -41,6 +33,14 @@ static const key_binding key_bindings[] = {
 #   TEST   #####################################################################
 ##############################################################################*/
 
+int handleXError(Display *dpy, XErrorEvent *e) {
+    if (e->error_code == BadAccess && e->resourceid == RootWindow(dpy, DefaultScreen(dpy)) ) {
+        fprintf(stderr, "Error: root window unavailable (maybe another wm is running?)\n");
+        exit(EXIT_FAILURE);
+    }
+    return 0;
+}
+
 WindowManager::WindowManager(int argc, char** argv)
 {
     wm = this;
@@ -49,8 +49,8 @@ WindowManager::WindowManager(int argc, char** argv)
     current_workspace = 1;
     focused_client = NULL;
     rand_window_placement = false;
-    edge_snap = false;
-    wire_move = false;
+    edge_snap = EDGE_SNAP;
+    wire_move = WIRE_MOVE;
 
     parseCommandLine(argc, argv);
 
@@ -249,11 +249,11 @@ void WindowManager::goToWorkspace(char x)
 
             if (c) {
                 if (c->isTagged(current_workspace)) {
-                    if (! (c->isIconified()))
+                    //if (! (c->isIconified()))
                     c->unhide();
                 }
                 else {
-                    if (! (c->isIconified()))
+                    //if (! (c->isIconified()))
                     c->hide();
                 }
             }
@@ -740,7 +740,7 @@ void WindowManager::focusPreviousWindowInStackingOrder()
 
             if (c) {
                 if ((c->isTagged(current_workspace)
-                && c->hasWindowDecorations() && (c->isIconified() == false) ))
+                && c->hasWindowDecorations() /*&& (c->isIconified() == false) */))
                 client_list_for_current_workspace.push_back(c);
             }
         }
@@ -806,11 +806,11 @@ void WindowManager::findTransientsToMapOrUnmap(Window win, bool hide)
         for(iter=client_list.begin(); iter!= client_list.end(); iter++) {
             if ((*iter)->getTransientWindow() == win) {
                 if (hide) {
-                    if (! (*iter)->isIconified())
-                        (*iter)->iconify();
+                    /*if (! (*iter)->isIconified())
+                        (*iter)->iconify();*/
                 }
                 else {
-                    if ((*iter)->isIconified())
+                    /*if ((*iter)->isIconified())*/
                         (*iter)->unhide();
                 }
             }

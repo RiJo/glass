@@ -107,5 +107,5 @@
 --------------------------------------------------------------------------------
     * Ability to execute actions with aliases
     * Cleaned up all includes
-    *
+    * Removed ability to iconify clients
 --------------------------------------------------------------------------------

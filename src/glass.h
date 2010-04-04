@@ -48,17 +48,16 @@ using namespace std;
 #define COLOR_CLIENT_BD_FOCUS       (char *)"#ff0000"
 #define COLOR_CLIENT_BD_UNFOCUS     (char *)"#333333"
 
+#define DEFAULT_WORKSPACE_COUNT     4
+#define WIRE_MOVE                   false
+#define EDGE_SNAP                   true
+
+
 #define SPACE                       3
 #define MINSIZE                     15
-#define EDGE_SNAP                   "true"
 #define SNAP                        5
 #define TEXT_JUSTIFY                "right"
-#define WIRE_MOVE                   "false"
-#define DEFAULT_WORKSPACE_COUNT     4
 #define TRANSIENT_WINDOW_HEIGHT     8
-
-// Border width accessor to handle hints/no hints
-#define BW                          (has_border ? 1 : 0)
 
 #ifdef _DEBUG_
 #define DEBUG printf("[debug] ");printf
@@ -66,8 +65,6 @@ using namespace std;
 #define DEBUG(arg1,...)
 #endif
 
-enum { LEFT_JUSTIFY, CENTER_JUSTIFY, RIGHT_JUSTIFY };
-enum { APPLY_GRAVITY=1, REMOVE_GRAVITY=-1 };
-enum { PIXELS=0, INCREMENTS=1 };
+
 
 #endif // _GLASS_H_
