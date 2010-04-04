@@ -100,3 +100,10 @@
     * Corrected warnings from valgrind, still memory leaks though
     * Bugfix: foobar could not handle dynamic number of workspaces
 --------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.x.x, xxxx-xx-xx
+--------------------------------------------------------------------------------
+    * Ability to execute actions with aliases
+--------------------------------------------------------------------------------

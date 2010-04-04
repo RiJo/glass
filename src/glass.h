@@ -74,7 +74,6 @@ enum { LEFT_JUSTIFY, CENTER_JUSTIFY, RIGHT_JUSTIFY };
 enum { APPLY_GRAVITY=1, REMOVE_GRAVITY=-1 };
 enum { PIXELS=0, INCREMENTS=1 };
 
-void forkExec(char *);
 int handleXError(Display *, XErrorEvent *);
 
 #include "client.h"

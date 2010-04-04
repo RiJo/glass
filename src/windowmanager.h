@@ -28,7 +28,7 @@ struct alias {
 
 struct key_binding {
     KeySym key;
-    unsigned int mod;
+    unsigned int modifier;
     action foo;
 };
 
@@ -78,13 +78,17 @@ private: /* member variables */
     Atom atom_wm_takefocus;
 
 private: /* Member Functions */
-
     void setupSignalHandlers();
     void setupDisplay();
     void cleanup();
     void doEventLoop();
     void scanWins();
 
+    void parseCommandLine(int argc, char** argv);
+    void quitNicely();
+    void restart();
+
+    void forkExec(char *);
     void handleAction(action);
 
     void print_help();
@@ -109,15 +113,14 @@ private: /* Member Functions */
     void handleExposeEvent(XEvent *ev);
     void handleDefaultEvent(XEvent *ev);
 
+    void grabKeys(Window w);
+    void ungrabKeys(Window w);
+
     static void sigHandler(int signal);
 
 public: /* Member Functions */
 
     WindowManager(int argc, char** argv);
-
-    void parseCommandLine(int argc, char** argv);
-    void quitNicely();
-    void restart();
 
     void execute(char *);
 
@@ -133,8 +136,7 @@ public: /* Member Functions */
     void unfocusAnyStrayClients();
     void findTransientsToMapOrUnmap(Window win, bool hide);
 
-    inline Resources *getResources()             const { return resources;               }
-
+    inline Resources *getResources() const { return resources; }
     inline int getShape()         const { return shape; }
     inline int getShapeEvent()     const { return shape_event; }
 
@@ -161,10 +163,6 @@ public: /* Member Functions */
     inline Atom getWMChangeStateAtom() const { return atom_wm_change_state; }
     inline Atom getWMProtosAtom() const { return atom_wm_protos; }
     inline Atom getWMTakeFocusAtom() const { return atom_wm_takefocus; }
-
-    void grabKeys(Window w);
-    void ungrabKeys(Window w);
-
 
     Client *focusedClient();
     void nextWorkspace();

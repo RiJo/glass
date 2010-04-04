@@ -21,24 +21,6 @@
 
 #include "windowmanager.h"
 
-void forkExec(char *cmd) {
-    if (!cmd || strlen(cmd) == 0) {
-        return;
-    }
-
-    DEBUG("executing: \"%s\"\n", cmd);
-
-    pid_t pid = fork();
-    if (pid < 0) {
-        fprintf(stderr, "Error: could not fork\n");
-    }
-    else if (pid == 0) {
-        execlp("/bin/sh", "sh", "-c", cmd, NULL);
-        fprintf(stderr, "Error: exec failed, cleaning up child\n");
-        exit(EXIT_FAILURE);
-    }
-}
-
 int handleXError(Display *dpy, XErrorEvent *e) {
     if (e->error_code == BadAccess && e->resourceid == RootWindow(dpy, DefaultScreen(dpy)) ) {
         fprintf(stderr, "Error: root window unavailable (maybe another wm is running?)\n");
