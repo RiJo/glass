@@ -3,10 +3,20 @@
 
 /*
     TODO:
+      Minor:
         * change all x and y to point (or similar)
         * create own class for point, with calculations
         * dynamic/static allocations of all strings (EXEC_*. etc...)
-        * fix command_line in windowmanager.h
+        * multiple windows in one client (grouping)
+        * title height should be at least x pixels even if there's no text
+        * negative egde_snap: snap outside screen
+      Major
+        * make foobar a window
+        * notify icons in foobar
+        * autocomplete in runfield
+      Bugs
+        * glass does not terminate if there is clients alive
+        * wire move does not redraw properly
 
 */
 
@@ -27,8 +37,8 @@ using namespace std;
 
 
 #define PROGRAM_NAME                "glass"
-#define PROGRAM_VERSION             "0.6.0"
-#define PROGRAM_DATE                "2010-04-03"
+#define PROGRAM_VERSION             "0.x.x"
+#define PROGRAM_DATE                "2010-xx-xx"
 
 #define EXEC_TERMINAL               "xterm -geometry 100x30"
 #define EXEC_WEBBROWSER             "firefox &> /dev/null"
@@ -50,14 +60,8 @@ using namespace std;
 
 #define DEFAULT_WORKSPACE_COUNT     4
 #define WIRE_MOVE                   false
-#define EDGE_SNAP                   true
-
-
-#define SPACE                       3
-#define MINSIZE                     15
-#define SNAP                        5
-#define TEXT_JUSTIFY                "right"
-#define TRANSIENT_WINDOW_HEIGHT     8
+#define EDGE_SNAP                   5
+#define TITLE_MINIMUM_HEIGHT        15
 
 #ifdef _DEBUG_
 #define DEBUG printf("[debug] ");printf

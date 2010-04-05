@@ -5,6 +5,9 @@
 
 #include <set>
 
+
+#define TEXT_JUSTIFY                "right"
+
 enum { LEFT_JUSTIFY, CENTER_JUSTIFY, RIGHT_JUSTIFY };
 enum { APPLY_GRAVITY=1, REMOVE_GRAVITY=-1 };
 enum { PIXELS=0, INCREMENTS=1 };
@@ -40,7 +43,6 @@ private: /* Member Variables */
     bool is_being_resized;
     bool do_drawoutline_once; // used for wire move
     bool is_shaded;
-    //bool is_iconified;
     bool is_maximized;
     bool is_visible;
     bool has_been_shaped;
@@ -70,7 +72,7 @@ private: /* Member Functions */
     int  getIncsize(int *, int *, int);
     void initPosition();
     void reparent();
-    int  theight();
+    int  titleHeight();
     void sendConfig();
     void gravitate(int);
 
@@ -87,7 +89,6 @@ public: /* Member Functions */
     void removeClient();
 
     char *getClientName() const { return name; }
-    //char* getClientIconName() const { return name; } // for now just return application name
 
     Window getFrameWindow() const    { return frame; }
     Window getAppWindow()     const { return window; }
@@ -100,14 +101,12 @@ public: /* Member Functions */
     bool hasFocus()            const { return has_focus; }
 
     bool isTagged(char workspace) const;
-    //bool isIconified()         const { return is_iconified;     }
     bool isVisible()        const { return is_visible;    }
 
     void setFocus(bool focus); // (decieving name) Only paints the titlebar in the focus color
 
     void hide();
     void unhide();
-    //void iconify();
     void shade();
     void maximize();
 
