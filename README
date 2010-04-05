@@ -4,7 +4,7 @@
     current version:     0.7.0
     by:                  Rikard Johansson
 
-    DESCRIPTION HERE!
+    A lightweight windowmanager for X11.
 
 --------------------------------------------------------------------------------
 
@@ -110,4 +110,11 @@
     * Removed ability to iconify clients
     * Improved edge snap and title height macros
     * Bugfix: invalid command line argument during restart action
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.x.x, xxxx-xx-xx
+--------------------------------------------------------------------------------
+    * 
 --------------------------------------------------------------------------------

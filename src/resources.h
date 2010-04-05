@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Class name: Resources
+ *
+ * Description:
+ *   Keeps all resources used by the windowmanager for easy access and to gather
+ *   them in one place. All resources are released when the object is deleted.
+ ******************************************************************************/
+
 #ifndef _RESOURCES_H_
 #define _RESOURCES_H_
 

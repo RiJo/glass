@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Class name: Client
+ *
+ * Description:
+ *   A wrapper for X11 Window(s). Used to manage the Window(s) and to render
+ *   additional window decorations.
+ ******************************************************************************/
+
 #ifndef _CLIENT_H_
 #define _CLIENT_H_
 
