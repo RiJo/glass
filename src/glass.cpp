@@ -23,5 +23,6 @@
 
 int main(int argc, char **argv) {
     WindowManager wm(argc, argv);
+    DEBUG("%s closed\n", PROGRAM_NAME);
     return 0;
 }

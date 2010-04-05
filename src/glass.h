@@ -1,18 +1,26 @@
+/*******************************************************************************
+ * Description:
+ *   Generic data to be used by all other classes. Simple modifications of the
+ *   windowmanager can be done here, such as colors, keybindings and definition
+ *   of executables.
+ ******************************************************************************/
+
 #ifndef _GLASS_H_
 #define _GLASS_H_
 
 /*
     TODO:
       Minor:
+        * comment all classes and explain their responsibilities
         * change all x and y to point (or similar)
         * create own class for point, with calculations
         * dynamic/static allocations of all strings (EXEC_*. etc...)
-        * multiple windows in one client (grouping)
-        * title height should be at least x pixels even if there's no text
         * negative egde_snap: snap outside screen
+        * add screenshot to repository
       Major
         * make foobar a window
         * notify icons in foobar
+        * multiple windows in one client (grouping)
         * autocomplete in runfield
       Bugs
         * glass does not terminate if there is clients alive

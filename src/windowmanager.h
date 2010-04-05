@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Class name: WindowManager
+ *
+ * Description:
+ *   The windowmanager itself. Handles signals, X events and manages all the
+ *   clients.
+ ******************************************************************************/
+
 #ifndef _WINDOWMANAGER_H_
 #define _WINDOWMANAGER_H_
 

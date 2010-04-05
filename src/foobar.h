@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Class name: FooBar
+ *
+ * Description:
+ *   Represents a graphical bar containing different types of items.
+ *
+ *   Currently it contains the following items:
+ *     - Workspaces
+ *     - Runfield
+ ******************************************************************************/
+
 #ifndef _FOOBAR_H_
 #define _FOOBAR_H_
 

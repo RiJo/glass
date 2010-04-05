@@ -166,6 +166,7 @@ void WindowManager::forkExec(char *cmd) {
 
 void WindowManager::handleAction(action a)
 {
+    DEBUG("action received: {%d, %s}\n", a.type, a.command);
     switch (a.type) {
         case WM_QUIT:
             quitNicely();
@@ -251,11 +252,9 @@ void WindowManager::goToWorkspace(char x)
 
             if (c) {
                 if (c->isTagged(current_workspace)) {
-                    //if (! (c->isIconified()))
                     c->unhide();
                 }
                 else {
-                    //if (! (c->isIconified()))
                     c->hide();
                 }
             }
@@ -739,10 +738,7 @@ void WindowManager::focusPreviousWindowInStackingOrder()
 
         for (i = 0; i < nwins; i++) {
             c = findClient(wins[i]);
-
-            if (c) {
-                if ((c->isTagged(current_workspace)
-                && c->hasWindowDecorations() /*&& (c->isIconified() == false) */))
+            if (c && c->isTagged(current_workspace) && c->hasWindowDecorations()) {
                 client_list_for_current_workspace.push_back(c);
             }
         }
@@ -807,13 +803,8 @@ void WindowManager::findTransientsToMapOrUnmap(Window win, bool hide)
     if (client_list.size()) {
         for(iter=client_list.begin(); iter!= client_list.end(); iter++) {
             if ((*iter)->getTransientWindow() == win) {
-                if (hide) {
-                    /*if (! (*iter)->isIconified())
-                        (*iter)->iconify();*/
-                }
-                else {
-                    /*if ((*iter)->isIconified())*/
-                        (*iter)->unhide();
+                if (!hide) {
+                    (*iter)->unhide();
                 }
             }
         }
