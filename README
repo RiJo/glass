@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 
     glass
-    current version:     0.6.0
+    current version:     0.7.0
     by:                  Rikard Johansson
 
     DESCRIPTION HERE!
@@ -103,7 +103,7 @@
 
 
 --------------------------------------------------------------------------------
- version 0.x.x, xxxx-xx-xx
+ version 0.7.0, 2010-04-05
 --------------------------------------------------------------------------------
     * Ability to execute actions with aliases
     * Cleaned up all includes

@@ -9,9 +9,9 @@ WindowManager* wm;
 static const alias aliases[] = {
     {(char *)"wm_quit",     {WM_QUIT,       NULL}                           },
     {(char *)"wm_restart",  {WM_RESTART,    NULL}                           },
-    {(char *)"terminal",    {WM_EXEC,       (char *)EXEC_TERMINAL}          },
-    {(char *)"webbrowser",  {WM_EXEC,       (char *)EXEC_WEBBROWSER}        },
-    {(char *)"editor",      {WM_EXEC,       (char *)EXEC_EDITOR}            }
+    {(char *)"terminal",    {WM_EXEC,       EXEC_TERMINAL}                  },
+    {(char *)"webbrowser",  {WM_EXEC,       EXEC_WEBBROWSER}                },
+    {(char *)"editor",      {WM_EXEC,       EXEC_EDITOR}                    }
 };
 #define ALIASES_COUNT (unsigned int)(sizeof(aliases)/sizeof(alias))
 
