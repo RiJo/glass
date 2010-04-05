@@ -11,7 +11,7 @@
 #include <getopt.h>
 #include <list>
 
-class Client;
+class Client; // forward declatation
 
 enum wm_action {
     WM_QUIT,
@@ -74,7 +74,7 @@ private: /* member variables */
 
     bool wire_move;
     bool rand_window_placement;
-    bool edge_snap;
+    unsigned int edge_snap;
 
     static KeySym alt_keys[];
 
@@ -159,7 +159,7 @@ public: /* Member Functions */
     bool setCurrentWorkspace(char);
 
     inline bool getWireMove()     const { return wire_move; }
-    inline bool getEdgeSnap()     const { return edge_snap; }
+    inline unsigned int getEdgeSnap()     const { return edge_snap; }
     inline bool getRandPlacement()     const { return rand_window_placement; }
     inline char getWorkspaceCount()     const { return workspace_count; }
 

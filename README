@@ -108,4 +108,6 @@
     * Ability to execute actions with aliases
     * Cleaned up all includes
     * Removed ability to iconify clients
+    * Improved edge snap and title height macros
+    * Bugfix: invalid command line argument during restart action
 --------------------------------------------------------------------------------

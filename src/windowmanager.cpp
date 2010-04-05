@@ -7,7 +7,7 @@ WindowManager* wm;
 ##############################################################################*/
 
 static const alias aliases[] = {
-    {(char *)"wm_die",      {WM_QUIT,       NULL}                           },
+    {(char *)"wm_quit",     {WM_QUIT,       NULL}                           },
     {(char *)"wm_restart",  {WM_RESTART,    NULL}                           },
     {(char *)"terminal",    {WM_EXEC,       (char *)EXEC_TERMINAL}          },
     {(char *)"webbrowser",  {WM_EXEC,       (char *)EXEC_WEBBROWSER}        },
@@ -115,6 +115,9 @@ void WindowManager::parseCommandLine(int argc, char** argv)
                 exit(EXIT_FAILURE);
         }
     }
+    
+    // Keep command line arguments for the restart action
+    for (int i = 0; i < argc; i++) command_line = command_line + " " + argv[i];
 }
 
 void WindowManager::sigHandler(int signal)
