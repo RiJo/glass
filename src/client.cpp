@@ -104,7 +104,7 @@ void Client::makeNewClient(Window w)
     border_width = attr.border_width;
     cmap = attr.colormap;
     size = XAllocSizeHints();
-    
+
     long dummy;
     XGetWMNormalHints(dpy, window, size, &dummy);
 
@@ -172,7 +172,7 @@ int Client::titleHeight()
     if (!has_title) {
         return 0;
     }
-    int title_size = wm->getResources()->getFont(FONT_NORMAL)->ascent + wm->getResources()->getFont(FONT_NORMAL)->descent + 3;
+    int title_size = wm->getResources()->getFont(FONT_NORMAL)->ascent + wm->getResources()->getFont(FONT_NORMAL)->descent + 4;
     return (title_size > TITLE_MINIMUM_HEIGHT) ? title_size : TITLE_MINIMUM_HEIGHT;
 }
 
@@ -198,7 +198,7 @@ void Client::redraw()
 {
     if (!has_title)
         return;
-    
+
     // Title decoration
     GC gc;
     if(has_focus)
@@ -206,7 +206,7 @@ void Client::redraw()
     else
         gc = wm->getResources()->getGC(COLOR_DECORATION_UNFOCUSED);
 
-    XDrawLine(dpy, title, gc, 0, titleHeight() - border_width +border_width/2, width, titleHeight() - border_width + border_width/2);
+    XDrawLine(dpy, title, gc, 0, titleHeight() - border_width, width, titleHeight() - border_width);
     XDrawLine(dpy, title, gc, width - titleHeight()+ border_width/2, 0, width - titleHeight()+ border_width/2, titleHeight());
 
     // Title text
