@@ -61,8 +61,8 @@ void Client::initialize(Display *d)
     ascent                  = 0;
     descent                 = 0;
     text_width              = 0;
-    text_justify            = 0;
-    justify_style           = RIGHT_JUSTIFY;
+//    text_justify            = 0;
+//    justify_style           = RIGHT_JUSTIFY;
 
     screen                  = DefaultScreen(dpy);
     root                    = RootWindow(dpy, screen);
@@ -207,7 +207,7 @@ void Client::redraw()
         gc = wm->getResources()->getGC(COLOR_DECORATION_UNFOCUSED);
 
     XDrawLine(dpy, title, gc, 0, titleHeight() - border_width, width, titleHeight() - border_width);
-    XDrawLine(dpy, title, gc, width - titleHeight()+ border_width/2, 0, width - titleHeight()+ border_width/2, titleHeight());
+    XDrawLine(dpy, title, gc, width - titleHeight(), 0, width - titleHeight(), titleHeight());
 
     // Title text
     if(has_focus)
@@ -216,21 +216,22 @@ void Client::redraw()
         gc = wm->getResources()->getGC(COLOR_FOREGROUND_UNFOCUSED);
 
     if (!trans && name) {
-        switch(justify_style) {
-            case LEFT_JUSTIFY:
-                text_justify = TITLE_MINIMUM_HEIGHT;
-            break;
+        //~ switch(justify_style) {
+            //~ case LEFT_JUSTIFY:
+                //~ text_justify = TITLE_MINIMUM_HEIGHT;
+            //~ break;
 
-            case CENTER_JUSTIFY:
-                text_justify = ( (width / 2) - (text_width / 2) );
-            break;
+            //~ case CENTER_JUSTIFY:
+                //~ text_justify = ( (width / 2) - (text_width / 2) );
+            //~ break;
 
-            case RIGHT_JUSTIFY:
-                text_justify = width - text_width - 25;
-            break;
-        }
+            //~ case RIGHT_JUSTIFY:
+                //~ text_justify = width - text_width - 25;
+            //~ break;
+        //~ }
 
         if(name != NULL) {
+            int text_justify = width - text_width - 25;
             XDrawString(dpy, title, gc, text_justify, wm->getResources()->getFont(FONT_NORMAL)->ascent+1,name, strlen(name));
         }
     }
@@ -539,7 +540,8 @@ void Client::handleMotionNotifyEvent(XMotionEvent *ev)
                 width =  ev->x;
                 height = ev->y - titleHeight();
 
-                getIncsize(&width, &height, PIXELS);
+                int pixels = 0; // what is this? old enum...
+                getIncsize(&width, &height, pixels);
 
                 if (size->flags & PMinSize) {
                     if (width < size->min_width)
@@ -602,7 +604,7 @@ int Client::getIncsize(int *x_ret, int *y_ret, int mode)
         basey = (size->flags & PBaseSize) ? size->base_height :
                 (size->flags & PMinSize) ? size->min_height : 0;
 
-        if (mode == PIXELS) {
+        if (mode == 0) {
             *x_ret = width - ((width - basex) % size->width_inc);
             *y_ret = height - ((height - basey) % size->height_inc);
         }

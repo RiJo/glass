@@ -14,11 +14,9 @@
 #include <set>
 
 
-#define TEXT_JUSTIFY                "right"
-
-enum { LEFT_JUSTIFY, CENTER_JUSTIFY, RIGHT_JUSTIFY };
+//enum { LEFT_JUSTIFY, CENTER_JUSTIFY, RIGHT_JUSTIFY };
 enum { APPLY_GRAVITY=1, REMOVE_GRAVITY=-1 };
-enum { PIXELS=0, INCREMENTS=1 };
+//enum { PIXELS=0, INCREMENTS=1 };
 
 class Client
 {
@@ -64,8 +62,8 @@ private: /* Member Variables */
     int ascent;
     int descent;
     int text_width;
-    int text_justify;
-    int justify_style;
+    //int text_justify;
+    //int justify_style;
 
     // Used in client move
     int pointer_x, pointer_y;
