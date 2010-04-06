@@ -19,7 +19,7 @@
 #include <getopt.h>
 #include <list>
 
-class Client; // forward declatation
+class Client; // forward declaration
 
 enum wm_action {
     WM_QUIT,
