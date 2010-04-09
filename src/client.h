@@ -20,7 +20,7 @@
 #   GROUPING   #################################################################
 ##############################################################################*/
 
-#include <list>     /* windows */
+#include <vector>     /* windows */
 
 class WindowManager; // forward declaration
 struct character; // forward declaration
@@ -34,8 +34,8 @@ enum { APPLY_GRAVITY=1, REMOVE_GRAVITY=-1 };
 
 struct win {
     pid_t pid;
+    char *name;    // Name used to display in titlebar
     Window window;
-    char *title;
 };
 
 /*##############################################################################
@@ -53,17 +53,17 @@ private: /* Member Variables */
     int screen;
     pid_t pid;
 
-    char *name;    // Name used to display in titlebar
+    //char *name;    // Name used to display in titlebar
     point size;
     point position;
 
-    Window window;   // actual client window
     Window frame;    // parent window which we reparent the client to
     Window title;    // window which holds title
     Window trans;    // window id for which this client is transient for
 
     set<char> tags;
-    list<win> windows;
+    int current_window;
+    vector<win *> windows;
 
     int border_width;
 
@@ -107,7 +107,7 @@ private: /* Member Functions */
     int  titleHeight();
     void sendConfig();
     void gravitate(int);
-    const char *getName() const { stringstream ss; ss << "[" << pid << "] " << string(name); return ss.str().c_str(); }
+    const char *getName() const;
 
     void setShape();
 
@@ -116,13 +116,14 @@ public: /* Member Functions */
     Client(Display *, Window, character *);
     ~Client();
 
-    void getXClientName();
+    void getXClientName(Window, char *);
 
     void makeNewClient(Window, character *);
     void removeClient();
 
+    Window currentWindow() const { return windows[current_window]->window; }
     Window getFrameWindow() const { return frame; }
-    Window getAppWindow() const { return window; }
+    Window getAppWindow() const { return currentWindow(); } /* REMOVE THIS WRAPPER */
     Window getTitleWindow() const { return title; }
     Window getTransientWindow() const { return trans; }
 

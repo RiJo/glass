@@ -16,14 +16,12 @@ void Client::initialize(Display *d, character *c)
 {
     dpy                     = d;
 
-    window                  = None;
     frame                   = None;
     title                   = None;
     trans                   = None;
-    
-    name = NULL;
-    pid = c->pid;
 
+    current_window          = 0;
+    
     //position.x              = 1;
     //position.y              = 1;
     //size.x                  = 1;
@@ -68,7 +66,7 @@ void Client::initialize(Display *d, character *c)
     root                    = RootWindow(dpy, screen);
 }
 
-void Client::getXClientName()
+void Client::getXClientName(Window window, char *name)
 {
     if(name) {
         XFree(name);
@@ -91,12 +89,17 @@ void Client::makeNewClient(Window w, character *c)
 
     XGrabServer(dpy);
 
-    window = w;
+    win *new_window = new win;
+    new_window->pid = c->pid;
+    new_window->name = NULL;
+    new_window->window = w;
+    windows.push_back(new_window);
+    current_window = windows.size() - 1;
 
-    getXClientName();
+    getXClientName(w, new_window->name);
 
-    XGetTransientForHint(dpy, window, &trans);
-    XGetWindowAttributes(dpy, window, &attr);
+    XGetTransientForHint(dpy, w, &trans);
+    XGetWindowAttributes(dpy, w, &attr);
 
     if (point_null(&c->position)) {
         position.x = attr.x;
@@ -117,7 +120,7 @@ void Client::makeNewClient(Window w, character *c)
     xsize = XAllocSizeHints();
 
     long dummy;
-    XGetWMNormalHints(dpy, window, xsize, &dummy);
+    XGetWMNormalHints(dpy, w, xsize, &dummy);
 
     old_x = position.x;
     old_y = position.y;
@@ -130,8 +133,8 @@ void Client::makeNewClient(Window w, character *c)
 
         if ((hints = XGetWMHints(dpy, w))) {
             if (hints->flags & StateHint)
-                wm->setWMState(window, hints->initial_state);
-            else wm->setWMState(window, NormalState);
+                wm->setWMState(w, hints->initial_state);
+            else wm->setWMState(w, NormalState);
                 XFree(hints);
         }
     }
@@ -145,7 +148,7 @@ void Client::makeNewClient(Window w, character *c)
 
     unhide();
 
-    XSetInputFocus(dpy, window, RevertToNone, CurrentTime);
+    XSetInputFocus(dpy, w, RevertToNone, CurrentTime);
 
     XSync(dpy, False);
     XUngrabServer(dpy);
@@ -161,14 +164,14 @@ void Client::removeClient()
 
     gravitate(REMOVE_GRAVITY);
 
-    XReparentWindow(dpy, window, root, position.x, position.y);
+    XReparentWindow(dpy, currentWindow(), root, position.x, position.y);
 
     XDestroyWindow(dpy, title);
     XDestroyWindow(dpy, frame);
 
-    if (name) {
+    /*if (name) {
         XFree(name);
-    }
+    }*/
 
     if (xsize) {
         XFree(xsize);
@@ -194,8 +197,8 @@ void Client::sendConfig()
     XConfigureEvent ce;
 
     ce.type = ConfigureNotify;
-    ce.event = window;
-    ce.window = window;
+    ce.event = windows[current_window]->window;
+    ce.window = windows[current_window]->window;
     ce.x = position.x;
     ce.y = position.y;
     ce.width = size.x;
@@ -204,7 +207,7 @@ void Client::sendConfig()
     //ce.above = (is_always_on_top) ? Above : Below;
     ce.override_redirect = False;
 
-    XSendEvent(dpy, window, False, StructureNotifyMask, (XEvent *)&ce);
+    XSendEvent(dpy, currentWindow(), False, StructureNotifyMask, (XEvent *)&ce);
 }
 
 void Client::redraw()
@@ -244,11 +247,27 @@ void Client::redraw()
             //~ break;
         //~ }
 
-        if(name != NULL) {
+        if(title_text != NULL) {
             int text_justify = size.x - text_width - 25;
             XDrawString(dpy, title, gc, text_justify, wm->getResources()->getFont(FONT_NORMAL)->ascent+1,title_text, strlen(title_text));
         }
     }
+}
+
+const char *Client::getName() const {
+    if (windows.size() == 0) {
+        return NULL;
+    }
+    win *window = windows[current_window];
+    if (window == NULL) {
+        return NULL;
+    }
+    if (window->name == NULL || pid == 0) {
+        return NULL;
+    }
+    stringstream ss;
+    ss << "[" << pid << "] " << string(window->name);
+    return ss.str().c_str();
 }
 
 void Client::gravitate(int multiplier)
@@ -275,11 +294,11 @@ void Client::setShape()
     int n=0, order=0;
     XRectangle temp, *dummy;
 
-    dummy = XShapeGetRectangles(dpy, window, ShapeBounding, &n, &order);
+    dummy = XShapeGetRectangles(dpy, currentWindow(), ShapeBounding, &n, &order);
 
     if (n > 1) {
         XShapeCombineShape(dpy, frame, ShapeBounding,
-                0, titleHeight(), window, ShapeBounding, ShapeSet);
+                0, titleHeight(), currentWindow(), ShapeBounding, ShapeSet);
 
         temp.x = -border_width;
         temp.y = -border_width;
@@ -330,7 +349,7 @@ void Client::hide()
     XUnmapSubwindows(dpy, frame);
     XUnmapWindow(dpy, frame);
 
-    wm->setWMState(window, WithdrawnState);
+    wm->setWMState(currentWindow(), WithdrawnState);
 
     is_visible = false;
 }
@@ -339,15 +358,15 @@ void Client::unhide()
 {
     if(isTagged(wm->getCurrentWorkspace())) {
         if(trans) {
-            wm->findTransientsToMapOrUnmap(window, false);
+            wm->findTransientsToMapOrUnmap(currentWindow(), false);
         }
 
         XMapSubwindows(dpy, frame);
         XMapRaised(dpy, frame);
 
-        wm->setWMState(window, NormalState);
+        wm->setWMState(currentWindow(), NormalState);
 
-        XSetInputFocus(dpy, window, RevertToNone, CurrentTime);
+        XSetInputFocus(dpy, currentWindow(), RevertToNone, CurrentTime);
 
         is_visible = true;
     }
@@ -362,12 +381,12 @@ void Client::initPosition()
 
     XWindowAttributes attr;
 
-    XGetWindowAttributes(dpy, window, &attr);
+    XGetWindowAttributes(dpy, currentWindow(), &attr);
 
     if (attr.map_state == IsViewable)
         return;
 
-    XGetGeometry(dpy, window, &root, &position.x, &position.y, &w, &h, &border_width, &depth);
+    XGetGeometry(dpy, currentWindow(), &root, &position.x, &position.y, &w, &h, &border_width, &depth);
 
     size.x = (int)w;
     size.y = (int)h;
@@ -463,7 +482,7 @@ void Client::maximize()
     }
 
     XResizeWindow(dpy, title, size.x, titleHeight());
-    XResizeWindow(dpy, window, size.x, size.y);
+    XResizeWindow(dpy, currentWindow(), size.x, size.y);
 
     sendConfig();
 }
@@ -657,7 +676,7 @@ void Client::handleConfigureRequest(XConfigureRequestEvent *e)
     if(!is_shaded) {
         XMoveResizeWindow(dpy, frame, position.x, position.y - titleHeight(), size.x, size.y + titleHeight());
         XResizeWindow(dpy, title, size.x, titleHeight());
-        XMoveResizeWindow(dpy, window,0,titleHeight(), size.x, size.y);
+        XMoveResizeWindow(dpy, currentWindow(),0,titleHeight(), size.x, size.y);
     }
 
     if ( (position.x + size.x > wm->getXRes())         ||
@@ -697,18 +716,16 @@ void Client::handleClientMessage(XClientMessageEvent *e)
 
 void Client::handlePropertyChange(XPropertyEvent *e)
 {
-    long dummy;
-
-    switch (e->atom)
-    {
-            case XA_WM_NAME:
-                getXClientName();
-                XClearWindow(dpy, title);
-                redraw();
-                break;
-
-            case XA_WM_NORMAL_HINTS:
-                    XGetWMNormalHints(dpy, window, xsize, &dummy);
+    char *name = (char *)getName(); /* :FIX: THIS IS UGLY */
+    switch (e->atom) {
+        case XA_WM_NAME:
+            getXClientName(currentWindow(), name);
+            XClearWindow(dpy, title);
+            redraw();
+            break;
+        case XA_WM_NORMAL_HINTS:
+            long dummy;
+            XGetWMNormalHints(dpy, currentWindow(), xsize, &dummy);
             break;
     }
 }
@@ -733,7 +750,8 @@ void Client::reparent()
 
     int b_w = 1;
     if(border_width) {
-        b_w = border_width; XSetWindowBorderWidth(dpy, window, 0);
+        b_w = border_width;
+        XSetWindowBorderWidth(dpy, currentWindow(), 0);
     }
 
     frame = XCreateWindow(
@@ -767,15 +785,15 @@ void Client::reparent()
     );
 
     if (wm->getShape()) {
-        XShapeSelectInput(dpy, window, ShapeNotifyMask);
+        XShapeSelectInput(dpy, currentWindow(), ShapeNotifyMask);
         setShape();
     }
 
-    XChangeWindowAttributes(dpy, window, CWDontPropagate, &pattr);
+    XChangeWindowAttributes(dpy, currentWindow(), CWDontPropagate, &pattr);
 
-    XSelectInput(dpy, window, FocusChangeMask|PropertyChangeMask);
+    XSelectInput(dpy, currentWindow(), FocusChangeMask|PropertyChangeMask);
 
-    XReparentWindow(dpy, window, frame, 0, titleHeight());
+    XReparentWindow(dpy, currentWindow(), frame, 0, titleHeight());
 
     XGrabButton(dpy, Button1, AnyModifier, frame, 1,  ButtonPressMask|ButtonReleaseMask,
             GrabModeSync, GrabModeAsync, None, None);
@@ -807,13 +825,13 @@ void Client::handleButtonEvent(XButtonEvent *e)
     {
         case Button1: {
             if (e->type == ButtonPress) {
-                if(e->window == window || e->subwindow == window) {
+                if(e->window == currentWindow() || e->subwindow == currentWindow()) {
                     XRaiseWindow(dpy, frame);
                 }
 
                 if (e->window == title) {
                     if (in_box)
-                        wm->sendWMDelete(window);
+                        wm->sendWMDelete(currentWindow());
                     else
                         XRaiseWindow(dpy, frame);
                 }
@@ -872,7 +890,7 @@ void Client::handleButtonEvent(XButtonEvent *e)
 
                         XResizeWindow(dpy, frame, size.x, size.y + titleHeight());
                         XResizeWindow(dpy, title, size.x, titleHeight());
-                        XResizeWindow(dpy, window, size.x, size.y);
+                        XResizeWindow(dpy, currentWindow(), size.x, size.y);
 
                         sendConfig();
 
@@ -890,12 +908,12 @@ void Client::handleButtonEvent(XButtonEvent *e)
 
 void Client::handleEnterEvent(XCrossingEvent *e)
 {
-    XSetInputFocus(dpy, window, RevertToNone, CurrentTime);
+    XSetInputFocus(dpy, currentWindow(), RevertToNone, CurrentTime);
 }
 
 void Client::handleFocusInEvent(XFocusChangeEvent *e)
 {
-    wm->sendXMessage(window, wm->getWMProtosAtom(), SubstructureRedirectMask,
+    wm->sendXMessage(currentWindow(), wm->getWMProtosAtom(), SubstructureRedirectMask,
             wm->getWMTakeFocusAtom());
     XInstallColormap(dpy, cmap);
     setFocus(true);
