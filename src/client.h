@@ -12,7 +12,9 @@
 #include "glass.h"
 #include "windowmanager.h"
 
-#include <set>      /* tags */
+#include <stdlib.h>     /* itoa() */
+#include <sstream>      /* put pid in name */
+#include <set>          /* tags */
 
 /*##############################################################################
 #   GROUPING   #################################################################
@@ -46,11 +48,14 @@ private: /* Member Variables */
 
     Display *dpy;
     Window root;
-    XSizeHints *size;
+    XSizeHints *xsize;
     Colormap cmap;
     int screen;
+    pid_t pid;
 
     char *name;    // Name used to display in titlebar
+    point size;
+    point position;
 
     Window window;   // actual client window
     Window frame;    // parent window which we reparent the client to
@@ -59,8 +64,6 @@ private: /* Member Variables */
 
     set<char> tags;
     list<win> windows;
-
-    int  x, y, width, height;
 
     int border_width;
 
@@ -104,6 +107,7 @@ private: /* Member Functions */
     int  titleHeight();
     void sendConfig();
     void gravitate(int);
+    const char *getName() const { stringstream ss; ss << "[" << pid << "] " << string(name); return ss.str().c_str(); }
 
     void setShape();
 
@@ -116,8 +120,6 @@ public: /* Member Functions */
 
     void makeNewClient(Window);
     void removeClient();
-
-    char *getClientName() const { return name; }
 
     Window getFrameWindow() const { return frame; }
     Window getAppWindow() const { return window; }

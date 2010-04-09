@@ -49,11 +49,6 @@ struct key_binding {
     action foo;
 };
 
-struct point {
-    int x;
-    int y;
-};
-
 /*##############################################################################
 #   GROUPING   #################################################################
 ##############################################################################*/
@@ -62,7 +57,7 @@ struct point {
 #include <set>
 
 struct character {
-    char *command;
+    string command;
     pid_t pid;
     point position;
     point size;
@@ -83,7 +78,7 @@ private: /* member variables */
 ##############################################################################*/
 
     queue<char *> commands;
-    character *pending_window;
+    character pending_window;
 
 /*##############################################################################
 #   GROUPING   #################################################################
