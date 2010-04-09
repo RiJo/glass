@@ -118,7 +118,7 @@ public: /* Member Functions */
 
     void getXClientName();
 
-    void makeNewClient(Window);
+    void makeNewClient(Window, character *);
     void removeClient();
 
     Window getFrameWindow() const { return frame; }
