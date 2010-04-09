@@ -78,5 +78,11 @@ using namespace std;
 #endif
 
 
+struct point {
+    int x;
+    int y;
+};
+
+
 
 #endif // _GLASS_H_
