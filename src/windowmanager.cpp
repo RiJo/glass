@@ -172,7 +172,6 @@ void WindowManager::forkExec(char *cmd) {
         pending_window.tags.clear();
         pending_window.tags.insert(current_workspace);
     }
-    
 }
 
 void WindowManager::handleAction(action a)
