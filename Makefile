@@ -7,17 +7,19 @@ LDPATH   =  -L/usr/lib64
 LIBS     =  -lXext -lX11
 NAME     =  glass
 
-HEADERS  =  src/$(NAME).h         \
-            src/client.h          \
-            src/resources.h       \
-            src/foobar.h          \
-            src/windowmanager.h   \
+HEADERS  =  src/$(NAME).h           \
+            src/client.h            \
+            src/resources.h         \
+            src/foobar.h            \
+            src/windowmanager.h     \
+            src/point.h             \
 
 OBJS     =  $(NAME).o               \
             windowmanager.o         \
             client.o                \
             resources.o             \
             foobar.o                \
+            point.o                 \
 
 all: $(NAME)
 

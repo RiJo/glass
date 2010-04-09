@@ -28,6 +28,8 @@
 
 */
 
+#include "point.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -76,12 +78,6 @@ using namespace std;
 #else
 #define DEBUG(arg1,...)
 #endif
-
-
-struct point {
-    int x;
-    int y;
-};
 
 
 

@@ -4,7 +4,7 @@ Client::Client(Display *d, Window new_client, character *c)
 {
     initialize(d, c);
     wm->addClient(this);
-    makeNewClient(new_client);
+    makeNewClient(new_client, c);
 }
 
 Client::~Client()
@@ -24,10 +24,10 @@ void Client::initialize(Display *d, character *c)
     name = NULL;
     pid = c->pid;
 
-    position.x              = 1;
-    position.y              = 1;
-    size.x                  = 1;
-    size.y                  = 1;
+    //position.x              = 1;
+    //position.y              = 1;
+    //size.x                  = 1;
+    //size.y                  = 1;
     ignore_unmap            = 0;
 
     pointer_x               = 0;
@@ -84,7 +84,7 @@ void Client::getXClientName()
     }
 }
 
-void Client::makeNewClient(Window w)
+void Client::makeNewClient(Window w, character *c)
 {
     XWindowAttributes attr;
     XWMHints *hints;
@@ -98,10 +98,20 @@ void Client::makeNewClient(Window w)
     XGetTransientForHint(dpy, window, &trans);
     XGetWindowAttributes(dpy, window, &attr);
 
-    position.x = attr.x;
-    position.y = attr.y;
-    size.x = attr.width;
-    size.y = attr.height;
+    if (point_null(&c->position)) {
+        position.x = attr.x;
+        position.y = attr.y;
+    }
+    else {
+        position = c->position;
+    }
+    if (point_null(&c->size)) {
+        size.x = attr.width;
+        size.y = attr.height;
+    }
+    else {
+        size = c->size;
+    }
     border_width = attr.border_width;
     cmap = attr.colormap;
     xsize = XAllocSizeHints();
@@ -129,7 +139,9 @@ void Client::makeNewClient(Window w)
     gravitate(APPLY_GRAVITY);
     reparent();
 
-    tags.insert(wm->getCurrentWorkspace());
+    set<char>::iterator i;
+    for (i = c->tags.begin(); i != c->tags.end(); i++)
+        tags.insert(*i);
 
     unhide();
 
