@@ -162,6 +162,17 @@ void WindowManager::forkExec(char *cmd) {
         fprintf(stderr, "Error: exec failed, cleaning up child\n");
         exit(EXIT_FAILURE);
     }
+    else {
+        pending_window = new character();
+        pending_window->command = cmd;
+        pending_window->pid = pid;
+        pending_window->position.x = 0;
+        pending_window->position.y = 0;
+        pending_window->size.x = 0;
+        pending_window->size.y = 0;
+        pending_window->tags.insert(current_workspace);
+    }
+    
 }
 
 void WindowManager::handleAction(action a)
@@ -275,7 +286,7 @@ void WindowManager::scanWins(void)
         XGetWindowAttributes(dpy, wins[i], &attr);
         if (!attr.override_redirect && attr.map_state == IsViewable) {
             client_window_list.push_back(wins[i]);
-            c = new Client(dpy, wins[i]);
+            c = new Client(dpy, wins[i], NULL);
         }
     }
     XFree(wins);
@@ -603,7 +614,7 @@ void WindowManager::handleMapRequestEvent(XEvent *ev)
     }
     else {
         client_window_list.push_back(ev->xmaprequest.window);
-        c = new Client(dpy, ev->xmaprequest.window);
+        c = new Client(dpy, ev->xmaprequest.window, pending_window);
     }
 }
 

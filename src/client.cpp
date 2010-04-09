@@ -1,9 +1,9 @@
 #include "client.h"
-#include "windowmanager.h"
 
-Client::Client(Display *d, Window new_client)
+Client::Client(Display *d, Window new_client, character *c)
 {
-    initialize(d);
+    printf("New window: pid: %ld\tposition: %d:%d\tsize: %d:%d\n", (long)c->pid, c->position.x, c->position.y, c->size.x, c->size.y);
+    initialize(d, c);
     wm->addClient(this);
     makeNewClient(new_client);
 }
@@ -13,7 +13,7 @@ Client::~Client()
     removeClient();
 }
 
-void Client::initialize(Display *d)
+void Client::initialize(Display *d, character *c)
 {
     dpy                     = d;
 
