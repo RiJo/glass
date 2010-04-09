@@ -58,7 +58,7 @@ void Client::initialize(Display *d, character *c)
     direction               = 0;
     ascent                  = 0;
     descent                 = 0;
-    text_width              = 0;
+    //text_width              = 0;
 //    text_justify            = 0;
 //    justify_style           = RIGHT_JUSTIFY;
 
@@ -66,19 +66,19 @@ void Client::initialize(Display *d, character *c)
     root                    = RootWindow(dpy, screen);
 }
 
-void Client::getXClientName(Window window, char *name)
+void Client::getXClientName(win *window)
 {
-    if(name) {
-        XFree(name);
+    if(window->name) {
+        XFree(window->name);
     }
 
-    XFetchName(dpy, window, &name);
+    XFetchName(dpy, window->window, &window->name);
+    generateTitle(window);
 
-    const char *title_text = getName();
-    if(title_text) {
-        XTextExtents(wm->getResources()->getFont(FONT_NORMAL), title_text , strlen(title_text),
-                &direction, &ascent, &descent, &overall);
-        text_width = overall.width;
+    if(window->title) {
+        XTextExtents(wm->getResources()->getFont(FONT_NORMAL), window->title ,
+                strlen(window->title), &direction, &ascent, &descent, &overall);
+        window->title_width = overall.width;
     }
 }
 
@@ -96,7 +96,7 @@ void Client::makeNewClient(Window w, character *c)
     windows.push_back(new_window);
     current_window = windows.size() - 1;
 
-    getXClientName(w, new_window->name);
+    getXClientName(new_window);
 
     XGetTransientForHint(dpy, w, &trans);
     XGetWindowAttributes(dpy, w, &attr);
@@ -108,6 +108,7 @@ void Client::makeNewClient(Window w, character *c)
     else {
         position = c->position;
     }
+
     if (point_null(&c->size)) {
         size.x = attr.width;
         size.y = attr.height;
@@ -115,6 +116,7 @@ void Client::makeNewClient(Window w, character *c)
     else {
         size = c->size;
     }
+
     border_width = attr.border_width;
     cmap = attr.colormap;
     xsize = XAllocSizeHints();
@@ -169,9 +171,9 @@ void Client::removeClient()
     XDestroyWindow(dpy, title);
     XDestroyWindow(dpy, frame);
 
-    /*if (name) {
+    if (name) {
         XFree(name);
-    }*/
+    }
 
     if (xsize) {
         XFree(xsize);
@@ -231,43 +233,30 @@ void Client::redraw()
     else
         gc = wm->getResources()->getGC(COLOR_FOREGROUND_UNFOCUSED);
 
-    const char *title_text = getName();
+    const char *title_text = windows[current_window]->title;
     if (!trans && title_text) {
-        //~ switch(justify_style) {
-            //~ case LEFT_JUSTIFY:
-                //~ text_justify = TITLE_MINIMUM_HEIGHT;
-            //~ break;
-
-            //~ case CENTER_JUSTIFY:
-                //~ text_justify = ( (width / 2) - (text_width / 2) );
-            //~ break;
-
-            //~ case RIGHT_JUSTIFY:
-                //~ text_justify = width - text_width - 25;
-            //~ break;
-        //~ }
-
-        if(title_text != NULL) {
-            int text_justify = size.x - text_width - 25;
-            XDrawString(dpy, title, gc, text_justify, wm->getResources()->getFont(FONT_NORMAL)->ascent+1,title_text, strlen(title_text));
-        }
+        int text_justify = size.x - windows[current_window]->title_width - 25;
+        XDrawString(dpy, title, gc, text_justify, wm->getResources()->getFont(FONT_NORMAL)->ascent+1,title_text, strlen(title_text));
     }
 }
 
-const char *Client::getName() const {
-    if (windows.size() == 0) {
-        return NULL;
-    }
-    win *window = windows[current_window];
+void Client::generateTitle(win *window) const {
     if (window == NULL) {
-        return NULL;
+        fprintf(stderr, "Warning: cannot get title from NULL window\n");
+        return;
     }
-    if (window->name == NULL || pid == 0) {
-        return NULL;
+    if (window->name == NULL) {
+        fprintf(stderr, "Warning: there is no name set on current window\n");
+        return;
+    }
+    if (window->title) {
+        free(window->title);
     }
     stringstream ss;
     ss << "[" << pid << "] " << string(window->name);
-    return ss.str().c_str();
+    window->title = (char *)malloc(sizeof(ss.str().length()) + 1);
+    const char *title = ss.str().c_str();
+    strcpy(window->title, title);
 }
 
 void Client::gravitate(int multiplier)
@@ -716,10 +705,9 @@ void Client::handleClientMessage(XClientMessageEvent *e)
 
 void Client::handlePropertyChange(XPropertyEvent *e)
 {
-    char *name = (char *)getName(); /* :FIX: THIS IS UGLY */
     switch (e->atom) {
         case XA_WM_NAME:
-            getXClientName(currentWindow(), name);
+            getXClientName(windows[current_window]);
             XClearWindow(dpy, title);
             redraw();
             break;
