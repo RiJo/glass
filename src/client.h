@@ -10,10 +10,35 @@
 #define _CLIENT_H_
 
 #include "glass.h"
+#include "windowmanager.h"
 
-#include <set>
+#include <set>      /* tags */
+
+/*##############################################################################
+#   GROUPING   #################################################################
+##############################################################################*/
+
+#include <list>     /* windows */
+
+class WindowManager; // forward declaration
+struct character; // forward declaration
+
+/*
+    What is gravity???
+    What is transistent???
+*/
 
 enum { APPLY_GRAVITY=1, REMOVE_GRAVITY=-1 };
+
+struct win {
+    pid_t pid;
+    Window window;
+    char *title;
+};
+
+/*##############################################################################
+#   GROUPING   #################################################################
+##############################################################################*/
 
 class Client
 {
@@ -33,6 +58,7 @@ private: /* Member Variables */
     Window trans;    // window id for which this client is transient for
 
     set<char> tags;
+    list<win> windows;
 
     int  x, y, width, height;
 
@@ -68,7 +94,7 @@ private: /* Member Variables */
 
 private: /* Member Functions */
 
-    void initialize(Display *d);
+    void initialize(Display *d, character *);
 
     void redraw();
     void drawOutline();
@@ -83,7 +109,7 @@ private: /* Member Functions */
 
 public: /* Member Functions */
 
-    Client(Display *, Window);
+    Client(Display *, Window, character *);
     ~Client();
 
     void getXClientName();
@@ -93,18 +119,18 @@ public: /* Member Functions */
 
     char *getClientName() const { return name; }
 
-    Window getFrameWindow() const    { return frame; }
-    Window getAppWindow()     const { return window; }
-    Window getTitleWindow()    const { return title;    }
+    Window getFrameWindow() const { return frame; }
+    Window getAppWindow() const { return window; }
+    Window getTitleWindow() const { return title; }
     Window getTransientWindow() const { return trans; }
 
     bool isTransient() { return (trans != 0); }
 
-    bool hasWindowDecorations()     const { return has_title; }
-    bool hasFocus()            const { return has_focus; }
+    bool hasWindowDecorations() const { return has_title; }
+    bool hasFocus() const { return has_focus; }
 
     bool isTagged(char workspace) const;
-    bool isVisible()        const { return is_visible;    }
+    bool isVisible() const { return is_visible; }
 
     void setFocus(bool focus); // (decieving name) Only paints the titlebar in the focus color
 
