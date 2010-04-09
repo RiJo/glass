@@ -34,7 +34,9 @@ enum { APPLY_GRAVITY=1, REMOVE_GRAVITY=-1 };
 
 struct win {
     pid_t pid;
-    char *name;    // Name used to display in titlebar
+    char *name;
+    char *title;
+    int title_width;
     Window window;
 };
 
@@ -67,7 +69,7 @@ private: /* Member Variables */
 
     int border_width;
 
-    int  old_x, old_y, old_width, old_height;
+    int old_x, old_y, old_width, old_height;
 
     bool has_focus, has_title, has_border;
 
@@ -87,7 +89,7 @@ private: /* Member Variables */
     int direction;
     int ascent;
     int descent;
-    int text_width;
+
     //int text_justify;
     //int justify_style;
 
@@ -107,7 +109,8 @@ private: /* Member Functions */
     int  titleHeight();
     void sendConfig();
     void gravitate(int);
-    const char *getName() const;
+    void generateTitle(win *) const;
+    int getTitleLength(win *) const;
 
     void setShape();
 
@@ -116,7 +119,7 @@ public: /* Member Functions */
     Client(Display *, Window, character *);
     ~Client();
 
-    void getXClientName(Window, char *);
+    void getXClientName(win *);
 
     void makeNewClient(Window, character *);
     void removeClient();
