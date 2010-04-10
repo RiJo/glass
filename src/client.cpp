@@ -2,7 +2,7 @@
 
 Client::Client(Display *d, Window new_client, character *c)
 {
-    printf("New client:\tpid:%ld\tpos:%d:%d\tsize:%d:%d\tcmd:%s\n", (long)c->pid, c->position.x, c->position.y, c->size.x, c->size.y, c->command.c_str());
+    DEBUG("new client:\tpid: %ld\tpos: %d:%d\tsize: %d:%d\tcmd: \"%s\"\n", (long)c->pid, c->position.x, c->position.y, c->size.x, c->size.y, c->command.c_str());
     initialize(d, c);
     wm->addClient(this);
     makeNewClient(new_client, c);
@@ -68,7 +68,6 @@ void Client::getXClientName(win *window)
 
 void Client::makeNewClient(Window w, character *c)
 {
-    DEBUG("creating client, number of windows: %d\n", (int)windows.size());
     XWindowAttributes attr;
     XWMHints *hints;
 
@@ -142,12 +141,11 @@ void Client::makeNewClient(Window w, character *c)
 
     XSync(dpy, False);
     XUngrabServer(dpy);
-    DEBUG("client created, number of windows: %d\n", (int)windows.size());
+    DEBUG("window created, number of windows: %d\n", (int)windows.size());
 }
 
 void Client::removeClient()
 {
-    DEBUG("removing window, number of windows: %d\n", (int)windows.size());
     XGrabServer(dpy);
 
     if (trans) {
@@ -160,9 +158,9 @@ void Client::removeClient()
 
     XReparentWindow(dpy, windows[current_window]->window, root, position.x, position.y);
 
-    /*if (windows[current_window]->name) {
+    if (windows[current_window]->name) {
         XFree(windows[current_window]->name);
-    }*/
+    }
 
     if (windows.size() == 1) {
         // Last window in this client => destroy client
@@ -694,8 +692,9 @@ void Client::handleMapRequest(XMapRequestEvent *e)
 
 void Client::handleUnmapEvent(XUnmapEvent *e)
 {
-    if (! ignore_unmap)
+    if (!ignore_unmap) {
         delete this;
+    }
 }
 
 void Client::handleDestroyEvent(XDestroyWindowEvent *e)
@@ -713,9 +712,7 @@ void Client::handlePropertyChange(XPropertyEvent *e)
 {
     switch (e->atom) {
         case XA_WM_NAME:
-            printf("before\n");
             getXClientName(windows[current_window]);
-            printf("after\n");
             XClearWindow(dpy, title);
             redraw();
             break;

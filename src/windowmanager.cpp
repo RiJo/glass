@@ -145,17 +145,28 @@ void WindowManager::setupSignalHandlers()
     signal(SIGCHLD, sigHandler);
 }
 
-void WindowManager::forkExec(char *cmd) {
+pid_t WindowManager::forkExec(char *cmd) {
     if (!cmd || strlen(cmd) == 0) {
         DEBUG("no command to execute\n");
-        return;
+        return 0;
     }
 
-    DEBUG("executing: \"%s\"\n", cmd);
+    // parse workspace from command
+    char workspace = current_workspace;
+    const char *separator = ":";
+    char *x = strstr(cmd, separator);
+    if (x != NULL) {
+        *x = '\0';
+        workspace = atoi(cmd);
+        cmd = (x + 1);
+    }
+
+    DEBUG("executing \"%s\" on workspace %d\n", cmd, workspace);
 
     pid_t pid = fork();
     if (pid < 0) {
         fprintf(stderr, "Error: could not fork\n");
+        return 0;
     }
     else if (pid == 0) {
         execlp("/bin/sh", "sh", "-c", cmd, NULL);
@@ -165,13 +176,14 @@ void WindowManager::forkExec(char *cmd) {
     else {
         pending_window.command = cmd;
         pending_window.pid = pid;
-        pending_window.position.x = 50;
-        pending_window.position.y = 50;
+        pending_window.position.x = 0;
+        pending_window.position.y = 0;
         pending_window.size.x = 0;
         pending_window.size.y = 0;
         pending_window.tags.clear();
-        pending_window.tags.insert(current_workspace);
+        pending_window.tags.insert(workspace);
     }
+    return pid;
 }
 
 void WindowManager::handleAction(action a)
@@ -359,7 +371,6 @@ void WindowManager::doEventLoop()
     XEvent ev;
 
     while (1) {
-        printf("dpy: %ld\troot: %ld\tclients: %d\twindows: %d\tfocused client: %ld\n", (long)dpy, (long)root, (int)client_list.size(), (int)client_window_list.size(), (long)focused_client);
         XNextEvent(dpy, &ev);
 
         switch (ev.type) {

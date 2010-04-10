@@ -47,12 +47,12 @@ using namespace std;
 
 
 #define PROGRAM_NAME                "glass"
-#define PROGRAM_VERSION             "0.7.0"
-#define PROGRAM_DATE                "2010-04-05"
+#define PROGRAM_VERSION             "0.8.0"
+#define PROGRAM_DATE                "2010-04-10"
 
-#define EXEC_TERMINAL               (char *)"xterm -geometry 100x30"
+#define EXEC_TERMINAL               (char *)"xterm -geometry 110x30"
 #define EXEC_WEBBROWSER             (char *)"firefox &> /dev/null"
-#define EXEC_EDITOR                 (char *)"scite"
+#define EXEC_EDITOR                 (char *)"scite &> /dev/null"
 
 #define MODIFIER_GOTO_WORKSPACE     Mod4Mask
 #define MODIFIER_TAG_CLIENT         (ControlMask|Mod1Mask)
