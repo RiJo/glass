@@ -43,7 +43,7 @@ void FooBar::redrawWorkspaces()
     for (char ws = 0; ws <= workspace_count; ws++) {
         x = 1 + WORKSPACE_OFFSET(ws);
         y = 1;
-        
+
         XFillRectangle(dpy, root, background_gc, x, y, WORKSPACE_WIDTH, BAR_HEIGHT);
         if (ws == current_workspace) {
             XDrawRectangle(dpy, root, active_gc, x, y, WORKSPACE_WIDTH, BAR_HEIGHT);

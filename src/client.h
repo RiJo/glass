@@ -53,11 +53,9 @@ private: /* Member Variables */
     XSizeHints *xsize;
     Colormap cmap;
     int screen;
-    pid_t pid;
 
-    //char *name;    // Name used to display in titlebar
-    point size;
-    point position;
+    Point size;
+    Point position;
 
     Window frame;    // parent window which we reparent the client to
     Window title;    // window which holds title
@@ -90,9 +88,6 @@ private: /* Member Variables */
     int ascent;
     int descent;
 
-    //int text_justify;
-    //int justify_style;
-
     // Used in client move
     int pointer_x, pointer_y;
     int old_cx, old_cy;
@@ -109,8 +104,7 @@ private: /* Member Functions */
     int  titleHeight();
     void sendConfig();
     void gravitate(int);
-    void generateTitle(win *) const;
-    int getTitleLength(win *) const;
+    void generateTitle(win *);
 
     void setShape();
 
@@ -124,13 +118,13 @@ public: /* Member Functions */
     void makeNewClient(Window, character *);
     void removeClient();
 
-    Window currentWindow() const { return windows[current_window]->window; }
+    unsigned int Windows() const { return windows.size(); }
     Window getFrameWindow() const { return frame; }
-    Window getAppWindow() const { return currentWindow(); } /* REMOVE THIS WRAPPER */
+    Window getAppWindow() const { return windows[current_window]->window; }
     Window getTitleWindow() const { return title; }
     Window getTransientWindow() const { return trans; }
 
-    bool isTransient() { return (trans != 0); }
+    bool isTransient() const { return (trans != 0); }
 
     bool hasWindowDecorations() const { return has_title; }
     bool hasFocus() const { return has_focus; }
