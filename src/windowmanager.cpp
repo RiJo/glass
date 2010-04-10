@@ -165,8 +165,8 @@ void WindowManager::forkExec(char *cmd) {
     else {
         pending_window.command = cmd;
         pending_window.pid = pid;
-        pending_window.position.x = 0;
-        pending_window.position.y = 0;
+        pending_window.position.x = 50;
+        pending_window.position.y = 50;
         pending_window.size.x = 0;
         pending_window.size.y = 0;
         pending_window.tags.clear();
@@ -359,6 +359,7 @@ void WindowManager::doEventLoop()
     XEvent ev;
 
     while (1) {
+        printf("dpy: %ld\troot: %ld\tclients: %d\twindows: %d\tfocused client: %ld\n", (long)dpy, (long)root, (int)client_list.size(), (int)client_window_list.size(), (long)focused_client);
         XNextEvent(dpy, &ev);
 
         switch (ev.type) {
@@ -793,14 +794,15 @@ void WindowManager::removeClient(Client* c)
 
 Client* WindowManager::findClient(Window w)
 {
-    if (client_list.size()) {
-        list<Client*>::iterator iter = client_list.begin();
-
-        for(; iter != client_list.end(); iter++) {
-            if (w == (*iter)->getTitleWindow()  ||
-                w == (*iter)->getFrameWindow()  ||
-                w == (*iter)->getAppWindow())
+    if (client_list.size() > 0) {
+        list<Client *>::iterator iter;
+        for(iter = client_list.begin(); iter != client_list.end(); iter++) {
+            Window a = (*iter)->getTitleWindow();
+            Window b = (*iter)->getFrameWindow();
+            Window c = (*iter)->getAppWindow();
+            if (w ==  a || w == b || w == c) {
                 return (*iter);
+            }
         }
     }
     return NULL;

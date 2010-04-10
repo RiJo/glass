@@ -59,8 +59,8 @@ struct key_binding {
 struct character {
     string command;
     pid_t pid;
-    point position;
-    point size;
+    Point position;
+    Point size;
     set<char> tags;
 };
 
@@ -77,7 +77,7 @@ private: /* member variables */
 #   GROUPING   #################################################################
 ##############################################################################*/
 
-    queue<char *> commands;
+    //queue<char *> commands;
     character pending_window;
 
 /*##############################################################################
@@ -98,7 +98,7 @@ private: /* member variables */
     int screen;
     char current_workspace;
 
-    point screen_size;
+    Point screen_size;
 
     int shape, shape_event;
 

@@ -118,5 +118,6 @@
 --------------------------------------------------------------------------------
     * Cleaned up old enums
     * Removed ability to set title align in clients
+    * Initial implementation of Point class to replace x and y variables
     * Bugfix: decoration line between title and window not drawn properly
 --------------------------------------------------------------------------------
