@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 
     glass
-    current version:     0.7.0
+    current version:     0.8.0
     by:                  Rikard Johansson
 
     A lightweight windowmanager for X11.
@@ -114,9 +114,12 @@
 
 
 --------------------------------------------------------------------------------
- version 0.x.x, xxxx-xx-xx
+ version 0.8.0, 2010-04-10
 --------------------------------------------------------------------------------
-    * Cleaned up old enums
+    * Preparation for grouping windows
+    * Preparation for fork-exec windows with predefined settings
+    * Ability to specify workspace to fork-exec in from runfield: "<ws>:<cmd>"
+    * Cleaned up old enums and macros
     * Removed ability to set title align in clients
     * Initial implementation of Point class to replace x and y variables
     * Bugfix: decoration line between title and window not drawn properly
