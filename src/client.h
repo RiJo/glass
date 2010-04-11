@@ -54,9 +54,6 @@ private: /* Member Variables */
     Colormap cmap;
     int screen;
 
-    Point size;
-    Point position;
-
     Window frame;    // parent window which we reparent the client to
     Window title;    // window which holds title
     Window trans;    // window id for which this client is transient for
@@ -67,10 +64,14 @@ private: /* Member Variables */
 
     int border_width;
 
-    int old_x, old_y, old_width, old_height;
+    Point size;
+    Point position;
+    Point old_position;
+    Point old_size;
 
-    bool has_focus, has_title, has_border;
-
+    bool has_focus;
+    bool has_title;
+    bool has_border;
     bool is_being_dragged;
     bool is_being_resized;
     bool do_drawoutline_once; // used for wire move
@@ -89,8 +90,8 @@ private: /* Member Variables */
     int descent;
 
     // Used in client move
-    int pointer_x, pointer_y;
-    int old_cx, old_cy;
+    Point cursor;
+    Point old_cursor;
 
 private: /* Member Functions */
 

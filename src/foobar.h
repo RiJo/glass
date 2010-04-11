@@ -52,8 +52,8 @@ private: /* Member Functions */
     void redrawWorkspaces();
     void redrawRunField();
 
-    inline bool insideWorkspaces(int, int);
-    inline bool insideRunfield(int, int);
+    inline bool insideWorkspaces(Point);
+    inline bool insideRunfield(Point);
 
 public: /* Member Functions */
     FooBar(Display *, Window, char &, char &);

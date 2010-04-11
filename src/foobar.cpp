@@ -39,22 +39,22 @@ void FooBar::redrawWorkspaces()
     text->chars = (char *)malloc(1);
     text->nchars = 1;
 
-    int x, y;
+    Point offset;
     for (char ws = 0; ws <= workspace_count; ws++) {
-        x = 1 + WORKSPACE_OFFSET(ws);
-        y = 1;
+        offset.x = 1 + WORKSPACE_OFFSET(ws);
+        offset.y = 1;
 
-        XFillRectangle(dpy, root, background_gc, x, y, WORKSPACE_WIDTH, BAR_HEIGHT);
+        XFillRectangle(dpy, root, background_gc, offset.x, offset.y, WORKSPACE_WIDTH, BAR_HEIGHT);
         if (ws == current_workspace) {
-            XDrawRectangle(dpy, root, active_gc, x, y, WORKSPACE_WIDTH, BAR_HEIGHT);
+            XDrawRectangle(dpy, root, active_gc, offset.x, offset.y, WORKSPACE_WIDTH, BAR_HEIGHT);
         }
         else {
-            XDrawRectangle(dpy, root, inactive_gc, x, y, WORKSPACE_WIDTH, BAR_HEIGHT);
+            XDrawRectangle(dpy, root, inactive_gc, offset.x, offset.y, WORKSPACE_WIDTH, BAR_HEIGHT);
         }
 
         if (ws > 0) {
             text->chars[0] = (char)(48 + ws);
-            XDrawText(dpy, root, text_gc, x + MAGIC_NUMBER - 1, y + MAGIC_NUMBER, text, 1);
+            XDrawText(dpy, root, text_gc, offset.x + MAGIC_NUMBER - 1, offset.y + MAGIC_NUMBER, text, 1);
         }
     }
 
@@ -70,11 +70,10 @@ void FooBar::redrawRunField()
     else
         gc = inactive_gc;
 
-    int x = WORKSPACES_WIDTH;
-    int y = 1;
+    Point offset(WORKSPACES_WIDTH, 1);
 
-    XFillRectangle(dpy, root, background_gc, x, y, RUNFIELD_WIDTH, BAR_HEIGHT);
-    XDrawRectangle(dpy, root, gc, x, y, RUNFIELD_WIDTH, BAR_HEIGHT);
+    XFillRectangle(dpy, root, background_gc, offset.x, offset.y, RUNFIELD_WIDTH, BAR_HEIGHT);
+    XDrawRectangle(dpy, root, gc, offset.x, offset.y, RUNFIELD_WIDTH, BAR_HEIGHT);
 
     XTextItem *text = new XTextItem();
     if (strlen(runfield) <= RUNFIELD_MAX_WIDTH) {
@@ -86,7 +85,7 @@ void FooBar::redrawRunField()
         text->nchars = RUNFIELD_MAX_WIDTH;
     }
 
-    XDrawText(dpy, root, text_gc, x + MAGIC_NUMBER, y + MAGIC_NUMBER, text, 1);
+    XDrawText(dpy, root, text_gc, offset.x + MAGIC_NUMBER, offset.y + MAGIC_NUMBER, text, 1);
 
     delete text;
 }
@@ -97,23 +96,19 @@ void FooBar::redraw()
     redrawRunField();
 }
 
-inline bool FooBar::insideWorkspaces(int x, int y)
+inline bool FooBar::insideWorkspaces(Point pixel)
 {
-    return (
-        x >= 0 &&
-        y >= 0 &&
-        x <= WORKSPACES_WIDTH &&
-        y <= BAR_HEIGHT
+    return pixel.intersects(
+        Point(0, 0),
+        Point(WORKSPACES_WIDTH, BAR_HEIGHT)
     );
 }
 
-inline bool FooBar::insideRunfield(int x, int y)
+inline bool FooBar::insideRunfield(Point pixel)
 {
-    return (
-        x >= WORKSPACES_WIDTH &&
-        y >= 0 &&
-        x <= WORKSPACES_WIDTH + RUNFIELD_WIDTH &&
-        y <= BAR_HEIGHT
+    return pixel.intersects(
+        Point(WORKSPACES_WIDTH, 0),
+        Point(WORKSPACES_WIDTH + RUNFIELD_WIDTH, BAR_HEIGHT)
     );
 }
 
@@ -137,17 +132,16 @@ void FooBar::setRunfield(bool active)
 
 void FooBar::handleButtonEvent(XButtonEvent *e)
 {
+    Point pixel(e->x, e->y);
     switch (e->button) {
         case Button1:
-            setRunfield(insideRunfield(e->x, e->y));
-
-            if (insideWorkspaces(e->x, e->y))
-                wm->goToWorkspace(e->x / (WORKSPACE_WIDTH+ITEM_PADDING));
-        break;
+            setRunfield(insideRunfield(pixel));
+            if (insideWorkspaces(pixel)) {
+                wm->goToWorkspace(pixel.x / (WORKSPACE_WIDTH+ITEM_PADDING));
+            }
+            break;
     }
 }
-
-//char FooBar::keysymToChar(
 
 void FooBar::handleKeyEvent(XKeyEvent *e)
 {

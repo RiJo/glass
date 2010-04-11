@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Description:
- *   TBD
+ *   A representation of a coordinate.
  ******************************************************************************/
 
 #ifndef _POINT_H_
@@ -15,7 +15,11 @@ public:
     int y;
 
 public:
+    Point() : x(0), y(0) {}
+    Point(int x, int y) : x(x), y(y) {}
+
     bool zero();
+    bool intersects(Point, Point);
     
 };
 

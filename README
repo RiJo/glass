@@ -124,3 +124,9 @@
     * Initial implementation of Point class to replace x and y variables
     * Bugfix: decoration line between title and window not drawn properly
 --------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+ version 0.9.0, xxxx-xx-xx
+--------------------------------------------------------------------------------
+    * Switched all x, y valriables to Point objects
+--------------------------------------------------------------------------------

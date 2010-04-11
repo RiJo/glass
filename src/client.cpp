@@ -23,10 +23,6 @@ void Client::initialize(Display *d, character *c)
 
     current_window          = 0;
     ignore_unmap            = 0;
-    pointer_x               = 0;
-    pointer_y               = 0;
-    old_cx                  = 0;
-    old_cy                  = 0;
 
     has_been_shaped         = false;
     has_title               = true;
@@ -43,10 +39,6 @@ void Client::initialize(Display *d, character *c)
     is_being_resized        = false;
 
     last_button1_time       = 0;
-    old_x                   = 0;
-    old_y                   = 0;
-    old_width               = 1;
-    old_height              = 1;
     direction               = 0;
     ascent                  = 0;
     descent                 = 0;
@@ -111,10 +103,10 @@ void Client::makeNewClient(Window w, character *c)
     long dummy;
     XGetWMNormalHints(dpy, w, xsize, &dummy);
 
-    old_x = position.x;
-    old_y = position.y;
-    old_width = size.x;
-    old_height = size.y;
+    old_position.x = position.x;
+    old_position.y = position.y;
+    old_size.x = size.x;
+    old_size.y = size.y;
 
     if (attr.map_state == IsViewable) {
         ignore_unmap++;
@@ -435,10 +427,10 @@ void Client::maximize()
     }
 
     if(! is_maximized) {
-        old_x = position.x;
-        old_y = position.y;
-        old_width = size.x;
-        old_height = size.y;
+        old_position.x = position.x;
+        old_position.y = position.y;
+        old_size.x = size.x;
+        old_size.y = size.y;
 
         if (xsize->flags & PMaxSize) {
             size.x = xsize->max_width;
@@ -460,12 +452,12 @@ void Client::maximize()
         is_maximized = true;
     }
     else {
-        position.x = old_x;
-        position.y = old_y;
-        size.x = old_width;
-        size.y = old_height;
+        position.x = old_position.x;
+        position.y = old_position.y;
+        size.x = old_size.x;
+        size.y = old_size.y;
 
-        XMoveResizeWindow(dpy, frame, old_x, old_y - titleHeight(), old_width, old_height + titleHeight());
+        XMoveResizeWindow(dpy, frame, old_position.x, old_position.y - titleHeight(), old_size.x, old_size.y + titleHeight());
 
         is_maximized = false;
 
@@ -482,67 +474,66 @@ void Client::maximize()
 
 void Client::handleMotionNotifyEvent(XMotionEvent *ev)
 {
-    int nx=0, ny=0;
-
     if((ev->state & Button1Mask) && (wm->getFocusedClient() == this)) {
-            if(! do_drawoutline_once && wm->getWireMove()) {
-                XGrabServer(dpy);
-                drawOutline();
-                do_drawoutline_once=true;
-                is_being_dragged=true;
+        if(! do_drawoutline_once && wm->getWireMove()) {
+            XGrabServer(dpy);
+            drawOutline();
+            do_drawoutline_once=true;
+            is_being_dragged=true;
+        }
+
+        if(wm->getWireMove()) {
+            drawOutline();
+        }
+
+        Point new_cursor;
+        new_cursor.x = old_cursor.x + (ev->x_root - cursor.x);
+        new_cursor.y = old_cursor.y + (ev->y_root - cursor.y);
+
+        int snap_width = wm->getEdgeSnap();
+        if(snap_width) {
+            // Move beyond edges of screen
+            if (new_cursor.x == wm->getXRes() - size.x)
+                new_cursor.x = wm->getXRes() - size.y + 1;
+            else if (new_cursor.x == 0)
+                new_cursor.x = -1;
+
+            if (new_cursor.y == wm->getYRes() - snap_width)
+                new_cursor.y = wm->getYRes() - snap_width - 1;
+            else if (new_cursor.y == titleHeight())
+                new_cursor.y = titleHeight() - 1;
+
+            // Snap to edges of screen
+            if ( (new_cursor.x + size.x >= wm->getXRes() - snap_width) && (new_cursor.x + size.x <= wm->getXRes()) )
+                new_cursor.x = wm->getXRes() - size.x;
+            else if ( (new_cursor.x <= snap_width) && (new_cursor.x >= 0) )
+                new_cursor.x = 0;
+
+            if (is_shaded) {
+                if ( (new_cursor.y  >= wm->getYRes() - snap_width) && (new_cursor.y  <= wm->getYRes()) )
+                    new_cursor.y = wm->getYRes();
+                else if ( (new_cursor.y - titleHeight() <= snap_width) && (new_cursor.y - titleHeight() >= 0))
+                    new_cursor.y = titleHeight();
             }
-
-            if(wm->getWireMove()) {
-                drawOutline();
+            else {
+                if ( (new_cursor.y + size.y >= wm->getYRes() - snap_width) && (new_cursor.y + size.y <= wm->getYRes()) )
+                    new_cursor.y = wm->getYRes() - size.y;
+                else if ( (new_cursor.y - titleHeight() <= snap_width) && (new_cursor.y - titleHeight() >= 0))
+                    new_cursor.y = titleHeight();
             }
+        }
 
-            nx = old_cx + (ev->x_root - pointer_x);
-            ny = old_cy + (ev->y_root - pointer_y);
+        position.x = new_cursor.x;
+        position.y = new_cursor.y;
 
-            int snap_width = wm->getEdgeSnap();
-            if(snap_width) {
-                // Move beyond edges of screen
-                if (nx == wm->getXRes() - size.x)
-                    nx = wm->getXRes() - size.y + 1;
-                else if (nx == 0)
-                    nx = -1;
+        if(!wm->getWireMove()) {
+            XMoveWindow(dpy, frame, new_cursor.x, new_cursor.y - titleHeight());
+            sendConfig();
+        }
 
-                if (ny == wm->getYRes() - snap_width)
-                    ny = wm->getYRes() - snap_width - 1;
-                else if (ny == titleHeight())
-                    ny = titleHeight() - 1;
-
-                // Snap to edges of screen
-                if ( (nx + size.x >= wm->getXRes() - snap_width) && (nx + size.x <= wm->getXRes()) )
-                    nx = wm->getXRes() - size.x;
-                else if ( (nx <= snap_width) && (nx >= 0) )
-                    nx = 0;
-
-                if (is_shaded) {
-                    if ( (ny  >= wm->getYRes() - snap_width) && (ny  <= wm->getYRes()) )
-                        ny = wm->getYRes();
-                    else if ( (ny - titleHeight() <= snap_width) && (ny - titleHeight() >= 0))
-                        ny = titleHeight();
-                }
-                else {
-                    if ( (ny + size.y >= wm->getYRes() - snap_width) && (ny + size.y <= wm->getYRes()) )
-                        ny = wm->getYRes() - size.y;
-                    else if ( (ny - titleHeight() <= snap_width) && (ny - titleHeight() >= 0))
-                        ny = titleHeight();
-                }
-            }
-
-            position.x = nx;
-            position.y = ny;
-
-            if(!wm->getWireMove()) {
-                XMoveWindow(dpy, frame, nx, ny-titleHeight());
-                sendConfig();
-            }
-
-            if(wm->getWireMove()) {
-                drawOutline();
-            }
+        if(wm->getWireMove()) {
+            drawOutline();
+        }
     }
     else if(ev->state & Button3Mask) {
         if(! is_being_resized) {
@@ -805,10 +796,10 @@ void Client::handleButtonEvent(XButtonEvent *e)
 
     // Used to compute the pointer position on click
     // used in the motion handler when doing a window move.
-    old_cx = position.x;
-    old_cy = position.y;
-    pointer_x = e->x_root;
-    pointer_y = e->y_root;
+    old_cursor.x = position.x;
+    old_cursor.y = position.y;
+    cursor.x = e->x_root;
+    cursor.y = e->y_root;
 
     // Allow us to get clicks from anywhere on the window
     // so click to raise works.
