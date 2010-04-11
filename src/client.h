@@ -95,7 +95,7 @@ private: /* Member Variables */
 
 private: /* Member Functions */
 
-    void initialize(Display *d, character *);
+    void initialize(Display *d);
 
     void redraw();
     void drawOutline();

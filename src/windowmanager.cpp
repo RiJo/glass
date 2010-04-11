@@ -152,7 +152,7 @@ pid_t WindowManager::forkExec(char *cmd) {
     }
 
     // parse workspace from command
-    char workspace = current_workspace;
+    char workspace = 0;
     const char *separator = ":";
     char *x = strstr(cmd, separator);
     if (x != NULL) {
@@ -176,12 +176,13 @@ pid_t WindowManager::forkExec(char *cmd) {
     else {
         pending_window.command = cmd;
         pending_window.pid = pid;
-        pending_window.position.x = 0;
-        pending_window.position.y = 0;
-        pending_window.size.x = 0;
-        pending_window.size.y = 0;
+        pending_window.position.reset();
+        pending_window.size.reset();
         pending_window.tags.clear();
-        pending_window.tags.insert(workspace);
+        if (workspace != 0) {
+            pending_window.tags.insert(workspace);
+        }
+        pending_window.durability = 1;
     }
     return pid;
 }
@@ -237,6 +238,17 @@ void WindowManager::execute(char *command)
         }
     }
     forkExec(command);
+}
+
+void WindowManager::updateCharacteristics() {
+    pending_window.durability--;
+    if (pending_window.durability == 0) {
+        pending_window.command = "";
+        pending_window.pid = 0;
+        pending_window.position.reset();
+        pending_window.size.reset();
+        pending_window.tags.clear();
+    }
 }
 
 bool WindowManager::setCurrentWorkspace(char x)
@@ -626,6 +638,7 @@ void WindowManager::handleMapRequestEvent(XEvent *ev)
     else {
         client_window_list.push_back(ev->xmaprequest.window);
         c = new Client(dpy, ev->xmaprequest.window, &pending_window);
+        updateCharacteristics();
     }
 }
 

@@ -1,5 +1,10 @@
 #include "point.h"
 
+void Point::reset() {
+    x = 0;
+    y = 0;
+}
+
 bool Point::zero() {
     return (x == 0 && y == 0);
 }

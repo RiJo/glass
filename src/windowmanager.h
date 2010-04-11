@@ -62,6 +62,7 @@ struct character {
     Point position;
     Point size;
     set<char> tags;
+    unsigned int durability;
 };
 
 
@@ -105,7 +106,7 @@ private: /* member variables */
     string command_line;
     char workspace_count;
     int focus_model;
-    char *display, *opt_wm, *opt_wp, *opt_es; /* ARE WE USING ALL OF THOSE??? */
+    char *display;
 
     bool wire_move;
     bool rand_window_placement;
@@ -133,6 +134,7 @@ private: /* Member Functions */
 
     pid_t forkExec(char *);
     void handleAction(action);
+    void updateCharacteristics();
 
     void print_help();
     void print_usage();

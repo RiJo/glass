@@ -3,7 +3,7 @@
 Client::Client(Display *d, Window new_client, character *c)
 {
     DEBUG("new client:\tpid: %ld\tpos: %d:%d\tsize: %d:%d\tcmd: \"%s\"\n", (long)c->pid, c->position.x, c->position.y, c->size.x, c->size.y, c->command.c_str());
-    initialize(d, c);
+    initialize(d);
     wm->addClient(this);
     makeNewClient(new_client, c);
 }
@@ -13,7 +13,7 @@ Client::~Client()
     removeClient();
 }
 
-void Client::initialize(Display *d, character *c)
+void Client::initialize(Display *d)
 {
     dpy                     = d;
 
@@ -103,10 +103,8 @@ void Client::makeNewClient(Window w, character *c)
     long dummy;
     XGetWMNormalHints(dpy, w, xsize, &dummy);
 
-    old_position.x = position.x;
-    old_position.y = position.y;
-    old_size.x = size.x;
-    old_size.y = size.y;
+    old_position = position;
+    old_size = size;
 
     if (attr.map_state == IsViewable) {
         ignore_unmap++;
@@ -123,9 +121,17 @@ void Client::makeNewClient(Window w, character *c)
     gravitate(APPLY_GRAVITY);
     reparent();
 
-    set<char>::iterator i;
-    for (i = c->tags.begin(); i != c->tags.end(); i++)
-        tags.insert(*i);
+    if (c->tags.size() == 0) {
+        tags.insert(wm->getCurrentWorkspace());
+    }
+    else {
+        set<char>::iterator i;
+        for (i = c->tags.begin(); i != c->tags.end(); i++) {
+            tags.insert(*i);
+        }
+    }
+    
+    c->durability -= 1;
 
     unhide();
 
@@ -375,8 +381,8 @@ void Client::initPosition()
 
     XGetGeometry(dpy, getAppWindow(), &root, &position.x, &position.y, &w, &h, &border_width, &depth);
 
-    size.x = (int)w;
-    size.y = (int)h;
+    size.x = w;
+    size.y = h;
 
     if (xsize->flags & PPosition) {
             if(!position.x) position.x = xsize->x;
@@ -391,8 +397,7 @@ void Client::initPosition()
         }
         else if ( (position.x == 0) || (position.y == 0)  ) {
             if(size.x >= wm->getXRes() && size.y >= wm->getYRes()) {
-                position.x = 0;
-                position.y = 0;
+                position.reset();
                 size.x = wm->getXRes();
                 size.y = wm->getYRes()-titleHeight();
             }
@@ -400,7 +405,6 @@ void Client::initPosition()
                 wm->getMousePosition(&mouse_x, &mouse_y);
 
                 if(mouse_x && mouse_y) {
-
                     if (wm->getRandPlacement()) {
                         position.x = (rand() % (unsigned int) ((wm->getXRes() - size.x) * 0.94)) + ((unsigned int) (wm->getXRes() * 0.03));
                         position.y = (rand() % (unsigned int) ((wm->getYRes() - size.y) * 0.94)) + ((unsigned int) (wm->getYRes() * 0.03));
@@ -427,10 +431,8 @@ void Client::maximize()
     }
 
     if(! is_maximized) {
-        old_position.x = position.x;
-        old_position.y = position.y;
-        old_size.x = size.x;
-        old_size.y = size.y;
+        old_position = position;
+        old_size = size;
 
         if (xsize->flags & PMaxSize) {
             size.x = xsize->max_width;
@@ -439,8 +441,7 @@ void Client::maximize()
             XMoveResizeWindow(dpy, frame, position.x, position.y-titleHeight(), size.x, size.y+titleHeight());
         }
         else {
-            position.x = 0;
-            position.y = 0;
+            position.reset();
             size.x = wm->getXRes()-2;
             size.y = wm->getYRes()-2;
 
@@ -452,16 +453,14 @@ void Client::maximize()
         is_maximized = true;
     }
     else {
-        position.x = old_position.x;
-        position.y = old_position.y;
-        size.x = old_size.x;
-        size.y = old_size.y;
+        position = old_position;
+        size = old_size;
 
         XMoveResizeWindow(dpy, frame, old_position.x, old_position.y - titleHeight(), old_size.x, old_size.y + titleHeight());
 
         is_maximized = false;
 
-        if(is_shaded) {
+        if (is_shaded) {
             is_shaded = false;
         }
     }
@@ -523,8 +522,7 @@ void Client::handleMotionNotifyEvent(XMotionEvent *ev)
             }
         }
 
-        position.x = new_cursor.x;
-        position.y = new_cursor.y;
+        position = new_cursor;
 
         if(!wm->getWireMove()) {
             XMoveWindow(dpy, frame, new_cursor.x, new_cursor.y - titleHeight());
@@ -663,17 +661,18 @@ void Client::handleConfigureRequest(XConfigureRequestEvent *e)
         XMoveResizeWindow(dpy, getAppWindow(),0,titleHeight(), size.x, size.y);
     }
 
-    if ( (position.x + size.x > wm->getXRes())         ||
-        (size.y + titleHeight() > wm->getYRes())     ||
-        (position.x > wm->getXRes())             ||
-        (position.y > wm->getYRes())            ||
-        (position.x < 0)            ||
+    if ( (position.x + size.x > wm->getXRes()) ||
+        (size.y + titleHeight() > wm->getYRes()) ||
+        (position.x > wm->getXRes()) ||
+        (position.y > wm->getYRes()) ||
+        (position.x < 0) ||
         (position.y < 0)
     )
-        initPosition();
+    initPosition();
 
-    if (e->value_mask & (CWWidth|CWHeight))
+    if (e->value_mask & (CWWidth|CWHeight)) {
         setShape();
+    }
 }
 
 void Client::handleMapRequest(XMapRequestEvent *e)
@@ -723,14 +722,14 @@ void Client::reparent()
     pattr.border_pixel = wm->getResources()->getColor(COLOR_BORDER_FOCUSED).pixel;
     pattr.do_not_propagate_mask = ButtonPressMask|ButtonReleaseMask|ButtonMotionMask;
     pattr.override_redirect=False;
-    pattr.event_mask = ButtonMotionMask        |
-                SubstructureRedirectMask    |
-                SubstructureNotifyMask    |
-                ButtonPressMask        |
-                ButtonReleaseMask        |
-                ExposureMask            |
-                EnterWindowMask         |
-                LeaveWindowMask        ;
+    pattr.event_mask = ButtonMotionMask|
+            SubstructureRedirectMask|
+            SubstructureNotifyMask|
+            ButtonPressMask|
+            ButtonReleaseMask|
+            ExposureMask|
+            EnterWindowMask|
+            LeaveWindowMask;
 
     int b_w = 1;
     if(border_width) {
@@ -774,13 +773,9 @@ void Client::reparent()
     }
 
     XChangeWindowAttributes(dpy, getAppWindow(), CWDontPropagate, &pattr);
-
     XSelectInput(dpy, getAppWindow(), FocusChangeMask|PropertyChangeMask);
-
     XReparentWindow(dpy, getAppWindow(), frame, 0, titleHeight());
-
-    XGrabButton(dpy, Button1, AnyModifier, frame, 1,  ButtonPressMask|ButtonReleaseMask,
-            GrabModeSync, GrabModeAsync, None, None);
+    XGrabButton(dpy, Button1, AnyModifier, frame, 1,  ButtonPressMask|ButtonReleaseMask, GrabModeSync, GrabModeAsync, None, None);
 
     sendConfig();
 
@@ -796,8 +791,7 @@ void Client::handleButtonEvent(XButtonEvent *e)
 
     // Used to compute the pointer position on click
     // used in the motion handler when doing a window move.
-    old_cursor.x = position.x;
-    old_cursor.y = position.y;
+    old_cursor = position;
     cursor.x = e->x_root;
     cursor.y = e->y_root;
 
@@ -812,7 +806,6 @@ void Client::handleButtonEvent(XButtonEvent *e)
                 if(e->window == getAppWindow() || e->subwindow == getAppWindow()) {
                     XRaiseWindow(dpy, frame);
                 }
-
                 if (e->window == title) {
                     if (in_box)
                         wm->sendWMDelete(getAppWindow());
@@ -897,8 +890,7 @@ void Client::handleEnterEvent(XCrossingEvent *e)
 
 void Client::handleFocusInEvent(XFocusChangeEvent *e)
 {
-    wm->sendXMessage(getAppWindow(), wm->getWMProtosAtom(), SubstructureRedirectMask,
-            wm->getWMTakeFocusAtom());
+    wm->sendXMessage(getAppWindow(), wm->getWMProtosAtom(), SubstructureRedirectMask, wm->getWMTakeFocusAtom());
     XInstallColormap(dpy, cmap);
     setFocus(true);
 }
