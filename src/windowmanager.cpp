@@ -46,9 +46,9 @@ WindowManager::WindowManager(int argc, char** argv)
     wm = this;
     display = NULL;
     workspace_count = DEFAULT_WORKSPACE_COUNT;
-    current_workspace = 1;
+    current_workspace = INITIAL_WORKSPACE;
     focused_client = NULL;
-    rand_window_placement = false;
+    rand_window_placement = RANDOM_WINDOW_PLACEMENT;
     edge_snap = EDGE_SNAP;
     wire_move = WIRE_MOVE;
 

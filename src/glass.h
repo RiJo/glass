@@ -49,6 +49,8 @@ using namespace std;
 #define COLOR_CLIENT_BD_UNFOCUS     (char *)"#333333"
 
 #define DEFAULT_WORKSPACE_COUNT     4
+#define INITIAL_WORKSPACE           1
+#define RANDOM_WINDOW_PLACEMENT     false
 #define WIRE_MOVE                   false
 #define EDGE_SNAP                   5
 #define TITLE_MINIMUM_HEIGHT        15

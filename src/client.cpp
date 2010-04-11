@@ -60,9 +60,6 @@ void Client::getXClientName(win *window)
 
 void Client::makeNewClient(Window w, character *c)
 {
-    XWindowAttributes attr;
-    XWMHints *hints;
-
     XGrabServer(dpy);
 
     win *new_window = new win;
@@ -78,23 +75,12 @@ void Client::makeNewClient(Window w, character *c)
     current_window = windows.size() - 1;
 
     XGetTransientForHint(dpy, w, &trans);
+
+    XWindowAttributes attr;
     XGetWindowAttributes(dpy, w, &attr);
 
-    if (c->position.zero()) {
-        position.x = attr.x;
-        position.y = attr.y;
-    }
-    else {
-        position = c->position;
-    }
-
-    if (c->size.zero()) {
-        size.x = attr.width;
-        size.y = attr.height;
-    }
-    else {
-        size = c->size;
-    }
+    position = c->position;
+    size = c->size;
 
     border_width = attr.border_width;
     cmap = attr.colormap;
@@ -103,20 +89,21 @@ void Client::makeNewClient(Window w, character *c)
     long dummy;
     XGetWMNormalHints(dpy, w, xsize, &dummy);
 
-    old_position = position;
-    old_size = size;
-
-    if (attr.map_state == IsViewable) {
-        ignore_unmap++;
+    //~ if (attr.map_state == IsViewable) {
+        //~ XWMHints *hints;
+        //~ ignore_unmap++;
         initPosition();
 
-        if ((hints = XGetWMHints(dpy, w))) {
-            if (hints->flags & StateHint)
-                wm->setWMState(w, hints->initial_state);
-            else wm->setWMState(w, NormalState);
-                XFree(hints);
-        }
-    }
+        //~ if ((hints = XGetWMHints(dpy, w))) {
+            //~ if (hints->flags & StateHint)
+                //~ wm->setWMState(w, hints->initial_state);
+            //~ else wm->setWMState(w, NormalState);
+                //~ XFree(hints);
+        //~ }
+    //~ }
+
+    old_position = position;
+    old_size = size;
 
     gravitate(APPLY_GRAVITY);
     reparent();
@@ -130,7 +117,7 @@ void Client::makeNewClient(Window w, character *c)
             tags.insert(*i);
         }
     }
-    
+
     c->durability -= 1;
 
     unhide();
@@ -367,56 +354,50 @@ void Client::unhide()
 
 void Client::initPosition()
 {
-    int mouse_x, mouse_y;
-
-    unsigned int w, h;
     unsigned int border_width, depth;
 
     XWindowAttributes attr;
-
     XGetWindowAttributes(dpy, getAppWindow(), &attr);
 
-    if (attr.map_state == IsViewable)
+    if (attr.map_state == IsViewable) {
         return;
+    }
 
-    XGetGeometry(dpy, getAppWindow(), &root, &position.x, &position.y, &w, &h, &border_width, &depth);
-
-    size.x = w;
-    size.y = h;
+    XGetGeometry(dpy, getAppWindow(), &root, &position.x, &position.y, (unsigned int *)&size.x, (unsigned int *)&size.y, &border_width, &depth);
 
     if (xsize->flags & PPosition) {
-            if(!position.x) position.x = xsize->x;
-            if(!position.y) position.y = xsize->y;
+        /* program specified position */
+        DEBUG("program specified position of window\n");
+        if(position.x == 0) position.x = xsize->x;
+        if(position.y == 0) position.y = xsize->y;
     }
-    else {
-        if (xsize->flags & USPosition) {
-            if(!position.x)
-                position.x = xsize->x;
-            if(!position.y)
-                position.y = xsize->y;
+    else if (xsize->flags & USPosition) {
+        /* user specified x, y */
+        DEBUG("user specified position of window\n");
+        if(position.x == 0) position.x = xsize->x;
+        if(position.y == 0) position.y = xsize->y;
+    }
+    else if (position.zero()) {
+        if(size.x >= wm->getXRes() && size.y >= wm->getYRes()) {
+            position.reset();
+            size.x = wm->getXRes();
+            size.y = wm->getYRes()-titleHeight();
         }
-        else if ( (position.x == 0) || (position.y == 0)  ) {
-            if(size.x >= wm->getXRes() && size.y >= wm->getYRes()) {
-                position.reset();
-                size.x = wm->getXRes();
-                size.y = wm->getYRes()-titleHeight();
+        else {
+            if (wm->getRandPlacement()) {
+                DEBUG("random position of window\n");
+                position.x = (rand() % (unsigned int) ((wm->getXRes() - size.x) * 0.94)) + ((unsigned int) (wm->getXRes() * 0.03));
+                position.y = (rand() % (unsigned int) ((wm->getYRes() - size.y) * 0.94)) + ((unsigned int) (wm->getYRes() * 0.03));
             }
             else {
-                wm->getMousePosition(&mouse_x, &mouse_y);
-
-                if(mouse_x && mouse_y) {
-                    if (wm->getRandPlacement()) {
-                        position.x = (rand() % (unsigned int) ((wm->getXRes() - size.x) * 0.94)) + ((unsigned int) (wm->getXRes() * 0.03));
-                        position.y = (rand() % (unsigned int) ((wm->getYRes() - size.y) * 0.94)) + ((unsigned int) (wm->getYRes() * 0.03));
-                    }
-                    else {
-                        position.x = (int) (((long) (wm->getXRes() - size.x) * (long) mouse_x) / (long) wm->getXRes());
-                        position.y = (int) (((long) (wm->getYRes() - size.y - titleHeight()) * (long) mouse_y) / (long) wm->getYRes());
-                        position.y = (position.y < titleHeight()) ? titleHeight() : position.y;
-                    }
-                    gravitate(REMOVE_GRAVITY);
-                }
+                DEBUG("mouse position used as position of window\n");
+                Point temp_mouse;
+                wm->getMousePosition(&temp_mouse.x, &temp_mouse.y);
+                position.x = (int) (((long) (wm->getXRes() - size.x) * (long) temp_mouse.x) / (long) wm->getXRes());
+                position.y = (int) (((long) (wm->getYRes() - size.y - titleHeight()) * (long) temp_mouse.y) / (long) wm->getYRes());
+                position.y = (position.y < titleHeight()) ? titleHeight() : position.y;
             }
+            gravitate(REMOVE_GRAVITY);
         }
     }
 }

@@ -129,6 +129,6 @@
  version 0.9.0, xxxx-xx-xx
 --------------------------------------------------------------------------------
     * Switched all x, y variables to Point objects
+    * Cleaned up window initial positioning
     * Bugfix: window instanciated by other window spawns on last used workspace
-    * 
 --------------------------------------------------------------------------------
