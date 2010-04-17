@@ -489,6 +489,8 @@ void WindowManager::grabKeys(Window w)
     for (unsigned int i = 0; i <= KEY_BINDING_COUNT; i++) {
         XGrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].modifier,
                 w,True,GrabModeAsync,GrabModeAsync);
+        XGrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].modifier|LockMask,
+                w,True,GrabModeAsync,GrabModeAsync);
     }
 }
 
@@ -502,6 +504,7 @@ void WindowManager::ungrabKeys(Window w)
     // Keybindings
     for (unsigned int i = 0; i <= KEY_BINDING_COUNT; i++) {
         XUngrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].modifier,w);
+        XUngrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].modifier|LockMask,w);
     }
 }
 
@@ -527,8 +530,9 @@ void WindowManager::handleKeyPressEvent(XEvent *ev)
     }
 
     // Key bindings
+    printf("keypress %d\n", (int)ks);
     for (unsigned int i = 0; i < KEY_BINDING_COUNT; i++) {
-        if (key_bindings[i].key == ks && key_bindings[i].modifier == state) {
+        if (key_bindings[i].key == ks && (key_bindings[i].modifier | state)) {
             handleAction(key_bindings[i].foo);
             return;
         }

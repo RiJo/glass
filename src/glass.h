@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Description:
- *   Generic data to be used by all other classes. Simple modifications of the
+ *   Common data to be used by all other classes. Simple modifications of the
  *   windowmanager can be done here, such as colors, keybindings and definition
  *   of executables.
  ******************************************************************************/

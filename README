@@ -131,4 +131,5 @@
     * Switched all x, y variables to Point objects
     * Cleaned up window initial positioning
     * Bugfix: window instanciated by other window spawns on last used workspace
+    * Bugfix: key bindings does not work if caps-lock is activated
 --------------------------------------------------------------------------------
