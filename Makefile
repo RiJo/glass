@@ -10,6 +10,7 @@ NAME     =  glass
 HEADERS  =  src/$(NAME).h           \
             src/client.h            \
             src/resources.h         \
+            src/widget.h            \
             src/foobar.h            \
             src/windowmanager.h     \
             src/point.h             \
@@ -18,6 +19,7 @@ OBJS     =  $(NAME).o               \
             windowmanager.o         \
             client.o                \
             resources.o             \
+            widget.o                \
             foobar.o                \
             point.o                 \
 

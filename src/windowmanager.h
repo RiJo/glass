@@ -12,6 +12,7 @@
 #include "glass.h"
 #include "client.h"
 #include "resources.h"
+#include "widget.h"
 #include "foobar.h"
 
 #include <signal.h>
@@ -85,6 +86,7 @@ private: /* member variables */
 #   GROUPING   #################################################################
 ##############################################################################*/
 
+    list<Widget> widgets;
     list<Client*> client_list;
     list<Window> client_window_list;
 

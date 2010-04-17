@@ -363,7 +363,8 @@ void Client::initPosition()
         return;
     }
 
-    XGetGeometry(dpy, getAppWindow(), &root, &position.x, &position.y, (unsigned int *)&size.x, (unsigned int *)&size.y, &border_width, &depth);
+    XGetGeometry(dpy, getAppWindow(), &root, &position.x, &position.y,
+            (unsigned int *)&size.x, (unsigned int *)&size.y, &border_width, &depth);
 
     if (xsize->flags & PPosition) {
         /* program specified position */
@@ -381,7 +382,7 @@ void Client::initPosition()
         if(size.x >= wm->getXRes() && size.y >= wm->getYRes()) {
             position.reset();
             size.x = wm->getXRes();
-            size.y = wm->getYRes()-titleHeight();
+            size.y = wm->getYRes() - titleHeight();
         }
         else {
             if (wm->getRandPlacement()) {

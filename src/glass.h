@@ -52,7 +52,7 @@ using namespace std;
 #define INITIAL_WORKSPACE           1
 #define RANDOM_WINDOW_PLACEMENT     false
 #define WIRE_MOVE                   false
-#define EDGE_SNAP                   5
+#define EDGE_SNAP                   10
 #define TITLE_MINIMUM_HEIGHT        15
 
 #ifdef _DEBUG_
