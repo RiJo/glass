@@ -58,6 +58,8 @@ WindowManager::WindowManager(int argc, char** argv)
     setupDisplay();
     scanWins();
 
+    //~ Widget tjoho(dpy, root, Point(100,100), Point(100,100));
+    
     foobar = new FooBar(dpy, root, workspace_count, current_workspace);
 
     doEventLoop();
@@ -385,6 +387,7 @@ void WindowManager::doEventLoop()
     while (1) {
         XNextEvent(dpy, &ev);
 
+        bool redraw_foobar = true;
         switch (ev.type) {
             case KeyPress:
                 DEBUG("* KeyPress\n");
@@ -426,15 +429,15 @@ void WindowManager::doEventLoop()
                 handleDestroyNotifyEvent(&ev);
             break;
 
-            case EnterNotify:
-                DEBUG("* EnterNotify\n");
-                handleEnterNotifyEvent(&ev);
-            break;
+            //~ case EnterNotify:
+                //~ DEBUG("* EnterNotify\n");
+                //~ handleEnterNotifyEvent(&ev);
+            //~ break;
 
-            case LeaveNotify:
-                DEBUG("* LeaveNotify\n");
-                handleLeaveNotifyEvent(&ev);
-            break;
+            //~ case LeaveNotify:
+                //~ DEBUG("* LeaveNotify\n");
+                //~ handleLeaveNotifyEvent(&ev);
+            //~ break;
 
             case FocusIn:
                 DEBUG("* FocusIn\n");
@@ -469,10 +472,13 @@ void WindowManager::doEventLoop()
             default:
                 DEBUG("* Unhandled type: %d\n", ev.type);
                 handleDefaultEvent(&ev);
+                redraw_foobar = false;
             break;
         }
         // Where to put this?!??
-        foobar->redraw();
+        if (redraw_foobar) {
+            foobar->redraw();
+        }
     }
 }
 

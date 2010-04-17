@@ -13,12 +13,17 @@
 class Widget
 {
 private: /* Member Variables */
+    Display *dpy;
+    Window window;
 
+    Point position;
+    Point size;
 
 private: /* Member Functions */
 
 
 public: /* Member Functions */
+    Widget(Display *, Window, Point, Point);
 
 };
 
