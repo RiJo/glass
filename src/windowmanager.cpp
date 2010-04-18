@@ -304,14 +304,15 @@ void WindowManager::scanWins(void)
     unsigned int nwins, i;
     Window dummyw1, dummyw2, *wins;
     XWindowAttributes attr;
-    Client *c=NULL;
+    Client *c = NULL;
 
     XQueryTree(dpy, root, &dummyw1, &dummyw2, &wins, &nwins);
     for(i = 0; i < nwins; i++) {
         XGetWindowAttributes(dpy, wins[i], &attr);
         if (!attr.override_redirect && attr.map_state == IsViewable) {
-            client_window_list.push_back(wins[i]);
             c = new Client(dpy, wins[i], NULL);
+            clients.insert(c);
+            windows[wins[i]] = c;
         }
     }
     XFree(wins);
@@ -651,8 +652,9 @@ void WindowManager::handleMapRequestEvent(XEvent *ev)
         c->handleMapRequest(&ev->xmaprequest);
     }
     else {
-        client_window_list.push_back(ev->xmaprequest.window);
         c = new Client(dpy, ev->xmaprequest.window, &pending_window);
+        windows[ev->xmaprequest.window] = c;
+        
         DEBUG("new client: window: %ld\t%ld\n", (long)ev->xmaprequest.window, (long)c);
         updateCharacteristics();
     }
@@ -692,36 +694,26 @@ void WindowManager::handleLeaveNotifyEvent(XEvent *ev)
 
 void WindowManager::handleFocusInEvent(XEvent *ev)
 {
-    if ((ev->xfocus.mode == NotifyGrab) || (ev->xfocus.mode == NotifyUngrab))
+    if ((ev->xfocus.mode == NotifyGrab) || (ev->xfocus.mode == NotifyUngrab)) {
         return;
+    }
 
-    list<Window>::iterator iter;
-
-    for(iter=client_window_list.begin(); iter != client_window_list.end(); iter++) {
-        if (ev->xfocus.window == (*iter)) {
-            Client *c = findClient( (*iter) );
-            if (c) {
-                unfocusAnyStrayClients();
-                c->handleFocusInEvent(&ev->xfocus);
-                focused_client = c;
-                grabKeys( (*iter) );
-            }
-        }
+    Client *c = windows[ev->xfocus.window];
+    if (c) {
+        unfocusAnyStrayClients();
+        c->handleFocusInEvent(&ev->xfocus);
+        focused_client = c;
+        grabKeys(ev->xfocus.window);
     }
 }
 
 void WindowManager::handleFocusOutEvent(XEvent *ev)
 {
-    list<Window>::iterator iter;
-    for(iter=client_window_list.begin(); iter != client_window_list.end(); iter++) {
-        if (ev->xfocus.window == (*iter)) {
-            Client *c = findClient( (*iter) );
-            if (c) {
-                focused_client = NULL;
-                ungrabKeys( (*iter) );
-                return;
-            }
-        }
+    Client *c = windows[ev->xfocus.window];
+    if (c) {
+        focused_client = NULL;
+        ungrabKeys(ev->xfocus.window);
+        return;
     }
 
     focusPreviousWindowInStackingOrder();
@@ -770,10 +762,10 @@ void WindowManager::unfocusAnyStrayClients()
 {
     // To prevent two windows titlebars from being painted with the focus color we
     // will prevent that from happening by setting all windows to false.
-
-    list<Client*>::iterator iter;
-    for(iter=client_list.begin(); iter != client_list.end(); iter++)
+    set<Client *>::iterator iter;
+    for (iter = clients.begin(); iter != clients.end(); iter++) {
         (*iter)->setFocus(false);
+    }
 }
 
 void WindowManager::focusPreviousWindowInStackingOrder()
@@ -786,7 +778,7 @@ void WindowManager::focusPreviousWindowInStackingOrder()
 
     XQueryTree(dpy, root, &dummyw1, &dummyw2, &wins, &nwins);
 
-    if (client_list.size()) {
+    if (clients.size()) {
         list<Client *> client_list_for_current_workspace;
 
         for (i = 0; i < nwins; i++) {
@@ -825,20 +817,20 @@ void WindowManager::getMousePosition(int *x, int *y)
 
 void WindowManager::addClient(Client *c)
 {
-    client_list.push_back(c);
+    clients.insert(c);
 }
 
 void WindowManager::removeClient(Client* c)
 {
-    client_window_list.remove(c->getAppWindow());
-    client_list.remove(c);
+    windows.erase(c->getAppWindow());
+    clients.erase(c);
 }
 
 Client* WindowManager::findClient(Window w)
 {
-    if (client_list.size() > 0) {
-        list<Client *>::iterator iter;
-        for(iter = client_list.begin(); iter != client_list.end(); iter++) {
+    if (clients.size() > 0) {
+        set<Client *>::iterator iter;
+        for (iter = clients.begin(); iter != clients.end(); iter++) {
             Window a = (*iter)->getTitleWindow();
             Window b = (*iter)->getFrameWindow();
             Window c = (*iter)->getAppWindow();
@@ -852,10 +844,9 @@ Client* WindowManager::findClient(Window w)
 
 void WindowManager::findTransientsToMapOrUnmap(Window win, bool hide)
 {
-    list<Client*>::iterator iter;
-
-    if (client_list.size()) {
-        for(iter=client_list.begin(); iter!= client_list.end(); iter++) {
+    if (clients.size()) {
+        set<Client *>::iterator iter;
+        for (iter = clients.begin(); iter != clients.end(); iter++) {
             if ((*iter)->getTransientWindow() == win) {
                 if (!hide) {
                     (*iter)->unhide();
@@ -979,10 +970,10 @@ int WindowManager::sendXMessage(Window w, Atom a, long mask, long x)
 }
 
 Client *WindowManager::focusedClient() {
-    list<Client*>::iterator it;
-    for(it = client_list.begin(); it != client_list.end(); it++) {
-        if ((*it)->hasFocus() && (*it)->isTagged(current_workspace)) {
-            return (*it);
+    set<Client *>::iterator iter;
+    for (iter = clients.begin(); iter != clients.end(); iter++) {
+        if ((*iter)->hasFocus() && (*iter)->isTagged(current_workspace)) {
+            return (*iter);
         }
     }
     return NULL;
@@ -1005,7 +996,7 @@ void WindowManager::runDialog() {
 }
 
 void WindowManager::closeFocusedClient() {
-    if (client_list.size()) {
+    if (clients.size()) {
         Client *focused = focusedClient();
         if (focused) {
             sendWMDelete(focused->getAppWindow());

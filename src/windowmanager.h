@@ -87,8 +87,8 @@ private: /* member variables */
 ##############################################################################*/
 
     list<Widget *> widgets;
-    list<Client *> client_list;
-    list<Window> client_window_list;
+    set<Client *> clients;
+    map<Window, Client *> windows;
 
     Resources *resources;
     FooBar *foobar;
@@ -173,7 +173,7 @@ public: /* Member Functions */
 
     Client* getFocusedClient() { return focused_client; }
 
-    inline list<Client*> getClientList() const { return client_list; }
+    //~ inline list<Client*> getClientList() const { return client_list; }
 
     void addClient(Client *c);
     void removeClient(Client* c);
