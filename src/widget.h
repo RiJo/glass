@@ -24,7 +24,8 @@ private: /* Member Functions */
 
 public: /* Member Functions */
     Widget(Display *, Window, Point, Point);
-
+    Point getPosition() { return position; }
+    Point getSize() { return size; }
 };
 
 

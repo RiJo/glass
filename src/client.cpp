@@ -163,7 +163,7 @@ void Client::removeClient()
     }
 
     // remove window from client
-    delete windows[current_window];
+    //~ delete windows[current_window];
     windows.erase(windows.begin() + current_window);
     current_window = 0;
     DEBUG("window removed, number of windows: %d\n", (int)windows.size());

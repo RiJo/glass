@@ -58,7 +58,7 @@ WindowManager::WindowManager(int argc, char** argv)
     setupDisplay();
     scanWins();
 
-    //~ Widget tjoho(dpy, root, Point(100,100), Point(100,100));
+    Widget tjoho(dpy, root, Point(100,100), Point(100,100));
     
     foobar = new FooBar(dpy, root, workspace_count, current_workspace);
 
@@ -581,10 +581,14 @@ void WindowManager::handleButtonPressEvent(XEvent *ev)
                 (ev->xbutton.type == ButtonPress) &&
                 (ev->xbutton.state == Mod1Mask) &&
                 (c->getFrameWindow() == ev->xbutton.window)
-            )
-            if (!XGrabPointer(dpy, c->getFrameWindow(), False, PointerMotionMask|ButtonReleaseMask,
-                    GrabModeAsync, GrabModeAsync, None, wm->getResources()->getCursor(CURSOR_MOVE), CurrentTime) == GrabSuccess)
-                return;
+            ) {
+                if (!XGrabPointer(dpy, c->getFrameWindow(), False,
+                        PointerMotionMask|ButtonReleaseMask, GrabModeAsync,
+                        GrabModeAsync, None, wm->getResources()->getCursor(CURSOR_MOVE),
+                        CurrentTime) == GrabSuccess) {
+                    return;
+                }
+            }
         }
 
         // if this is the first time the client window's clicked, focus it
@@ -649,6 +653,7 @@ void WindowManager::handleMapRequestEvent(XEvent *ev)
     else {
         client_window_list.push_back(ev->xmaprequest.window);
         c = new Client(dpy, ev->xmaprequest.window, &pending_window);
+        DEBUG("new client: window: %ld\t%ld\n", (long)ev->xmaprequest.window, (long)c);
         updateCharacteristics();
     }
 }
@@ -752,6 +757,8 @@ void WindowManager::handleExposeEvent(XEvent *ev)
 
 void WindowManager::handleDefaultEvent(XEvent *ev)
 {
+    // not in use
+
     /*Client* c = findClient(ev->xany.window);
     if (c) {
         if (shape && ev->type == shape_event)
@@ -780,7 +787,7 @@ void WindowManager::focusPreviousWindowInStackingOrder()
     XQueryTree(dpy, root, &dummyw1, &dummyw2, &wins, &nwins);
 
     if (client_list.size()) {
-        list<Client*> client_list_for_current_workspace;
+        list<Client *> client_list_for_current_workspace;
 
         for (i = 0; i < nwins; i++) {
             c = findClient(wins[i]);
@@ -887,6 +894,7 @@ void WindowManager::cleanup()
     for (i = 0; i < nwins; i++) {
         c = findClient(wins[i]);
         if (c) {
+            DEBUG("removing window: %ld\tclient: %ld\n", (long)wins[i], (long)c);
             XMapWindow(dpy, c->getAppWindow());
             delete c;
         }
@@ -899,6 +907,8 @@ void WindowManager::cleanup()
     XInstallColormap(dpy, DefaultColormap(dpy, screen));
     XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
     XCloseDisplay(dpy);
+    
+    cerr << PROGRAM_NAME << " is cleaned up!" << endl;
 }
 
 /* If we can't find a wm->wm_state we're going to have to assume

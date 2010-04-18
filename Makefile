@@ -1,37 +1,29 @@
-CC       =  g++
-CCFLAGS  =  -O2 -march=core2 -Wall
-DEBUG    =  -g -D=_DEBUG_
-PROFILE  =  -pg
-INCLUDES =  -I/usr/include
-LDPATH   =  -L/usr/lib64
-LIBS     =  -lXext -lX11
-NAME     =  glass
+CC          = g++
+CCFLAGS     = -O2 -march=core2 -Wall
+CCDEBUG     = -g -D=_DEBUG_
+CCPROFILE   = -pg
+INCLUDES    = -I/usr/include
+LDPATH      = -L/usr/lib64
+LIBS        = -lXext -lX11
+NAME        = glass
 
-HEADERS  =  src/$(NAME).h           \
-            src/client.h            \
-            src/resources.h         \
-            src/widget.h            \
-            src/foobar.h            \
-            src/windowmanager.h     \
-            src/point.h             \
-
-OBJS     =  $(NAME).o               \
-            windowmanager.o         \
-            client.o                \
-            resources.o             \
-            widget.o                \
-            foobar.o                \
-            point.o                 \
+OBJS        = $(NAME).o               \
+              windowmanager.o         \
+              client.o                \
+              resources.o             \
+              widget.o                \
+              foobar.o                \
+              point.o                 \
 
 all: $(NAME)
 
-debug: CCFLAGS += $(DEBUG) $(PROFILE)
+debug: CCFLAGS += $(CCDEBUG) $(CCPROFILE)
 debug: $(NAME)
 
-$(NAME): $(OBJS) $(HEADERS) Makefile
+$(NAME): $(OBJS) Makefile
 	$(CC) $(CCFLAGS) $(OBJS) $(LDPATH) $(LIBS) -o $@
 
-$(OBJS): %.o: src/%.cpp
+$(OBJS): %.o: src/%.cpp src/%.h
 	$(CC) $(CCFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:

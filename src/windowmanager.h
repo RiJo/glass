@@ -86,8 +86,8 @@ private: /* member variables */
 #   GROUPING   #################################################################
 ##############################################################################*/
 
-    list<Widget> widgets;
-    list<Client*> client_list;
+    list<Widget *> widgets;
+    list<Client *> client_list;
     list<Window> client_window_list;
 
     Resources *resources;
