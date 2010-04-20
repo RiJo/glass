@@ -58,8 +58,8 @@ WindowManager::WindowManager(int argc, char** argv)
     setupDisplay();
     scanWins();
 
-    Widget tjoho(dpy, root, Point(100,100), Point(100,100));
-    
+    //~ Widget tjoho(dpy, root, Point(100,100), Point(100,100));
+
     foobar = new FooBar(dpy, root, workspace_count, current_workspace);
 
     doEventLoop();
@@ -117,7 +117,7 @@ void WindowManager::parseCommandLine(int argc, char** argv)
                 exit(EXIT_FAILURE);
         }
     }
-    
+
     // Keep command line arguments for the restart action
     for (int i = 0; i < argc; i++) command_line = command_line + " " + argv[i];
 }
@@ -312,9 +312,9 @@ void WindowManager::scanWins(void)
         if (!attr.override_redirect && attr.map_state == IsViewable) {
             c = new Client(dpy, wins[i], NULL);
             windows[wins[i]] = c;
-            windows[c->getFrameWindow()] = c;
-            windows[c->getTitleWindow()] = c;
-            windows[c->getTransientWindow()] = c;
+            //~ windows[c->getFrameWindow()] = c;
+            //~ windows[c->getTitleWindow()] = c;
+            //~ windows[c->getTransientWindow()] = c;
         }
     }
     XFree(wins);
@@ -656,11 +656,11 @@ void WindowManager::handleMapRequestEvent(XEvent *ev)
     else {
         c = new Client(dpy, ev->xmaprequest.window, &pending_window);
         windows[ev->xmaprequest.window] = c;
-        windows[c->getFrameWindow()] = c;
-        windows[c->getTitleWindow()] = c;
-        windows[c->getTransientWindow()] = c;
-        
-        
+        //~ windows[c->getFrameWindow()] = c;
+        //~ windows[c->getTitleWindow()] = c;
+        //~ windows[c->getTransientWindow()] = c;
+
+
         DEBUG("new client: window: %ld\t%ld\n", (long)ev->xmaprequest.window, (long)c);
         updateCharacteristics();
     }
@@ -834,19 +834,20 @@ void WindowManager::removeClient(Client* c)
 
 Client *WindowManager::findClient(Window w)
 {
-    return windows[w];
-    //~ if (clients.size() > 0) {
-        //~ set<Client *>::iterator iter;
-        //~ for (iter = clients.begin(); iter != clients.end(); iter++) {
-            //~ Window a = (*iter)->getTitleWindow();
-            //~ Window b = (*iter)->getFrameWindow();
-            //~ Window c = (*iter)->getAppWindow();
-            //~ if (w ==  a || w == b || w == c) {
-                //~ return (*iter);
-            //~ }
-        //~ }
-    //~ }
-    //~ return NULL;
+    //~ map<Window, Client *>::iterator iter = windows.find(w);
+    //~ return (iter != windows.end()) ? (*iter).second : NULL;
+    if (clients.size() > 0) {
+        set<Client *>::iterator iter;
+        for (iter = clients.begin(); iter != clients.end(); iter++) {
+            Window a = (*iter)->getTitleWindow();
+            Window b = (*iter)->getFrameWindow();
+            Window c = (*iter)->getAppWindow();
+            if (w ==  a || w == b || w == c) {
+                return (*iter);
+            }
+        }
+    }
+    return NULL;
 }
 
 void WindowManager::findTransientsToMapOrUnmap(Window win, bool hide)
@@ -905,7 +906,7 @@ void WindowManager::cleanup()
     XInstallColormap(dpy, DefaultColormap(dpy, screen));
     XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
     XCloseDisplay(dpy);
-    
+
     cerr << PROGRAM_NAME << " is cleaned up!" << endl;
 }
 

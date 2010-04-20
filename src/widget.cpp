@@ -13,9 +13,9 @@ Widget::Widget(Display *display, Window parent, Point position, Point size)
     XMapWindow(dpy, window);
     //XFlush(dpy);
 
-    XEvent e;
-    char *msg = (char *)"Hello, World!";
-    int s = DefaultScreen(dpy);
+    //~ XEvent e;
+    //~ char *msg = (char *)"Hello, World!";
+    //~ int s = DefaultScreen(dpy);
 
     //~ if (fork() == 0) {
         //~ while (1) {
