@@ -312,9 +312,9 @@ void WindowManager::scanWins(void)
         if (!attr.override_redirect && attr.map_state == IsViewable) {
             c = new Client(dpy, wins[i], NULL);
             windows[wins[i]] = c;
-            //~ windows[c->getFrameWindow()] = c;
-            //~ windows[c->getTitleWindow()] = c;
-            //~ windows[c->getTransientWindow()] = c;
+            windows[c->getFrameWindow()] = c;
+            windows[c->getTitleWindow()] = c;
+            windows[c->getTransientWindow()] = c;
         }
     }
     XFree(wins);
@@ -474,7 +474,7 @@ void WindowManager::doEventLoop()
 
             default:
                 DEBUG("* Unhandled type: %d\n", ev.type);
-                handleDefaultEvent(&ev);
+                //handleDefaultEvent(&ev);
                 redraw_foobar = false;
             break;
         }
@@ -656,9 +656,9 @@ void WindowManager::handleMapRequestEvent(XEvent *ev)
     else {
         c = new Client(dpy, ev->xmaprequest.window, &pending_window);
         windows[ev->xmaprequest.window] = c;
-        //~ windows[c->getFrameWindow()] = c;
-        //~ windows[c->getTitleWindow()] = c;
-        //~ windows[c->getTransientWindow()] = c;
+        windows[c->getFrameWindow()] = c;
+        windows[c->getTitleWindow()] = c;
+        windows[c->getTransientWindow()] = c;
 
 
         DEBUG("new client: window: %ld\t%ld\n", (long)ev->xmaprequest.window, (long)c);
@@ -829,14 +829,17 @@ void WindowManager::addClient(Client *c)
 void WindowManager::removeClient(Client* c)
 {
     windows.erase(c->getAppWindow());
+    windows.erase(c->getFrameWindow());
+    windows.erase(c->getTitleWindow());
+    windows.erase(c->getTransientWindow());
     clients.erase(c);
 }
 
 Client *WindowManager::findClient(Window w)
 {
-    //~ map<Window, Client *>::iterator iter = windows.find(w);
-    //~ return (iter != windows.end()) ? (*iter).second : NULL;
-    if (clients.size() > 0) {
+    map<Window, Client *>::iterator iter = windows.find(w);
+    return (iter != windows.end()) ? (*iter).second : NULL;
+    /* if (clients.size() > 0) {
         set<Client *>::iterator iter;
         for (iter = clients.begin(); iter != clients.end(); iter++) {
             Window a = (*iter)->getTitleWindow();
@@ -847,7 +850,7 @@ Client *WindowManager::findClient(Window w)
             }
         }
     }
-    return NULL;
+    return NULL; */
 }
 
 void WindowManager::findTransientsToMapOrUnmap(Window win, bool hide)
