@@ -1,10 +1,12 @@
 --------------------------------------------------------------------------------
 
     glass
-    current version:     0.8.0
+    current version:     0.9.0
     by:                  Rikard Johansson
 
     A lightweight windowmanager for X11.
+
+    Feature requests/bugs: http://bugs.hermit.se/
 
 --------------------------------------------------------------------------------
 
@@ -127,7 +129,7 @@
 
 
 --------------------------------------------------------------------------------
- version 0.9.0, xxxx-xx-xx
+ version 0.9.0, 2010-04-23
 --------------------------------------------------------------------------------
     * Switched all x, y variables to Point objects
     * Cleaned up window initial positioning
@@ -136,4 +138,11 @@
     * Improved calculation of client title height
     * Bugfix: window instanciated by other window spawns on last used workspace
     * Bugfix: key bindings does not work if caps-lock is activated
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version x.x.x, xxxx-xx-xx
+--------------------------------------------------------------------------------
+    * 
 --------------------------------------------------------------------------------

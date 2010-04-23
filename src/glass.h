@@ -5,15 +5,6 @@
  *   of executables.
  ******************************************************************************/
 
-/*
-    Opitmizations?
-        Called alot of times:
-        - Client::titleHeight()
-        - FooBar::redraw*()
-        - additional compilation flags?
-
-*/
-
 #ifndef _GLASS_H_
 #define _GLASS_H_
 
@@ -36,8 +27,8 @@ using namespace std;
 
 
 #define PROGRAM_NAME                "glass"
-#define PROGRAM_VERSION             "0.9.0-b2"
-#define PROGRAM_DATE                "xxxx-xx-xx"
+#define PROGRAM_VERSION             "0.9.0"
+#define PROGRAM_DATE                "2010-04-23"
 
 #define EXEC_TERMINAL               (char *)"xterm -geometry 110x30"
 #define EXEC_WEBBROWSER             (char *)"firefox &> /dev/null"
