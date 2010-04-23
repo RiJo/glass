@@ -315,7 +315,6 @@ void WindowManager::scanWins(void)
             windows[wins[i]] = c;
             windows[c->getFrameWindow()] = c;
             windows[c->getTitleWindow()] = c;
-            //~ windows[c->getTransientWindow()] = c;
         }
     }
     XFree(wins);
@@ -328,7 +327,6 @@ void WindowManager::scanWins(void)
 void WindowManager::setupDisplay()
 {
     XSetWindowAttributes sattr;
-    int dummy;
 
     if (display)
         setenv("DISPLAY", display, 1);
@@ -364,6 +362,7 @@ void WindowManager::setupDisplay()
     _button_proxy_win=XCreateSimpleWindow(dpy, root, -80, -80, 24, 24,0,0,0);
     XChangeWindowAttributes(dpy, _button_proxy_win, CWOverrideRedirect, &pattr);
 
+    int dummy;
     shape = XShapeQueryExtension(dpy, &shape_event, &dummy);
 
     XDefineCursor(dpy, root, resources->getCursor(CURSOR_ARROW));
@@ -659,7 +658,6 @@ void WindowManager::handleMapRequestEvent(XEvent *ev)
         windows[ev->xmaprequest.window] = c;
         windows[c->getFrameWindow()] = c;
         windows[c->getTitleWindow()] = c;
-        //~ windows[c->getTransientWindow()] = c;
 
 
         DEBUG("new client: window: %ld\t%ld\n", (long)ev->xmaprequest.window, (long)c);
@@ -827,7 +825,6 @@ void WindowManager::removeClient(Client* c)
     windows.erase(c->getAppWindow());
     windows.erase(c->getFrameWindow());
     windows.erase(c->getTitleWindow());
-    //~ windows.erase(c->getTransientWindow());
     clients.erase(c);
 }
 
@@ -835,18 +832,6 @@ Client *WindowManager::findClient(Window w)
 {
     map<Window, Client *>::iterator iter = windows.find(w);
     return (iter != windows.end()) ? (*iter).second : NULL;
-    /* if (clients.size() > 0) {
-        set<Client *>::iterator iter;
-        for (iter = clients.begin(); iter != clients.end(); iter++) {
-            Window a = (*iter)->getTitleWindow();
-            Window b = (*iter)->getFrameWindow();
-            Window c = (*iter)->getAppWindow();
-            if (w ==  a || w == b || w == c) {
-                return (*iter);
-            }
-        }
-    }
-    return NULL; */
 }
 
 void WindowManager::findTransientsToMapOrUnmap(Window win, bool hide)

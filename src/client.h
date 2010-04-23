@@ -63,6 +63,7 @@ private: /* Member Variables */
     vector<win *> windows;
 
     int border_width;
+    int title_height;
 
     Point size;
     Point position;
@@ -102,7 +103,6 @@ private: /* Member Functions */
     int  getIncsize(int *, int *, int);
     void initPosition();
     void reparent();
-    int  titleHeight();
     void sendConfig();
     void gravitate(int);
     void generateTitle(win *);

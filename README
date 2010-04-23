@@ -131,8 +131,9 @@
 --------------------------------------------------------------------------------
     * Switched all x, y variables to Point objects
     * Cleaned up window initial positioning
-    * Improved storage of clients/windows in windowmanager for faster access
     * Made resource pointer global
+    * Improved storage of clients/windows in windowmanager for faster access
+    * Improved calculation of client title height
     * Bugfix: window instanciated by other window spawns on last used workspace
     * Bugfix: key bindings does not work if caps-lock is activated
 --------------------------------------------------------------------------------
