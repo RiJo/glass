@@ -33,11 +33,6 @@ private: /* Member Variables */
     Display *dpy;
     Window root;
 
-    GC background_gc;
-    GC active_gc;
-    GC inactive_gc;
-    GC text_gc;
-
     // Workspaces
     char &workspace_count;
     char &current_workspace;
@@ -48,7 +43,6 @@ private: /* Member Variables */
     unsigned int current_character;
 
 private: /* Member Functions */
-    void setupColors();
     void redrawWorkspaces();
     void redrawRunField();
 

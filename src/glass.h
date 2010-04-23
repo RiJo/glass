@@ -27,8 +27,8 @@ using namespace std;
 
 
 #define PROGRAM_NAME                "glass"
-#define PROGRAM_VERSION             "0.9.0"
-#define PROGRAM_DATE                "2010-04-23"
+#define PROGRAM_VERSION             "0.10.0-b1"
+#define PROGRAM_DATE                "xxxx-xx-xx"
 
 #define EXEC_TERMINAL               (char *)"xterm -geometry 110x30"
 #define EXEC_WEBBROWSER             (char *)"firefox &> /dev/null"
@@ -41,7 +41,7 @@ using namespace std;
 
 #define COLOR_TITLE_FG_FOCUS        (char *)"#dddddd"
 #define COLOR_TITLE_FG_UNFOCUS      (char *)"#bbbbbb"
-#define COLOR_TITLE_BG_FOCUS        (char *)"#000000"
+#define COLOR_TITLE_BG_FOCUS        (char *)"#070707"
 #define COLOR_TITLE_BG_UNFOCUS      (char *)"#000000"
 #define COLOR_TITLE_BD_FOCUS        (char *)"#333333"
 #define COLOR_TITLE_BD_UNFOCUS      (char *)"#333333"

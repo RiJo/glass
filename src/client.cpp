@@ -467,8 +467,8 @@ void Client::handleMotionNotifyEvent(XMotionEvent *ev)
         if(! do_drawoutline_once && wm->getWireMove()) {
             XGrabServer(dpy);
             drawOutline();
-            do_drawoutline_once=true;
-            is_being_dragged=true;
+            do_drawoutline_once = true;
+            is_being_dragged = true;
         }
 
         if(wm->getWireMove()) {
@@ -494,19 +494,19 @@ void Client::handleMotionNotifyEvent(XMotionEvent *ev)
 
             // Snap to edges of screen
             if ( (new_cursor.x + size.x >= wm->getXRes() - snap_width) && (new_cursor.x + size.x <= wm->getXRes()) )
-                new_cursor.x = wm->getXRes() - size.x;
+                new_cursor.x = wm->getXRes() - size.x - (2 * border_width);
             else if ( (new_cursor.x <= snap_width) && (new_cursor.x >= 0) )
                 new_cursor.x = 0;
 
             if (is_shaded) {
                 if ( (new_cursor.y  >= wm->getYRes() - snap_width) && (new_cursor.y  <= wm->getYRes()) )
-                    new_cursor.y = wm->getYRes();
+                    new_cursor.y = wm->getYRes() - (2 * border_width);
                 else if ( (new_cursor.y - title_height <= snap_width) && (new_cursor.y - title_height >= 0))
                     new_cursor.y = title_height;
             }
             else {
                 if ( (new_cursor.y + size.y >= wm->getYRes() - snap_width) && (new_cursor.y + size.y <= wm->getYRes()) )
-                    new_cursor.y = wm->getYRes() - size.y;
+                    new_cursor.y = wm->getYRes() - size.y - (2 * border_width);
                 else if ( (new_cursor.y - title_height <= snap_width) && (new_cursor.y - title_height >= 0))
                     new_cursor.y = title_height;
             }
@@ -514,14 +514,14 @@ void Client::handleMotionNotifyEvent(XMotionEvent *ev)
 
         position = new_cursor;
 
-        if(!wm->getWireMove()) {
+        if(wm->getWireMove()) {
+            drawOutline();
+        }
+        else {
             XMoveWindow(dpy, frame, new_cursor.x, new_cursor.y - title_height);
             sendConfig();
         }
 
-        if(wm->getWireMove()) {
-            drawOutline();
-        }
     }
     else if(ev->state & Button3Mask) {
         if(! is_being_resized) {

@@ -69,7 +69,7 @@ WindowManager::WindowManager(int argc, char** argv)
 void WindowManager::print_help() {
     printf("Usage: %s [-hv] [-d DISPLAY] [-w WORKSPACES]\n", PROGRAM_NAME);
     printf("Small windowmanager\n\n");
-    printf("  -d, --display DISPLAY          the display to start the window manager on, default is %s\n", getenv("DISPLAY"));
+    printf("  -d, --display DISPLAY          the display to start the window manager on, default is \"%s\"\n", getenv("DISPLAY"));
     printf("  -h, --help                     display this help and exit\n");
     printf("  -v, --version                  display version information and exit\n");
     printf("  -w, --workspaces WORKSPACES    specify the number of workspaces, default is %d\n", DEFAULT_WORKSPACE_COUNT);
@@ -358,8 +358,8 @@ void WindowManager::setupDisplay()
     atom_wm_takefocus = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
 
     XSetWindowAttributes pattr;
-    pattr.override_redirect=True;
-    _button_proxy_win=XCreateSimpleWindow(dpy, root, -80, -80, 24, 24,0,0,0);
+    pattr.override_redirect = True;
+    _button_proxy_win = XCreateSimpleWindow(dpy, root, -80, -80, 24, 24,0,0,0);
     XChangeWindowAttributes(dpy, _button_proxy_win, CWOverrideRedirect, &pattr);
 
     int dummy;

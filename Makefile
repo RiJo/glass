@@ -19,7 +19,7 @@ OBJS        = $(NAME).o               \
               foobar.o                \
               point.o                 \
 
-all: $(NAME)
+all: $(NAME) $(SRC)/$(NAME).h
 
 debug: CCFLAGS += $(CCDEBUG) $(CCPROFILE)
 debug: $(NAME)

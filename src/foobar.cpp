@@ -1,36 +1,21 @@
 #include "foobar.h"
 #include "windowmanager.h"
 
+/*
+    Use resource object in setupColors()?
+    Need for redrawing filled box every time?
+*/
+
 FooBar::FooBar(Display *d, Window w, char &count, char &current) :
 workspace_count(count), current_workspace(current)
 {
     dpy = d;
     root = w;
 
-    setupColors();
+    //~ setupColors();
 
     runfield_active = false;
     resetRunField();
-}
-
-void FooBar::setupColors() {
-    XColor background_color, active_color, inactive_color, text_color, dummyc;
-
-    background_gc = XCreateGC(dpy, root, 0, 0);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_TITLE_BG_FOCUS, &background_color, &dummyc);
-    XSetForeground(dpy, background_gc, background_color.pixel);
-
-    active_gc = XCreateGC(dpy, root, 0, 0);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_CLIENT_BD_FOCUS, &active_color, &dummyc);
-    XSetForeground(dpy, active_gc, active_color.pixel);
-
-    inactive_gc = XCreateGC(dpy, root, 0, 0);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_CLIENT_BD_UNFOCUS, &inactive_color, &dummyc);
-    XSetForeground(dpy, inactive_gc, inactive_color.pixel);
-
-    text_gc = XCreateGC(dpy, root, 0, 0);
-    XAllocNamedColor(dpy, DefaultColormap(dpy, 0), COLOR_TITLE_FG_FOCUS, &text_color, &dummyc);
-    XSetForeground(dpy, text_gc, text_color.pixel);
 }
 
 void FooBar::redrawWorkspaces()
@@ -44,17 +29,27 @@ void FooBar::redrawWorkspaces()
         offset.x = 1 + WORKSPACE_OFFSET(ws);
         offset.y = 1;
 
-        XFillRectangle(dpy, root, background_gc, offset.x, offset.y, WORKSPACE_WIDTH, BAR_HEIGHT);
+        COLOR background_color;
+        COLOR border_color;
+        COLOR text_color;
+        
         if (ws == current_workspace) {
-            XDrawRectangle(dpy, root, active_gc, offset.x, offset.y, WORKSPACE_WIDTH, BAR_HEIGHT);
+            background_color = COLOR_BACKGROUND_FOCUSED;
+            border_color = COLOR_BORDER_FOCUSED;
+            text_color = COLOR_FOREGROUND_FOCUSED;
         }
         else {
-            XDrawRectangle(dpy, root, inactive_gc, offset.x, offset.y, WORKSPACE_WIDTH, BAR_HEIGHT);
+            background_color = COLOR_BACKGROUND_UNFOCUSED;
+            border_color = COLOR_BORDER_UNFOCUSED;
+            text_color = COLOR_FOREGROUND_UNFOCUSED;
         }
+
+        XFillRectangle(dpy, root, resources->getGC(background_color), offset.x, offset.y, WORKSPACE_WIDTH, BAR_HEIGHT);
+        XDrawRectangle(dpy, root, resources->getGC(border_color), offset.x, offset.y, WORKSPACE_WIDTH, BAR_HEIGHT);
 
         if (ws > 0) {
             text->chars[0] = (char)(48 + ws);
-            XDrawText(dpy, root, text_gc, offset.x + MAGIC_NUMBER - 1, offset.y + MAGIC_NUMBER, text, 1);
+            XDrawText(dpy, root, resources->getGC(text_color), offset.x + MAGIC_NUMBER - 1, offset.y + MAGIC_NUMBER, text, 1);
         }
     }
 
@@ -64,16 +59,25 @@ void FooBar::redrawWorkspaces()
 
 void FooBar::redrawRunField()
 {
-    GC gc;
-    if (runfield_active)
-        gc = active_gc;
-    else
-        gc = inactive_gc;
+    COLOR background_color;
+    COLOR border_color;
+    COLOR text_color;
+    
+    if (runfield_active) {
+        background_color = COLOR_BACKGROUND_FOCUSED;
+        border_color = COLOR_BORDER_FOCUSED;
+        text_color = COLOR_FOREGROUND_FOCUSED;
+    }
+    else {
+        background_color = COLOR_BACKGROUND_UNFOCUSED;
+        border_color = COLOR_BORDER_UNFOCUSED;
+        text_color = COLOR_FOREGROUND_UNFOCUSED;
+    }
 
     Point offset(WORKSPACES_WIDTH, 1);
 
-    XFillRectangle(dpy, root, background_gc, offset.x, offset.y, RUNFIELD_WIDTH, BAR_HEIGHT);
-    XDrawRectangle(dpy, root, gc, offset.x, offset.y, RUNFIELD_WIDTH, BAR_HEIGHT);
+    XFillRectangle(dpy, root, resources->getGC(background_color), offset.x, offset.y, RUNFIELD_WIDTH, BAR_HEIGHT);
+    XDrawRectangle(dpy, root, resources->getGC(border_color), offset.x, offset.y, RUNFIELD_WIDTH, BAR_HEIGHT);
 
     XTextItem *text = new XTextItem();
     if (strlen(runfield) <= RUNFIELD_MAX_WIDTH) {
@@ -85,7 +89,7 @@ void FooBar::redrawRunField()
         text->nchars = RUNFIELD_MAX_WIDTH;
     }
 
-    XDrawText(dpy, root, text_gc, offset.x + MAGIC_NUMBER, offset.y + MAGIC_NUMBER, text, 1);
+    XDrawText(dpy, root, resources->getGC(text_color), offset.x + MAGIC_NUMBER, offset.y + MAGIC_NUMBER, text, 1);
 
     delete text;
 }
