@@ -175,7 +175,7 @@ int Client::titleHeight()
         return 0;
     }
 
-    int title_size = wm->getResources()->getFont(FONT_NORMAL)->ascent + wm->getResources()->getFont(FONT_NORMAL)->descent + 4;
+    int title_size = resources->getFont(FONT_NORMAL)->ascent + resources->getFont(FONT_NORMAL)->descent + 4;
     return (title_size > TITLE_MINIMUM_HEIGHT) ? title_size : TITLE_MINIMUM_HEIGHT;
 }
 
@@ -206,23 +206,23 @@ void Client::redraw()
     // Title decoration
     GC gc;
     if(has_focus)
-        gc = wm->getResources()->getGC(COLOR_DECORATION_FOCUSED);
+        gc = resources->getGC(COLOR_DECORATION_FOCUSED);
     else
-        gc = wm->getResources()->getGC(COLOR_DECORATION_UNFOCUSED);
+        gc = resources->getGC(COLOR_DECORATION_UNFOCUSED);
 
     XDrawLine(dpy, title, gc, 0, titleHeight() - border_width, size.x, titleHeight() - border_width);
     XDrawLine(dpy, title, gc, size.x - titleHeight(), 0, size.x - titleHeight(), titleHeight());
 
     // Title text
     if(has_focus)
-        gc = wm->getResources()->getGC(COLOR_FOREGROUND_FOCUSED);
+        gc = resources->getGC(COLOR_FOREGROUND_FOCUSED);
     else
-        gc = wm->getResources()->getGC(COLOR_FOREGROUND_UNFOCUSED);
+        gc = resources->getGC(COLOR_FOREGROUND_UNFOCUSED);
 
     const char *title_text = windows[current_window]->title;
     if (!trans && title_text) {
         int text_justify = size.x - windows[current_window]->title_width - 25;
-        XDrawString(dpy, title, gc, text_justify, wm->getResources()->getFont(FONT_NORMAL)->ascent+1,title_text, strlen(title_text));
+        XDrawString(dpy, title, gc, text_justify, resources->getFont(FONT_NORMAL)->ascent+1,title_text, strlen(title_text));
     }
 }
 
@@ -246,7 +246,7 @@ void Client::generateTitle(win *window) {
     strcpy(window->title, buffer);
 
     // title width
-    XTextExtents(wm->getResources()->getFont(FONT_NORMAL), window->title, strlen(window->title), &direction, &ascent, &descent, &overall);
+    XTextExtents(resources->getFont(FONT_NORMAL), window->title, strlen(window->title), &direction, &ascent, &descent, &overall);
     window->title_width = overall.width;
 }
 
@@ -573,16 +573,16 @@ void Client::handleMotionNotifyEvent(XMotionEvent *ev)
 void Client::drawOutline()
 {
     if (!is_shaded) {
-        XDrawRectangle(dpy, root, wm->getResources()->getGC(COLOR_BORDER_FOCUSED),
+        XDrawRectangle(dpy, root, resources->getGC(COLOR_BORDER_FOCUSED),
                 position.x + border_width/2, position.y - titleHeight() + border_width/2,
                 size.x + border_width, size.y + titleHeight() + border_width);
 
-        XDrawRectangle(dpy, root, wm->getResources()->getGC(COLOR_BORDER_FOCUSED),
+        XDrawRectangle(dpy, root, resources->getGC(COLOR_BORDER_FOCUSED),
                 position.x + border_width/2 + 4, position.y - titleHeight() + border_width/2 + 4,
                 size.x + border_width - 8, size.y + titleHeight() + border_width - 8);
     }
     else {
-        XDrawRectangle(dpy, root, wm->getResources()->getGC(COLOR_BORDER_FOCUSED),
+        XDrawRectangle(dpy, root, resources->getGC(COLOR_BORDER_FOCUSED),
                 position.x + border_width/2,
                 position.y - titleHeight() + border_width/2,
                 size.x + border_width,
@@ -700,8 +700,8 @@ void Client::reparent()
     XGrabServer(dpy);
 
     XSetWindowAttributes pattr;
-    pattr.background_pixel = wm->getResources()->getColor(COLOR_BACKGROUND_FOCUSED).pixel;
-    pattr.border_pixel = wm->getResources()->getColor(COLOR_BORDER_FOCUSED).pixel;
+    pattr.background_pixel = resources->getColor(COLOR_BACKGROUND_FOCUSED).pixel;
+    pattr.border_pixel = resources->getColor(COLOR_BORDER_FOCUSED).pixel;
     pattr.do_not_propagate_mask = ButtonPressMask|ButtonReleaseMask|ButtonMotionMask;
     pattr.override_redirect=False;
     pattr.event_mask = ButtonMotionMask|
@@ -883,12 +883,12 @@ void Client::setFocus(bool focus)
 
     if (has_title) {
         if(has_focus) {
-            XSetWindowBackground(dpy, title, wm->getResources()->getColor(COLOR_BACKGROUND_FOCUSED).pixel);
-            XSetWindowBorder(dpy, frame, wm->getResources()->getColor(COLOR_BORDER_FOCUSED).pixel);
+            XSetWindowBackground(dpy, title, resources->getColor(COLOR_BACKGROUND_FOCUSED).pixel);
+            XSetWindowBorder(dpy, frame, resources->getColor(COLOR_BORDER_FOCUSED).pixel);
         }
         else {
-            XSetWindowBackground(dpy, title, wm->getResources()->getColor(COLOR_BACKGROUND_UNFOCUSED).pixel);
-            XSetWindowBorder(dpy, frame, wm->getResources()->getColor(COLOR_BORDER_UNFOCUSED).pixel);
+            XSetWindowBackground(dpy, title, resources->getColor(COLOR_BACKGROUND_UNFOCUSED).pixel);
+            XSetWindowBorder(dpy, frame, resources->getColor(COLOR_BORDER_UNFOCUSED).pixel);
         }
         XClearWindow(dpy, title);
         redraw();

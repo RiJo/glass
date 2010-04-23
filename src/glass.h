@@ -5,6 +5,22 @@
  *   of executables.
  ******************************************************************************/
 
+/*
+    Opitmizations?
+        Called alot of times:
+        - Client::titleHeight()
+        - WindowManager::getResources()
+        - FooBar::redraw*()
+        - focused_client used in wm?
+        - additional compilation flags?
+    line 803 in wm.c
+
+    What are those in wm?
+    * inline int getShape()         const { return shape; }
+    * inline int getShapeEvent()     const { return shape_event; }
+
+*/
+
 #ifndef _GLASS_H_
 #define _GLASS_H_
 
@@ -27,8 +43,8 @@ using namespace std;
 
 
 #define PROGRAM_NAME                "glass"
-#define PROGRAM_VERSION             "0.8.0"
-#define PROGRAM_DATE                "2010-04-10"
+#define PROGRAM_VERSION             "0.9.0-b1"
+#define PROGRAM_DATE                "xxxx-xx-xx"
 
 #define EXEC_TERMINAL               (char *)"xterm -geometry 110x30"
 #define EXEC_WEBBROWSER             (char *)"firefox &> /dev/null"

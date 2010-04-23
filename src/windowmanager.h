@@ -90,7 +90,6 @@ private: /* member variables */
     set<Client *> clients;
     map<Window, Client *> windows;
 
-    Resources *resources;
     FooBar *foobar;
     Client* focused_client;
 
@@ -183,7 +182,6 @@ public: /* Member Functions */
     void unfocusAnyStrayClients();
     void findTransientsToMapOrUnmap(Window win, bool hide);
 
-    inline Resources *getResources() const { return resources; }
     inline int getShape()         const { return shape; }
     inline int getShapeEvent()     const { return shape_event; }
 
@@ -220,5 +218,6 @@ public: /* Member Functions */
 };
 
 extern WindowManager *wm;
+extern Resources *resources;
 
 #endif // _WINDOWMANAGER_H_

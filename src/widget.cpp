@@ -5,7 +5,7 @@ Widget::Widget(Display *display, Window parent, Point position, Point size)
         : position(position), size(size) {
     dpy = display;
 
-    unsigned long background = wm->getResources()->getColor(COLOR_BORDER_FOCUSED).pixel;
+    unsigned long background =resources->getColor(COLOR_BORDER_FOCUSED).pixel;
 
     window = XCreateSimpleWindow(dpy, parent, position.x, position.y, size.x, size.y, 0, 0, background);
 

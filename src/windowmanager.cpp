@@ -1,6 +1,7 @@
 #include "windowmanager.h"
 
 WindowManager* wm;
+Resources *resources;
 
 /*##############################################################################
 #   TEST   #####################################################################
@@ -314,7 +315,7 @@ void WindowManager::scanWins(void)
             windows[wins[i]] = c;
             windows[c->getFrameWindow()] = c;
             windows[c->getTitleWindow()] = c;
-            windows[c->getTransientWindow()] = c;
+            //~ windows[c->getTransientWindow()] = c;
         }
     }
     XFree(wins);
@@ -365,7 +366,7 @@ void WindowManager::setupDisplay()
 
     shape = XShapeQueryExtension(dpy, &shape_event, &dummy);
 
-    XDefineCursor(dpy, root, wm->getResources()->getCursor(CURSOR_ARROW));
+    XDefineCursor(dpy, root, resources->getCursor(CURSOR_ARROW));
 
     sattr.event_mask = SubstructureRedirectMask |
                 SubstructureNotifyMask |
@@ -587,7 +588,7 @@ void WindowManager::handleButtonPressEvent(XEvent *ev)
             ) {
                 if (!XGrabPointer(dpy, c->getFrameWindow(), False,
                         PointerMotionMask|ButtonReleaseMask, GrabModeAsync,
-                        GrabModeAsync, None, wm->getResources()->getCursor(CURSOR_MOVE),
+                        GrabModeAsync, None, resources->getCursor(CURSOR_MOVE),
                         CurrentTime) == GrabSuccess) {
                     return;
                 }
@@ -658,7 +659,7 @@ void WindowManager::handleMapRequestEvent(XEvent *ev)
         windows[ev->xmaprequest.window] = c;
         windows[c->getFrameWindow()] = c;
         windows[c->getTitleWindow()] = c;
-        windows[c->getTransientWindow()] = c;
+        //~ windows[c->getTransientWindow()] = c;
 
 
         DEBUG("new client: window: %ld\t%ld\n", (long)ev->xmaprequest.window, (long)c);
@@ -778,7 +779,6 @@ void WindowManager::focusPreviousWindowInStackingOrder()
 {
     unsigned int nwins, i;
     Window dummyw1, dummyw2, *wins;
-    Client* c=NULL;
 
     XSetInputFocus(dpy, _button_proxy_win, RevertToNone, CurrentTime);
 
@@ -788,7 +788,7 @@ void WindowManager::focusPreviousWindowInStackingOrder()
         list<Client *> client_list_for_current_workspace;
 
         for (i = 0; i < nwins; i++) {
-            c = findClient(wins[i]);
+            Client* c = findClient(wins[i]);
             if (c && c->isTagged(current_workspace) && c->hasWindowDecorations()) {
                 client_list_for_current_workspace.push_back(c);
             }
@@ -799,12 +799,8 @@ void WindowManager::focusPreviousWindowInStackingOrder()
 
             iter--;
 
-            if ( (*iter) ) {
+            if ((*iter)) {
                 XSetInputFocus(dpy, (*iter)->getAppWindow(), RevertToNone, CurrentTime);
-                client_list_for_current_workspace.clear();
-                XFree(wins);
-
-                return;
             }
         }
     }
@@ -831,7 +827,7 @@ void WindowManager::removeClient(Client* c)
     windows.erase(c->getAppWindow());
     windows.erase(c->getFrameWindow());
     windows.erase(c->getTitleWindow());
-    windows.erase(c->getTransientWindow());
+    //~ windows.erase(c->getTransientWindow());
     clients.erase(c);
 }
 
