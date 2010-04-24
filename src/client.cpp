@@ -479,6 +479,7 @@ void Client::handleMotionNotifyEvent(XMotionEvent *ev)
         new_cursor.x = old_cursor.x + (ev->x_root - cursor.x);
         new_cursor.y = old_cursor.y + (ev->y_root - cursor.y);
 
+        int border_offset = 2; // fix this! some window (firefox, scite) does not have border => (2 * border_width) = 0
         int snap_width = wm->getEdgeSnap();
         if(snap_width) {
             // Move beyond edges of screen
@@ -494,19 +495,19 @@ void Client::handleMotionNotifyEvent(XMotionEvent *ev)
 
             // Snap to edges of screen
             if ( (new_cursor.x + size.x >= wm->getXRes() - snap_width) && (new_cursor.x + size.x <= wm->getXRes()) )
-                new_cursor.x = wm->getXRes() - size.x - (2 * border_width);
+                new_cursor.x = wm->getXRes() - size.x - border_offset;
             else if ( (new_cursor.x <= snap_width) && (new_cursor.x >= 0) )
                 new_cursor.x = 0;
 
             if (is_shaded) {
                 if ( (new_cursor.y  >= wm->getYRes() - snap_width) && (new_cursor.y  <= wm->getYRes()) )
-                    new_cursor.y = wm->getYRes() - (2 * border_width);
+                    new_cursor.y = wm->getYRes() - border_offset;
                 else if ( (new_cursor.y - title_height <= snap_width) && (new_cursor.y - title_height >= 0))
                     new_cursor.y = title_height;
             }
             else {
                 if ( (new_cursor.y + size.y >= wm->getYRes() - snap_width) && (new_cursor.y + size.y <= wm->getYRes()) )
-                    new_cursor.y = wm->getYRes() - size.y - (2 * border_width);
+                    new_cursor.y = wm->getYRes() - size.y - border_offset;
                 else if ( (new_cursor.y - title_height <= snap_width) && (new_cursor.y - title_height >= 0))
                     new_cursor.y = title_height;
             }

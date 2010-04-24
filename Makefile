@@ -15,7 +15,6 @@ OBJS        = $(NAME).o               \
               windowmanager.o         \
               client.o                \
               resources.o             \
-              widget.o                \
               foobar.o                \
               point.o                 \
 

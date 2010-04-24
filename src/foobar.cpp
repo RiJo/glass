@@ -1,18 +1,11 @@
 #include "foobar.h"
 #include "windowmanager.h"
 
-/*
-    Use resource object in setupColors()?
-    Need for redrawing filled box every time?
-*/
-
 FooBar::FooBar(Display *d, Window w, char &count, char &current) :
 workspace_count(count), current_workspace(current)
 {
     dpy = d;
     root = w;
-
-    //~ setupColors();
 
     runfield_active = false;
     resetRunField();
@@ -145,6 +138,7 @@ void FooBar::handleButtonEvent(XButtonEvent *e)
             }
             break;
     }
+    redraw();
 }
 
 void FooBar::handleKeyEvent(XKeyEvent *e)
@@ -185,5 +179,16 @@ void FooBar::handleKeyEvent(XKeyEvent *e)
                 runfield[current_character++] = ks;
             }
             break;
+    }
+    redraw();
+}
+
+void FooBar::handleFocusInEvent(XFocusChangeEvent *e) {
+    redraw();
+}
+
+void FooBar::handleExposeEvent(XExposeEvent *e) {
+    if (e->count == 0) {
+        redraw();
     }
 }

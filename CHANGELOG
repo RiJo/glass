@@ -1,0 +1,124 @@
+--------------------------------------------------------------------------------
+
+    glass
+
+    for more information see the file README.
+
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.1.0, 2010-03-18
+--------------------------------------------------------------------------------
+    * Forked from aewm++ (timestamped 28 December 2008)
+    * Abstracted keybindings
+    * Toggle windows (Alt-Tab)
+    * Close active window (Alt-F4)
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.2.0, 2010-03-19
+--------------------------------------------------------------------------------
+    * Improved swapping of workspace
+    * Renamed desktop to workspace
+    * Removed all menus
+    * Windows are tagged a workspace (can belong to several workspaces)
+    * A workspace with all windows
+    * Shortcuts for accessing workspaces (Mod4+<num>)
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.3.0, 2010-03-20
+--------------------------------------------------------------------------------
+    * Updated copyright information
+    * Shortcut for toggling tags on focused window (Ctrl-Alt-<num>)
+    * Step through workspaces with mouse scrolling
+    * Simple bar showing workspaces as boxes with the active one highlighted
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.4.0, 2010-03-22
+--------------------------------------------------------------------------------
+    * Renamed workspacebar to foobar
+    * Minor calibrations of foobar geometry
+    * Added workspace numbers in foobar
+    * Switch workspace by clicking in foobar
+    * Runfield to fork programs in foobar (Mod4-r)
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.5.0, 2010-03-23
+--------------------------------------------------------------------------------
+    * Removed some of the commandline arguments
+    * Rewrote commandline argument parser to use getopt instead
+    * Added resource object to handle all X resources
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.5.1, 2010-03-23
+--------------------------------------------------------------------------------
+    * Moved source code to separate folder, updated Makefile
+    * Updated help output
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.6.0, 2010-04-03
+--------------------------------------------------------------------------------
+    * Added support for special characters in runfield
+    * Added aliases to the fork-exec functionality
+    * Added debug option to Makefile, cleaned up Makefile
+    * Added debug printout when compiled as debug
+    * Corrected warnings from valgrind, still memory leaks though
+    * Bugfix: foobar could not handle dynamic number of workspaces
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.7.0, 2010-04-05
+--------------------------------------------------------------------------------
+    * Ability to execute actions with aliases
+    * Cleaned up all includes
+    * Removed ability to iconify clients
+    * Improved edge snap and title height macros
+    * Bugfix: invalid command line argument during restart action
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.8.0, 2010-04-10
+--------------------------------------------------------------------------------
+    * Preparation for grouping windows
+    * Preparation for fork-exec windows with predefined settings
+    * Ability to specify workspace to fork-exec in from runfield: "<ws>:<cmd>"
+    * Cleaned up old enums and macros
+    * Removed ability to set title align in clients
+    * Initial implementation of Point class to replace x and y variables
+    * Bugfix: decoration line between title and window not drawn properly
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version 0.9.0, 2010-04-23
+--------------------------------------------------------------------------------
+    * Switched all x, y variables to Point objects
+    * Cleaned up window initial positioning
+    * Made resource pointer global
+    * Improved storage of clients/windows in windowmanager for faster access
+    * Improved calculation of client title height
+    * Bugfix: window instanciated by other window spawns on last used workspace
+    * Bugfix: key bindings does not work if caps-lock is activated
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+ version x.x.x, xxxx-xx-xx
+--------------------------------------------------------------------------------
+    * Improved redrawing of FooBar
+    * Bugfix: snap to edge not aligned properly on the right and bottom side
+--------------------------------------------------------------------------------

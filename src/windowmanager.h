@@ -12,7 +12,6 @@
 #include "glass.h"
 #include "client.h"
 #include "resources.h"
-#include "widget.h"
 #include "foobar.h"
 
 #include <signal.h>
@@ -86,7 +85,6 @@ private: /* member variables */
 #   GROUPING   #################################################################
 ##############################################################################*/
 
-    list<Widget *> widgets;
     set<Client *> clients;
     map<Window, Client *> windows;
 
@@ -172,8 +170,6 @@ public: /* Member Functions */
 
     Client* getFocusedClient() { return focused_client; }
 
-    //~ inline list<Client*> getClientList() const { return client_list; }
-
     void addClient(Client *c);
     void removeClient(Client* c);
     Client* findClient(Window w);
@@ -191,7 +187,7 @@ public: /* Member Functions */
     int sendXMessage(Window w, Atom a, long mask, long x);
 
     void getMousePosition(int *x, int *y);
-    void goToWorkspace(char);
+    bool goToWorkspace(char);
     inline char getCurrentWorkspace() const { return current_workspace; }
     bool setCurrentWorkspace(char);
 
@@ -210,8 +206,6 @@ public: /* Member Functions */
     inline Atom getWMTakeFocusAtom() const { return atom_wm_takefocus; }
 
     Client *focusedClient();
-    void nextWorkspace();
-    void previousWorkspace();
     void nextClient();
     void runDialog();
     void closeFocusedClient();

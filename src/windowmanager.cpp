@@ -59,8 +59,6 @@ WindowManager::WindowManager(int argc, char** argv)
     setupDisplay();
     scanWins();
 
-    //~ Widget tjoho(dpy, root, Point(100,100), Point(100,100));
-
     foobar = new FooBar(dpy, root, workspace_count, current_workspace);
 
     doEventLoop();
@@ -196,39 +194,39 @@ void WindowManager::handleAction(action a)
     switch (a.type) {
         case WM_QUIT:
             quitNicely();
-        break;
+            break;
 
         case WM_RESTART:
             restart();
-        break;
+            break;
 
         case WM_NEXT_CLIENT:
             nextClient();
-        break;
+            break;
 
         case WM_CLOSE_CLIENT:
             closeFocusedClient();
-        break;
+            break;
 
         case WM_WS_SHIFT_RIGHT:
-            nextWorkspace();
-        break;
+            goToWorkspace(current_workspace + 1);
+            break;
 
         case WM_WS_SHIFT_LEFT:
-            previousWorkspace();
-        break;
+            goToWorkspace(current_workspace - 1);
+            break;
 
         case WM_RUN_DIALOG:
             runDialog();
-        break;
+            break;
 
         case WM_EXEC:
             forkExec(a.command);
-        break;
+            break;
 
         default:
             fprintf(stderr, "Warning: not a valid action type: %d\n", a.type);
-        break;
+            break;
     }
 }
 
@@ -273,18 +271,18 @@ bool WindowManager::setCurrentWorkspace(char x)
     }
 }
 
-void WindowManager::goToWorkspace(char x)
+bool WindowManager::goToWorkspace(char x)
 {
-    unsigned int nwins, i;
-    Window dummyw1, dummyw2, *wins;
-    Client* c;
-
     if (setCurrentWorkspace(x)) {
         XSetInputFocus(dpy, _button_proxy_win, RevertToNone, CurrentTime);
 
         // Preserve stacking order
+        unsigned int nwins;
+        Window dummyw1, dummyw2, *wins;
         XQueryTree(dpy, root, &dummyw1, &dummyw2, &wins, &nwins);
-        for (i = 0; i < nwins; i++) {
+
+        Client* c;
+        for (unsigned int i = 0; i < nwins; i++) {
             c = findClient(wins[i]);
 
             if (c) {
@@ -297,7 +295,9 @@ void WindowManager::goToWorkspace(char x)
             }
         }
         XFree(wins);
+        return true;
     }
+    return false;
 }
 
 void WindowManager::scanWins(void)
@@ -389,98 +389,91 @@ void WindowManager::doEventLoop()
 
     while (1) {
         XNextEvent(dpy, &ev);
-
-        bool redraw_foobar = true;
         switch (ev.type) {
             case KeyPress:
-                DEBUG("* KeyPress\n");
+                DEBUG("* KeyPress (%ld)\n", (long)ev.xkey.window);
                 handleKeyPressEvent(&ev);
-            break;
+                break;
 
             case ButtonPress:
-                DEBUG("* ButtonPress\n");
+                DEBUG("* ButtonPress (%ld)\n", (long)ev.xbutton.window);
                 handleButtonPressEvent(&ev);
-            break;
+                break;
 
             case ButtonRelease:
-                DEBUG("* ButtonRelease\n");
+                DEBUG("* ButtonRelease (%ld)\n", (long)ev.xbutton.window);
                 handleButtonReleaseEvent(&ev);
-            break;
+                break;
 
             case ConfigureRequest:
-                DEBUG("* ConfigureRequest\n");
+                DEBUG("* ConfigureRequest (%ld)\n", (long)ev.xconfigurerequest.window);
                 handleConfigureRequestEvent(&ev);
-            break;
+                break;
 
             case MotionNotify:
-                DEBUG("* MotionNotify\n");
+                DEBUG("* MotionNotify (%ld)\n", (long)ev.xmotion.window);
                 handleMotionNotifyEvent(&ev);
-            break;
+                break;
 
             case MapRequest:
-                DEBUG("* MapRequest\n");
+                DEBUG("* MapRequest (%ld)\n", (long)ev.xmaprequest.window);
                 handleMapRequestEvent(&ev);
-            break;
+                break;
 
-            case UnmapNotify:
-                DEBUG("* UnmapNotify\n");
+                case UnmapNotify:
+                DEBUG("* UnmapNotify (%ld)\n", (long)ev.xunmap.window);
                 handleUnmapNotifyEvent(&ev);
-            break;
+                break;
 
             case DestroyNotify:
-                DEBUG("* DestroyNotify\n");
+                DEBUG("* DestroyNotify (%ld)\n", (long)ev.xdestroywindow.window);
                 handleDestroyNotifyEvent(&ev);
-            break;
+                break;
 
             //~ case EnterNotify:
                 //~ DEBUG("* EnterNotify\n");
                 //~ handleEnterNotifyEvent(&ev);
-            //~ break;
+            //~     break;
 
             //~ case LeaveNotify:
                 //~ DEBUG("* LeaveNotify\n");
                 //~ handleLeaveNotifyEvent(&ev);
-            //~ break;
+            //~     break;
 
             case FocusIn:
-                DEBUG("* FocusIn\n");
+                DEBUG("* FocusIn (%ld)\n", (long)ev.xfocus.window);
                 handleFocusInEvent(&ev);
-            break;
+                break;
 
             case FocusOut:
-                DEBUG("* FocusOut\n");
+                DEBUG("* FocusOut (%ld)\n", (long)ev.xfocus.window);
                 handleFocusOutEvent(&ev);
-            break;
+                break;
 
             case ClientMessage:
-                DEBUG("* ClientMessage\n");
+                DEBUG("* ClientMessage (%ld)\n", (long)ev.xclient.window);
                 handleClientMessageEvent(&ev);
-            break;
+                break;
 
             case ColormapNotify:
-                DEBUG("* ColormapNotify\n");
+                DEBUG("* ColormapNotify (%ld)\n", (long)ev.xcolormap.window);
                 handleColormapNotifyEvent(&ev);
-            break;
+                break;
 
             case PropertyNotify:
-                DEBUG("* PropertyNotify\n");
+                DEBUG("* PropertyNotify (%ld)\n", (long)ev.xproperty.window);
                 handlePropertyNotifyEvent(&ev);
-            break;
+                break;
 
             case Expose:
-                DEBUG("* Expose\n");
+                DEBUG("* Expose (%ld)\n", (long)ev.xexpose.window);
                 handleExposeEvent(&ev);
-            break;
+                break;
 
             default:
                 DEBUG("* Unhandled type: %d\n", ev.type);
                 //handleDefaultEvent(&ev);
-                redraw_foobar = false;
-            break;
-        }
-        // Where to put this?!??
-        if (redraw_foobar) {
-            foobar->redraw();
+                break;
         }
     }
 }
@@ -556,29 +549,26 @@ void WindowManager::handleButtonPressEvent(XEvent *ev)
     if (ev->xbutton.window == root) {
         switch (ev->xbutton.button) {
             case Button1: // left
-                foobar->handleButtonEvent(&ev->xbutton);
-            break;
-
             case Button2: // middle
-                foobar->handleButtonEvent(&ev->xbutton);
-            break;
-
             case Button3: // right
                 foobar->handleButtonEvent(&ev->xbutton);
-            break;
+                break;
 
             case Button4: // scroll up
-                nextWorkspace();
-            break;
+                if (goToWorkspace(current_workspace + 1)) {
+                    foobar->redraw();
+                }
+                break;
 
             case Button5: // scroll down
-                previousWorkspace();
-            break;
+                if (goToWorkspace(current_workspace - 1)) {
+                    foobar->redraw();
+                }
+                break;
         }
     }
     else {
         Client* c = findClient(ev->xbutton.window);
-
         if (c && c->hasWindowDecorations()) {
             if ( (ev->xbutton.button == Button1) &&
                 (ev->xbutton.type == ButtonPress) &&
@@ -644,6 +634,7 @@ void WindowManager::handleMotionNotifyEvent(XEvent *ev)
     Client* c = findClient(ev->xmotion.window);
     if (c) {
         c->handleMotionNotifyEvent(&ev->xmotion);
+        foobar->redraw();
     }
 }
 
@@ -658,7 +649,6 @@ void WindowManager::handleMapRequestEvent(XEvent *ev)
         windows[ev->xmaprequest.window] = c;
         windows[c->getFrameWindow()] = c;
         windows[c->getTitleWindow()] = c;
-
 
         DEBUG("new client: window: %ld\t%ld\n", (long)ev->xmaprequest.window, (long)c);
         updateCharacteristics();
@@ -710,6 +700,8 @@ void WindowManager::handleFocusInEvent(XEvent *ev)
         focused_client = c;
         grabKeys(ev->xfocus.window);
     }
+    
+    foobar->handleFocusInEvent(&ev->xfocus);
 }
 
 void WindowManager::handleFocusOutEvent(XEvent *ev)
@@ -748,8 +740,10 @@ void WindowManager::handlePropertyNotifyEvent(XEvent *ev)
 void WindowManager::handleExposeEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xexpose.window);
-    if (c)
+    if (c) {
         c->handleExposeEvent(&ev->xexpose);
+    }
+    foobar->handleExposeEvent(&ev->xexpose);
 }
 
 void WindowManager::handleDefaultEvent(XEvent *ev)
@@ -969,14 +963,6 @@ Client *WindowManager::focusedClient() {
         }
     }
     return NULL;
-}
-
-void WindowManager::nextWorkspace() {
-    goToWorkspace(current_workspace + 1);
-}
-
-void WindowManager::previousWorkspace() {
-    goToWorkspace(current_workspace - 1);
 }
 
 void WindowManager::nextClient() {

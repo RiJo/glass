@@ -53,8 +53,11 @@ public: /* Member Functions */
     FooBar(Display *, Window, char &, char &);
 
     void redraw();
+
     void handleButtonEvent(XButtonEvent *);
     void handleKeyEvent(XKeyEvent *);
+    void handleFocusInEvent(XFocusChangeEvent *);
+    void handleExposeEvent(XExposeEvent *);
 
     void setRunfield(bool);
     bool getRunfield() { return runfield_active; }
