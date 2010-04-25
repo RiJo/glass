@@ -27,7 +27,7 @@ struct character; // forward declaration
 
 /*
     What is gravity???
-    What is transistent???
+    What is transient??? dialogs/message boxes
 */
 
 enum { APPLY_GRAVITY=1, REMOVE_GRAVITY=-1 };
@@ -54,9 +54,9 @@ private: /* Member Variables */
     Colormap cmap;
     int screen;
 
-    Window frame;    // parent window which we reparent the client to
-    Window title;    // window which holds title
-    Window trans;    // window id for which this client is transient for
+    Window frame;       // parent window which we reparent the client to
+    Window title;       // window which holds title
+    Window transient;   // window id for which this client is transient for
 
     set<char> tags;
     int current_window;
@@ -123,9 +123,9 @@ public: /* Member Functions */
     Window getFrameWindow() const { return frame; }
     Window getAppWindow() const { return windows[current_window]->window; }
     Window getTitleWindow() const { return title; }
-    Window getTransientWindow() const { return trans; }
+    Window getTransientWindow() const { return transient; }
 
-    bool isTransient() const { return (trans != 0); }
+    bool isTransient() const { return (transient != 0); }
 
     bool hasWindowDecorations() const { return has_title; }
     bool hasFocus() const { return has_focus; }

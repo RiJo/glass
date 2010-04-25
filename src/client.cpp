@@ -19,7 +19,7 @@ void Client::initialize(Display *d)
 
     frame                   = None;
     title                   = None;
-    trans                   = None;
+    transient               = None;
 
     current_window          = 0;
     ignore_unmap            = 0;
@@ -76,7 +76,7 @@ void Client::makeNewClient(Window w, character *c)
     windows.push_back(new_window);
     current_window = windows.size() - 1;
 
-    XGetTransientForHint(dpy, w, &trans);
+    XGetTransientForHint(dpy, w, &transient);
 
     XWindowAttributes attr;
     XGetWindowAttributes(dpy, w, &attr);
@@ -135,8 +135,8 @@ void Client::removeClient()
 {
     XGrabServer(dpy);
 
-    if (trans) {
-        XSetInputFocus(dpy, trans, RevertToNone, CurrentTime);
+    if (transient) {
+        XSetInputFocus(dpy, transient, RevertToNone, CurrentTime);
     }
 
     XUngrabButton(dpy, AnyButton, AnyModifier, frame);
@@ -216,15 +216,16 @@ void Client::redraw()
     XDrawLine(dpy, title, gc, size.x - title_height, 0, size.x - title_height, title_height);
 
     // Title text
-    if(has_focus)
-        gc = resources->getGC(COLOR_FOREGROUND_FOCUSED);
-    else
-        gc = resources->getGC(COLOR_FOREGROUND_UNFOCUSED);
-
     const char *title_text = windows[current_window]->title;
-    if (!trans && title_text) {
+    if (!transient && title_text) {
+        if(has_focus)
+            gc = resources->getGC(COLOR_FOREGROUND_FOCUSED);
+        else
+            gc = resources->getGC(COLOR_FOREGROUND_UNFOCUSED);
+
+        XFontStruct *font = resources->getFont(FONT_NORMAL);
         int text_justify = size.x - windows[current_window]->title_width - 25;
-        XDrawString(dpy, title, gc, text_justify, resources->getFont(FONT_NORMAL)->ascent+1,title_text, strlen(title_text));
+        XDrawString(dpy, title, gc, text_justify, font->ascent + 1, title_text, strlen(title_text));
     }
 }
 
@@ -285,24 +286,21 @@ void Client::setShape()
     dummy = XShapeGetRectangles(dpy, getAppWindow(), ShapeBounding, &n, &order);
 
     if (n > 1) {
-        XShapeCombineShape(dpy, frame, ShapeBounding,
-                0, title_height, getAppWindow(), ShapeBounding, ShapeSet);
+        XShapeCombineShape(dpy, frame, ShapeBounding, 0, title_height, getAppWindow(), ShapeBounding, ShapeSet);
 
         temp.x = -border_width;
         temp.y = -border_width;
         temp.width = size.x + 2 * border_width;
         temp.height = title_height + border_width;
 
-        XShapeCombineRectangles(dpy, frame, ShapeBounding,
-                0, 0, &temp, 1, ShapeUnion, YXBanded);
+        XShapeCombineRectangles(dpy, frame, ShapeBounding, 0, 0, &temp, 1, ShapeUnion, YXBanded);
 
         temp.x = 0;
         temp.y = 0;
         temp.width = size.x;
         temp.height = title_height - border_width;
 
-        XShapeCombineRectangles(dpy, frame, ShapeClip,
-                0, title_height, &temp, 1, ShapeUnion, YXBanded);
+        XShapeCombineRectangles(dpy, frame, ShapeClip, 0, title_height, &temp, 1, ShapeUnion, YXBanded);
 
         has_been_shaped = 1;
     }
@@ -312,8 +310,7 @@ void Client::setShape()
         temp.width = size.x + 2 * border_width;
         temp.height = size.y + title_height + 2 * border_width;
 
-        XShapeCombineRectangles(dpy, frame, ShapeBounding,
-                0, 0, &temp, 1, ShapeSet, YXBanded);
+        XShapeCombineRectangles(dpy, frame, ShapeBounding, 0, 0, &temp, 1, ShapeSet, YXBanded);
     }
 
     XFree(dummy);
@@ -345,7 +342,7 @@ void Client::hide()
 void Client::unhide()
 {
     if(isTagged(wm->getCurrentWorkspace())) {
-        if(trans) {
+        if(transient) {
             wm->findTransientsToMapOrUnmap(getAppWindow(), false);
         }
 
@@ -413,7 +410,9 @@ void Client::initPosition()
 
 void Client::maximize()
 {
-    if(trans) return;
+    if(transient) {
+        return;
+    }
 
     if(is_shaded) {
         shade();

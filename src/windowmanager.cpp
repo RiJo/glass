@@ -133,7 +133,10 @@ void WindowManager::sigHandler(int signal)
             wm->restart();
             break;
         case SIGCHLD:
-            wait(NULL);
+            wait(NULL); // remove ghost processes
+            break;
+        case SIGALRM:
+            wm->forkExec(INACTIVITY_COMMAND);
             break;
     }
 }
@@ -144,6 +147,7 @@ void WindowManager::setupSignalHandlers()
     signal(SIGTERM, sigHandler);
     signal(SIGHUP, sigHandler);
     signal(SIGCHLD, sigHandler);
+    signal(SIGALRM, sigHandler);
 }
 
 pid_t WindowManager::forkExec(char *cmd) {
@@ -475,6 +479,10 @@ void WindowManager::doEventLoop()
                 //handleDefaultEvent(&ev);
                 break;
         }
+        
+        /* Note: it's improtant that the INACTIVITY_COMMAND not sends any xevents
+           to the server, though this will cause the alarm timer to start again */
+        alarm(INACTIVITY_TIMEOUT);
     }
 }
 

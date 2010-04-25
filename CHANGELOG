@@ -119,6 +119,10 @@
 --------------------------------------------------------------------------------
  version x.x.x, xxxx-xx-xx
 --------------------------------------------------------------------------------
+    * Added event inactivity timer to execute a command (lock/screensaver)
     * Improved redrawing of FooBar
     * Bugfix: snap to edge not aligned properly on the right and bottom side
+    
+    TODO: 
+        dig into transient clients
 --------------------------------------------------------------------------------

@@ -27,8 +27,11 @@ using namespace std;
 
 
 #define PROGRAM_NAME                "glass"
-#define PROGRAM_VERSION             "0.10.0-b2"
+#define PROGRAM_VERSION             "0.10.0-b3"
 #define PROGRAM_DATE                "xxxx-xx-xx"
+
+#define INACTIVITY_TIMEOUT          600
+#define INACTIVITY_COMMAND          (char *)"vlock -n"
 
 #define EXEC_TERMINAL               (char *)"xterm -geometry 110x30"
 #define EXEC_WEBBROWSER             (char *)"firefox &> /dev/null"
@@ -54,6 +57,7 @@ using namespace std;
 #define WIRE_MOVE                   false
 #define EDGE_SNAP                   10
 #define TITLE_MINIMUM_HEIGHT        15
+
 
 #ifdef _DEBUG_
 #define DEBUG printf("[debug] ");printf
