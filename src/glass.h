@@ -27,7 +27,7 @@ using namespace std;
 
 
 #define PROGRAM_NAME                "glass"
-#define PROGRAM_VERSION             "0.10.0-b3"
+#define PROGRAM_VERSION             "0.10.0-b4"
 #define PROGRAM_DATE                "xxxx-xx-xx"
 
 #define INACTIVITY_TIMEOUT          600

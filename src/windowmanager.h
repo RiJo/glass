@@ -160,7 +160,7 @@ private: /* Member Functions */
     void grabKeys(Window w);
     void ungrabKeys(Window w);
 
-    static void sigHandler(int signal);
+    static void signalHandler(int signal);
 
 public: /* Member Functions */
 

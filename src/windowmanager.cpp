@@ -121,7 +121,7 @@ void WindowManager::parseCommandLine(int argc, char** argv)
     for (int i = 0; i < argc; i++) command_line = command_line + " " + argv[i];
 }
 
-void WindowManager::sigHandler(int signal)
+void WindowManager::signalHandler(int signal)
 {
     DEBUG("signal received: %d\n", signal);
     switch (signal) {
@@ -143,11 +143,11 @@ void WindowManager::sigHandler(int signal)
 
 void WindowManager::setupSignalHandlers()
 {
-    signal(SIGINT, sigHandler);
-    signal(SIGTERM, sigHandler);
-    signal(SIGHUP, sigHandler);
-    signal(SIGCHLD, sigHandler);
-    signal(SIGALRM, sigHandler);
+    signal(SIGINT, signalHandler);
+    signal(SIGTERM, signalHandler);
+    signal(SIGHUP, signalHandler);
+    signal(SIGCHLD, signalHandler);
+    signal(SIGALRM, signalHandler);
 }
 
 pid_t WindowManager::forkExec(char *cmd) {
@@ -299,6 +299,9 @@ bool WindowManager::goToWorkspace(char x)
             }
         }
         XFree(wins);
+
+        foobar->redraw();
+
         return true;
     }
     return false;
@@ -316,9 +319,9 @@ void WindowManager::scanWins(void)
         XGetWindowAttributes(dpy, wins[i], &attr);
         if (!attr.override_redirect && attr.map_state == IsViewable) {
             c = new Client(dpy, wins[i], NULL);
-            windows[wins[i]] = c;
-            windows[c->getFrameWindow()] = c;
-            windows[c->getTitleWindow()] = c;
+            //~ windows[wins[i]] = c;
+            //~ windows[c->getFrameWindow()] = c;
+            //~ windows[c->getTitleWindow()] = c;
         }
     }
     XFree(wins);
@@ -479,10 +482,12 @@ void WindowManager::doEventLoop()
                 //handleDefaultEvent(&ev);
                 break;
         }
-        
+
         /* Note: it's improtant that the INACTIVITY_COMMAND not sends any xevents
-           to the server, though this will cause the alarm timer to start again */
-        alarm(INACTIVITY_TIMEOUT);
+            to the server, though this will cause the alarm timer to start again */
+        if (INACTIVITY_TIMEOUT > 0) {
+            alarm(INACTIVITY_TIMEOUT);
+        }
     }
 }
 
@@ -563,15 +568,11 @@ void WindowManager::handleButtonPressEvent(XEvent *ev)
                 break;
 
             case Button4: // scroll up
-                if (goToWorkspace(current_workspace + 1)) {
-                    foobar->redraw();
-                }
+                goToWorkspace(current_workspace + 1);
                 break;
 
             case Button5: // scroll down
-                if (goToWorkspace(current_workspace - 1)) {
-                    foobar->redraw();
-                }
+                goToWorkspace(current_workspace - 1);
                 break;
         }
     }
@@ -654,9 +655,9 @@ void WindowManager::handleMapRequestEvent(XEvent *ev)
     }
     else {
         c = new Client(dpy, ev->xmaprequest.window, &pending_window);
-        windows[ev->xmaprequest.window] = c;
-        windows[c->getFrameWindow()] = c;
-        windows[c->getTitleWindow()] = c;
+        //~ windows[ev->xmaprequest.window] = c;
+        //~ windows[c->getFrameWindow()] = c;
+        //~ windows[c->getTitleWindow()] = c;
 
         DEBUG("new client: window: %ld\t%ld\n", (long)ev->xmaprequest.window, (long)c);
         updateCharacteristics();
@@ -708,7 +709,7 @@ void WindowManager::handleFocusInEvent(XEvent *ev)
         focused_client = c;
         grabKeys(ev->xfocus.window);
     }
-    
+
     foobar->handleFocusInEvent(&ev->xfocus);
 }
 
@@ -727,22 +728,25 @@ void WindowManager::handleFocusOutEvent(XEvent *ev)
 void WindowManager::handleClientMessageEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xclient.window);
-    if (c)
+    if (c) {
         c->handleClientMessage(&ev->xclient);
+    }
 }
 
 void WindowManager::handleColormapNotifyEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xcolormap.window);
-    if (c)
+    if (c) {
         c->handleColormapChange(&ev->xcolormap);
+    }
 }
 
 void WindowManager::handlePropertyNotifyEvent(XEvent *ev)
 {
     Client* c = findClient(ev->xproperty.window);
-    if (c)
+    if (c) {
         c->handlePropertyChange(&ev->xproperty);
+    }
 }
 
 void WindowManager::handleExposeEvent(XEvent *ev)
@@ -757,12 +761,6 @@ void WindowManager::handleExposeEvent(XEvent *ev)
 void WindowManager::handleDefaultEvent(XEvent *ev)
 {
     // not in use
-
-    /*Client* c = findClient(ev->xany.window);
-    if (c) {
-        if (shape && ev->type == shape_event)
-            c->handleShapeChange((XShapeEvent *)ev);
-    }*/
 }
 
 void WindowManager::unfocusAnyStrayClients()
@@ -820,6 +818,9 @@ void WindowManager::getMousePosition(int *x, int *y)
 void WindowManager::addClient(Client *c)
 {
     clients.insert(c);
+    windows[c->getAppWindow()] = c;
+    windows[c->getFrameWindow()] = c;
+    windows[c->getTitleWindow()] = c;
 }
 
 void WindowManager::removeClient(Client* c)

@@ -2,10 +2,11 @@
 
 Client::Client(Display *d, Window new_client, character *c)
 {
-    DEBUG("new client:\tpid: %ld\tpos: %d:%d\tsize: %d:%d\tcmd: \"%s\"\n", (long)c->pid, c->position.x, c->position.y, c->size.x, c->size.y, c->command.c_str());
+    DEBUG("new client:\tpid: %ld\tpos: %d:%d\tsize: %d:%d\tcmd: \"%s\"\n",
+            (long)c->pid, c->position.x, c->position.y, c->size.x, c->size.y, c->command.c_str());
     initialize(d);
-    wm->addClient(this);
     makeNewClient(new_client, c);
+    wm->addClient(this);
 }
 
 Client::~Client()
