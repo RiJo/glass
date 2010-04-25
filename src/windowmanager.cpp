@@ -150,23 +150,12 @@ void WindowManager::setupSignalHandlers()
     signal(SIGALRM, signalHandler);
 }
 
-pid_t WindowManager::forkExec(char *cmd) {
+pid_t WindowManager::forkExec(const char *cmd) {
     if (!cmd || strlen(cmd) == 0) {
         DEBUG("no command to execute\n");
         return 0;
     }
-
-    // parse workspace from command
-    char workspace = 0;
-    const char *separator = ":";
-    char *x = strstr(cmd, separator);
-    if (x != NULL) {
-        *x = '\0';
-        workspace = atoi(cmd);
-        cmd = (x + 1);
-    }
-
-    DEBUG("executing \"%s\" on workspace %d\n", cmd, workspace);
+    DEBUG("executing \"%s\"\n", cmd);
 
     pid_t pid = fork();
     if (pid < 0) {
@@ -177,17 +166,6 @@ pid_t WindowManager::forkExec(char *cmd) {
         execlp("/bin/sh", "sh", "-c", cmd, NULL);
         fprintf(stderr, "Error: exec failed, cleaning up child\n");
         exit(EXIT_FAILURE);
-    }
-    else {
-        pending_window.command = cmd;
-        pending_window.pid = pid;
-        pending_window.position.reset();
-        pending_window.size.reset();
-        pending_window.tags.clear();
-        if (workspace != 0) {
-            pending_window.tags.insert(workspace);
-        }
-        pending_window.durability = 1;
     }
     return pid;
 }
@@ -224,25 +202,57 @@ void WindowManager::handleAction(action a)
             runDialog();
             break;
 
-        case WM_EXEC:
-            forkExec(a.command);
+        case WM_EXEC: {
+            pid_t pid;
+            if (a.command == NULL) {
+                pid = forkExec(pending_window.command.c_str());
+            }
+            else {
+                pid = forkExec(a.command);
+            }
+            pending_window.pid = pid;
             break;
-
+        }
         default:
             fprintf(stderr, "Warning: not a valid action type: %d\n", a.type);
             break;
     }
 }
 
+void WindowManager::parseCommand(char *command) {
+    char workspace = current_workspace;
+    const char *separator = ":";
+    char *x = strstr(command, separator);
+    if (x != NULL) {
+        *x = '\0';
+        workspace = atoi(command);
+        pending_window.command.assign(x + 1);
+    }
+    else {
+        pending_window.command.assign(command);
+    }
+    pending_window.position.reset();
+    pending_window.size.reset();
+    pending_window.tags.clear();
+    pending_window.tags.insert(workspace);
+    pending_window.durability = 1;
+}
+
 void WindowManager::execute(char *command)
 {
+    /* stores the parsed data in pending_window */
+    parseCommand(command);
+
     for (register unsigned int i = 0; i < ALIASES_COUNT; i++) {
-        if (strcmp(aliases[i].identifier, command) == 0) {
+        if (strcmp(aliases[i].identifier, pending_window.command.c_str()) == 0) {
             handleAction(aliases[i].foo);
             return;
         }
     }
-    forkExec(command);
+    action exec;
+    exec.type = WM_EXEC;
+    exec.command = NULL;
+    handleAction(exec);
 }
 
 void WindowManager::updateCharacteristics() {

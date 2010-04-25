@@ -131,8 +131,9 @@ private: /* Member Functions */
     void quitNicely();
     void restart();
 
-    pid_t forkExec(char *);
+    pid_t forkExec(const char *);
     void handleAction(action);
+    void parseCommand(char *);
     void updateCharacteristics();
 
     void print_help();
