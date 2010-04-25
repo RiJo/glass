@@ -61,7 +61,7 @@ void Client::getXClientName(win *window)
     generateTitle(window);
 }
 
-void Client::makeNewClient(Window w, character *c)
+void Client::makeNewClient(Window window, character *c)
 {
     XGrabServer(dpy);
 
@@ -70,17 +70,17 @@ void Client::makeNewClient(Window w, character *c)
     new_window->name = NULL;
     new_window->title = NULL;
     new_window->title_width = 0;
-    new_window->window = w;
+    new_window->window = window;
 
     getXClientName(new_window);
 
     windows.push_back(new_window);
     current_window = windows.size() - 1;
 
-    XGetTransientForHint(dpy, w, &transient);
+    XGetTransientForHint(dpy, window, &transient);
 
     XWindowAttributes attr;
-    XGetWindowAttributes(dpy, w, &attr);
+    XGetWindowAttributes(dpy, window, &attr);
 
     position = c->position;
     size = c->size;
@@ -90,7 +90,7 @@ void Client::makeNewClient(Window w, character *c)
     xsize = XAllocSizeHints();
 
     long dummy;
-    XGetWMNormalHints(dpy, w, xsize, &dummy);
+    XGetWMNormalHints(dpy, window, xsize, &dummy);
 
     //~ if (attr.map_state == IsViewable) {
         //~ XWMHints *hints;
@@ -125,7 +125,7 @@ void Client::makeNewClient(Window w, character *c)
 
     unhide();
 
-    XSetInputFocus(dpy, w, RevertToNone, CurrentTime);
+    XSetInputFocus(dpy, window, RevertToNone, CurrentTime);
 
     XSync(dpy, False);
     XUngrabServer(dpy);
@@ -218,7 +218,8 @@ void Client::redraw()
 
     // Title text
     const char *title_text = windows[current_window]->title;
-    if (!transient && title_text) {
+    if (title_text) {
+    //~ if (!transient && title_text) {
         if(has_focus)
             gc = resources->getGC(COLOR_FOREGROUND_FOCUSED);
         else

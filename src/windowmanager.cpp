@@ -491,37 +491,37 @@ void WindowManager::doEventLoop()
     }
 }
 
-void WindowManager::grabKeys(Window w)
+void WindowManager::grabKeys(Window window)
 {
     // Workspace/tag switchers
     for (int i = 0; i <= workspace_count; i++) {
         XGrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), MODIFIER_GOTO_WORKSPACE,
-                w, True, GrabModeAsync, GrabModeAsync);
+                window, True, GrabModeAsync, GrabModeAsync);
         XGrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), MODIFIER_TAG_CLIENT,
-                w, True, GrabModeAsync, GrabModeAsync);
+                window, True, GrabModeAsync, GrabModeAsync);
     }
     // Keybindings
     for (unsigned int i = 0; i <= KEY_BINDING_COUNT; i++) {
         // grab with caps-lock both activated and inactivated
-        XGrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].modifier,
-                w,True,GrabModeAsync,GrabModeAsync);
-        XGrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].modifier|LockMask,
-                w,True,GrabModeAsync,GrabModeAsync);
+        XGrabKey(dpy, XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].modifier,
+                window, True, GrabModeAsync, GrabModeAsync);
+        XGrabKey(dpy, XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].modifier|LockMask,
+                window, True, GrabModeAsync, GrabModeAsync);
     }
 }
 
-void WindowManager::ungrabKeys(Window w)
+void WindowManager::ungrabKeys(Window window)
 {
     // Workspace/tag switchers
     for (int i = 0; i <= workspace_count; i++) {
-        XUngrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), MODIFIER_GOTO_WORKSPACE, w);
-        XUngrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), MODIFIER_TAG_CLIENT, w);
+        XUngrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), MODIFIER_GOTO_WORKSPACE, window);
+        XUngrabKey(dpy,XKeysymToKeycode(dpy, XK_0 + i), MODIFIER_TAG_CLIENT, window);
     }
     // Keybindings
     for (unsigned int i = 0; i <= KEY_BINDING_COUNT; i++) {
         // ungrab with caps-lock both activated and inactivated
-        XUngrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].modifier,w);
-        XUngrabKey(dpy,XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].modifier|LockMask,w);
+        XUngrabKey(dpy, XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].modifier, window);
+        XUngrabKey(dpy, XKeysymToKeycode(dpy,key_bindings[i].key), key_bindings[i].modifier | LockMask, window);
     }
 }
 
@@ -831,21 +831,19 @@ void WindowManager::removeClient(Client* c)
     clients.erase(c);
 }
 
-Client *WindowManager::findClient(Window w)
+Client *WindowManager::findClient(Window window)
 {
-    map<Window, Client *>::iterator iter = windows.find(w);
+    map<Window, Client *>::iterator iter = windows.find(window);
     return (iter != windows.end()) ? (*iter).second : NULL;
 }
 
-void WindowManager::findTransientsToMapOrUnmap(Window win, bool hide)
+void WindowManager::findTransientsToMapOrUnmap(Window window, bool hide)
 {
     if (clients.size()) {
         set<Client *>::iterator iter;
         for (iter = clients.begin(); iter != clients.end(); iter++) {
-            if ((*iter)->getTransientWindow() == win) {
-                if (!hide) {
-                    (*iter)->unhide();
-                }
+            if ((*iter)->getTransientWindow() == window && !hide) {
+                (*iter)->unhide();
             }
         }
     }
@@ -950,18 +948,18 @@ void WindowManager::sendWMDelete(Window window)
 }
 
 // Currently, only sendWMDelete uses this one...
-int WindowManager::sendXMessage(Window w, Atom a, long mask, long x)
+int WindowManager::sendXMessage(Window window, Atom a, long mask, long x)
 {
         XEvent e;
 
         e.type = ClientMessage;
-        e.xclient.window = w;
+        e.xclient.window = window;
         e.xclient.message_type = a;
         e.xclient.format = 32;
         e.xclient.data.l[0] = x;
         e.xclient.data.l[1] = CurrentTime;
 
-        return XSendEvent(dpy, w, False, mask, &e);
+        return XSendEvent(dpy, window, False, mask, &e);
 }
 
 Client *WindowManager::focusedClient() {
