@@ -127,7 +127,6 @@
     * Bugfix: title not visible on transient windows
 
     Still does not work:
-        * After '2:xterm' has been executed, all Mod4-Enter will spawn on ws 2
         * Improve redrawing of FooBar even more
         * What happens if Mod4-L is pressed and then timeout occurs (add as WM_LOCK?)
 --------------------------------------------------------------------------------

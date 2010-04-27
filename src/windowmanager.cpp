@@ -273,14 +273,14 @@ void WindowManager::execute(string command)
 ////////////////////////////////////////////////////////////////////////////////
 
 void WindowManager::updateCharacteristics() {
-    pending_window.durability--;
-    if (pending_window.durability == 0) {
+    if (pending_window.durability == 1) { // final window
         pending_window.command = "";
         pending_window.pid = 0;
         pending_window.position.reset();
         pending_window.size.reset();
         pending_window.tags.clear();
     }
+    pending_window.durability--;
 }
 
 bool WindowManager::setCurrentWorkspace(char x)

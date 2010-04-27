@@ -121,8 +121,6 @@ void Client::makeNewClient(Window window, character *c)
         }
     }
 
-    c->durability -= 1;
-
     unhide();
 
     XSetInputFocus(dpy, window, RevertToNone, CurrentTime);
