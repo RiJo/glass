@@ -125,6 +125,7 @@ void FooBar::setRunfield(bool active)
         XUngrabKeyboard(dpy, CurrentTime);
         resetRunField();
     }
+    redraw();
 }
 
 void FooBar::handleButtonEvent(XButtonEvent *e)
@@ -164,7 +165,7 @@ void FooBar::handleKeyEvent(XKeyEvent *e)
             return;
         case XK_Return:
             if (strlen(runfield) > 0)
-                wm->execute(runfield);
+                wm->execute(string(runfield));
             //break;
         case XK_Escape:
             setRunfield(false);

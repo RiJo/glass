@@ -31,11 +31,12 @@ using namespace std;
 #define PROGRAM_DATE                "xxxx-xx-xx"
 
 #define INACTIVITY_TIMEOUT          600
-#define INACTIVITY_COMMAND          (char *)"vlock -n"
+#define INACTIVITY_COMMAND          "vlock -n"
 
-#define EXEC_TERMINAL               (char *)"xterm -geometry 110x30"
-#define EXEC_WEBBROWSER             (char *)"firefox &> /dev/null"
-#define EXEC_EDITOR                 (char *)"scite &> /dev/null"
+#define EXEC_NONE                   ""
+#define EXEC_TERMINAL               "xterm -geometry 110x30"
+#define EXEC_WEBBROWSER             "1:firefox &> /dev/null"
+#define EXEC_EDITOR                 "2:scite &> /dev/null"
 
 #define MODIFIER_GOTO_WORKSPACE     Mod4Mask
 #define MODIFIER_TAG_CLIENT         (ControlMask|Mod1Mask)
@@ -57,6 +58,7 @@ using namespace std;
 #define WIRE_MOVE                   false
 #define EDGE_SNAP                   10
 #define TITLE_MINIMUM_HEIGHT        15
+#define RUNFIELD_COMMAND_SEPARATOR  ":"
 
 
 #ifdef _DEBUG_

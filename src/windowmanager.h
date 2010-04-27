@@ -35,11 +35,11 @@ enum wm_action {
 
 struct action {
     wm_action type;
-    char *command;
+    string command;
 };
 
 struct alias {
-    char *identifier;
+    string identifier;
     action foo;
 };
 
@@ -131,9 +131,9 @@ private: /* Member Functions */
     void quitNicely();
     void restart();
 
-    pid_t forkExec(const char *);
     void handleAction(action);
-    void parseCommand(char *);
+    pid_t forkExec(string);
+    void parseCommand(string);
     void updateCharacteristics();
 
     void print_help();
@@ -167,7 +167,7 @@ public: /* Member Functions */
 
     WindowManager(int argc, char** argv);
 
-    void execute(char *);
+    void execute(string);
 
     Client* getFocusedClient() { return focused_client; }
 

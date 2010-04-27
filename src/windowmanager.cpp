@@ -8,25 +8,27 @@ Resources *resources;
 ##############################################################################*/
 
 static const alias aliases[] = {
-    {(char *)"wm_quit",     {WM_QUIT,       NULL}                           },
-    {(char *)"wm_restart",  {WM_RESTART,    NULL}                           },
-    {(char *)"terminal",    {WM_EXEC,       EXEC_TERMINAL}                  },
-    {(char *)"webbrowser",  {WM_EXEC,       EXEC_WEBBROWSER}                },
-    {(char *)"editor",      {WM_EXEC,       EXEC_EDITOR}                    }
+    {"wm_quit",         {WM_QUIT,       EXEC_NONE}                          },
+    {"wm_restart",      {WM_RESTART,    EXEC_NONE}                          },
+    {"lock",            {WM_EXEC,       INACTIVITY_COMMAND}                 },
+    {"terminal",        {WM_EXEC,       EXEC_TERMINAL}                      },
+    {"webbrowser",      {WM_EXEC,       EXEC_WEBBROWSER}                    },
+    {"editor",          {WM_EXEC,       EXEC_EDITOR}                        }
 };
 #define ALIASES_COUNT (unsigned int)(sizeof(aliases)/sizeof(alias))
 
 static const key_binding key_bindings[] = {
     {XK_End,        (ControlMask|Mod1Mask), aliases[0].foo                  },
     {XK_Home,       (ControlMask|Mod1Mask), aliases[1].foo                  },
-    {XK_Tab,        (Mod1Mask),             {WM_NEXT_CLIENT,        NULL}   },
-    {XK_F4,         (Mod1Mask),             {WM_CLOSE_CLIENT,       NULL}   },
-    {XK_Right,      (Mod4Mask),             {WM_WS_SHIFT_RIGHT,     NULL}   },
-    {XK_Left,       (Mod4Mask),             {WM_WS_SHIFT_LEFT,      NULL}   },
-    {XK_r,          (Mod4Mask),             {WM_RUN_DIALOG,         NULL}   },
-    {XK_Return,     (Mod4Mask),             aliases[2].foo                  },
-    {XK_w,          (Mod4Mask),             aliases[3].foo                  },
-    {XK_s,          (Mod4Mask),             aliases[4].foo                  }
+    {XK_Tab,        (Mod1Mask),             {WM_NEXT_CLIENT,    EXEC_NONE}  },
+    {XK_F4,         (Mod1Mask),             {WM_CLOSE_CLIENT,   EXEC_NONE}  },
+    {XK_Right,      (Mod4Mask),             {WM_WS_SHIFT_RIGHT, EXEC_NONE}  },
+    {XK_Left,       (Mod4Mask),             {WM_WS_SHIFT_LEFT,  EXEC_NONE}  },
+    {XK_r,          (Mod4Mask),             {WM_RUN_DIALOG,     EXEC_NONE}  },
+    {XK_l,          (Mod4Mask),             aliases[2].foo                  },
+    {XK_Return,     (Mod4Mask),             aliases[3].foo                  },
+    {XK_w,          (Mod4Mask),             aliases[4].foo                  },
+    {XK_s,          (Mod4Mask),             aliases[5].foo                  }
 };
 #define KEY_BINDING_COUNT (unsigned int)(sizeof(key_bindings)/sizeof(key_binding))
 
@@ -150,12 +152,12 @@ void WindowManager::setupSignalHandlers()
     signal(SIGALRM, signalHandler);
 }
 
-pid_t WindowManager::forkExec(const char *cmd) {
-    if (!cmd || strlen(cmd) == 0) {
+pid_t WindowManager::forkExec(string command) {
+    if (command.length() == 0) {
         DEBUG("no command to execute\n");
         return 0;
     }
-    DEBUG("executing \"%s\"\n", cmd);
+    DEBUG("executing \"%s\"\n", command.c_str());
 
     pid_t pid = fork();
     if (pid < 0) {
@@ -163,16 +165,19 @@ pid_t WindowManager::forkExec(const char *cmd) {
         return 0;
     }
     else if (pid == 0) {
-        execlp("/bin/sh", "sh", "-c", cmd, NULL);
+        execlp("/bin/sh", "sh", "-c", command.c_str(), NULL);
         fprintf(stderr, "Error: exec failed, cleaning up child\n");
         exit(EXIT_FAILURE);
     }
     return pid;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void WindowManager::handleAction(action a)
 {
-    DEBUG("action received: {%d, %s}\n", a.type, a.command);
+    DEBUG("action received: {%d, \"%s\"}\n", a.type, a.command.c_str());
     switch (a.type) {
         case WM_QUIT:
             quitNicely();
@@ -203,13 +208,9 @@ void WindowManager::handleAction(action a)
             break;
 
         case WM_EXEC: {
-            pid_t pid;
-            if (a.command == NULL) {
-                pid = forkExec(pending_window.command.c_str());
-            }
-            else {
-                pid = forkExec(a.command);
-            }
+            /* stores the parsed data in pending_window */
+            parseCommand(a.command);
+            pid_t pid = forkExec(pending_window.command);
             pending_window.pid = pid;
             break;
         }
@@ -219,41 +220,57 @@ void WindowManager::handleAction(action a)
     }
 }
 
-void WindowManager::parseCommand(char *command) {
+void WindowManager::parseCommand(string command) {
+    //~ DEBUG("parsing command: \"%s\"\n", command.c_str());
     char workspace = current_workspace;
-    const char *separator = ":";
-    char *x = strstr(command, separator);
-    if (x != NULL) {
-        *x = '\0';
-        workspace = atoi(command);
-        pending_window.command.assign(x + 1);
+    string separator(RUNFIELD_COMMAND_SEPARATOR);
+    size_t offset = command.find(separator);
+    if (offset != string::npos) {
+        workspace = atoi(command.substr(0, offset).c_str());
+        pending_window.command = command.substr(offset + 1);
     }
     else {
-        pending_window.command.assign(command);
+        pending_window.command = command;
     }
     pending_window.position.reset();
     pending_window.size.reset();
     pending_window.tags.clear();
     pending_window.tags.insert(workspace);
     pending_window.durability = 1;
+    //~ DEBUG("command parsed:\tcmd: \"%s\"\tws: %d\n", pending_window.command.c_str(), workspace);
 }
 
-void WindowManager::execute(char *command)
+void WindowManager::execute(string command)
 {
-    /* stores the parsed data in pending_window */
-    parseCommand(command);
-
+    size_t separator;
     for (register unsigned int i = 0; i < ALIASES_COUNT; i++) {
-        if (strcmp(aliases[i].identifier, pending_window.command.c_str()) == 0) {
-            handleAction(aliases[i].foo);
-            return;
+        separator = command.find(RUNFIELD_COMMAND_SEPARATOR);
+        if (separator == string::npos) {
+            separator = 0;
+        }
+        else {
+            separator += strlen(RUNFIELD_COMMAND_SEPARATOR);
+        }
+        if (command.substr(separator).compare(aliases[i].identifier) == 0) {
+            if (aliases[i].foo.type == WM_EXEC) {
+                command = command.substr(0, separator) + aliases[i].foo.command;
+                break;
+            }
+            else {
+                handleAction(aliases[i].foo);
+                return;
+            }
         }
     }
+    // no alias for command, execute it as normal
     action exec;
     exec.type = WM_EXEC;
-    exec.command = NULL;
+    exec.command = command;
     handleAction(exec);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 void WindowManager::updateCharacteristics() {
     pending_window.durability--;
