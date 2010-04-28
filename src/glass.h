@@ -27,13 +27,20 @@ using namespace std;
 
 
 #define PROGRAM_NAME                "glass"
-#define PROGRAM_VERSION             "0.10.0-b6"
+#define PROGRAM_VERSION             "0.10.0-b7"
 #define PROGRAM_DATE                "xxxx-xx-xx"
 
-#define INACTIVITY_TIMEOUT          600
-#define INACTIVITY_COMMAND          "vlock -n"
+#define EXEC_NONE                   ""
+#define EXEC_LOCK                   "vlock -n"
+#define EXEC_TERMINAL               "xterm -geometry 110x30"
+#define EXEC_WEBBROWSER             "1:firefox &> /dev/null"
+#define EXEC_EDITOR                 "2:scite &> /dev/null"
+
+#define LOCK_TIMEOUT                600
+#define LOCK_COMMAND                EXEC_LOCK
 
 #define EXEC_NONE                   ""
+#define EXEC_LOCK_WM                "vlock -n"
 #define EXEC_TERMINAL               "xterm -geometry 110x30"
 #define EXEC_WEBBROWSER             "1:firefox &> /dev/null"
 #define EXEC_EDITOR                 "2:scite &> /dev/null"

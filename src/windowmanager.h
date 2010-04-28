@@ -25,6 +25,7 @@ class Client; // forward declaration
 enum wm_action {
     WM_QUIT,
     WM_RESTART,
+    WM_LOCK,
     WM_NEXT_CLIENT,
     WM_CLOSE_CLIENT,
     WM_RUN_DIALOG,

@@ -10,7 +10,7 @@ Resources *resources;
 static const alias aliases[] = {
     {"wm_quit",         {WM_QUIT,       EXEC_NONE}                          },
     {"wm_restart",      {WM_RESTART,    EXEC_NONE}                          },
-    {"lock",            {WM_EXEC,       INACTIVITY_COMMAND}                 },
+    {"lock",            {WM_LOCK,       EXEC_NONE}                          },
     {"terminal",        {WM_EXEC,       EXEC_TERMINAL}                      },
     {"webbrowser",      {WM_EXEC,       EXEC_WEBBROWSER}                    },
     {"editor",          {WM_EXEC,       EXEC_EDITOR}                        }
@@ -138,7 +138,8 @@ void WindowManager::signalHandler(int signal)
             wait(NULL); // remove ghost processes
             break;
         case SIGALRM:
-            wm->forkExec(INACTIVITY_COMMAND);
+            action lock = {WM_LOCK, EXEC_NONE};
+            wm->handleAction(lock);
             break;
     }
 }
@@ -186,6 +187,12 @@ void WindowManager::handleAction(action a)
         case WM_RESTART:
             restart();
             break;
+
+        case WM_LOCK:
+            alarm(0); // turn off timer
+            forkExec(LOCK_COMMAND);
+            break;
+
 
         case WM_NEXT_CLIENT:
             nextClient();
@@ -512,8 +519,8 @@ void WindowManager::doEventLoop()
 
         /* Note: it's improtant that the INACTIVITY_COMMAND not sends any xevents
             to the server, though this will cause the alarm timer to start again */
-        if (INACTIVITY_TIMEOUT > 0) {
-            alarm(INACTIVITY_TIMEOUT);
+        if (LOCK_TIMEOUT > 0) {
+            alarm(LOCK_TIMEOUT);
         }
     }
 }

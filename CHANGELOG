@@ -127,6 +127,7 @@
     * Bugfix: title not visible on transient windows
 
     Still does not work:
-        * Improve redrawing of FooBar even more
+        * Improve redrawing of FooBar even more (revert?)
         * What happens if Mod4-L is pressed and then timeout occurs (add as WM_LOCK?)
+        * Get pid on transient windows from their parents?
 --------------------------------------------------------------------------------
