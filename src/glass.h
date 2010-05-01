@@ -27,7 +27,7 @@ using namespace std;
 
 
 #define PROGRAM_NAME                "glass"
-#define PROGRAM_VERSION             "0.10.0-b7"
+#define PROGRAM_VERSION             "0.10.0-b8"
 #define PROGRAM_DATE                "xxxx-xx-xx"
 
 #define EXEC_NONE                   ""
@@ -36,14 +36,8 @@ using namespace std;
 #define EXEC_WEBBROWSER             "1:firefox &> /dev/null"
 #define EXEC_EDITOR                 "2:scite &> /dev/null"
 
-#define LOCK_TIMEOUT                600
+#define LOCK_TIMEOUT                0
 #define LOCK_COMMAND                EXEC_LOCK
-
-#define EXEC_NONE                   ""
-#define EXEC_LOCK_WM                "vlock -n"
-#define EXEC_TERMINAL               "xterm -geometry 110x30"
-#define EXEC_WEBBROWSER             "1:firefox &> /dev/null"
-#define EXEC_EDITOR                 "2:scite &> /dev/null"
 
 #define MODIFIER_GOTO_WORKSPACE     Mod4Mask
 #define MODIFIER_TAG_CLIENT         (ControlMask|Mod1Mask)
